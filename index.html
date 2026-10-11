@@ -353,7 +353,7 @@ function tbl(c,b){
       td.oninput=()=>{x.t=td.innerText;save()};
       td.onmousedown=e=>{if(e.shiftKey&&s.a){e.preventDefault();s.b=[r,k];mark()}};
       td.onfocus=()=>{s.a=s.b=[r,k];mark()}})});
-    b.append(tb,t);mark();setTimeout(lines,0)};
+    if(c.w)t.style.tableLayout='fixed';if(c.hh)t.style.height=c.hh+'px';b.append(tb,t);mark();setTimeout(lines,0)};
   draw()}
 
 /* wrap card renderer: zoom-aware drag, resize, table, Drive delete */
@@ -378,7 +378,7 @@ cardEl=function(c){
 /* free drawing -> becomes an image card (uploaded to Drive) */
 function startDraw(){
   if($('#dc'))return;const r=view.getBoundingClientRect(),cv=document.createElement('canvas');cv.id='dc';cv.width=r.width;cv.height=r.height;
-  Object.assign(cv.style,{position:'fixed',left:r.left+'px',top:r.top+'px',width:r.width+'px',height:r.height+'px',zIndex:20,cursor:'crosshair',touchAction:'none',background:'rgba(127,135,155,.06)'});
+  Object.assign(cv.style,{position:'fixed',left:r.left+'px',top:r.top+'px',width:r.width+'px',height:r.height+'px',zIndex:20,cursor:'crosshair',touchAction:'none',background:'transparent'});
   document.body.appendChild(cv);const g=cv.getContext('2d');let col=DC[0],w=4,S=[],cur=null;
   const paint=(x,dx,dy)=>S.forEach(s=>{x.strokeStyle=s.col;x.lineWidth=s.w;x.lineCap=x.lineJoin='round';x.beginPath();
     s.p.forEach(([a,b],i)=>i?x.lineTo(a-dx,b-dy):x.moveTo(a-dx,b-dy));if(s.p.length===1)x.lineTo(s.p[0][0]-dx+.01,s.p[0][1]-dy);x.stroke()});
@@ -404,6 +404,91 @@ function startDraw(){
 $('#tools').insertAdjacentHTML('beforeend','<button data-t="table"><b>▦</b>جدول</button><button data-t="draw"><b>✎</b>رسم</button>');
 document.querySelector('[data-t=table]').onclick=()=>addCard({t:'table',cells:grid(3,3)});
 document.querySelector('[data-t=draw]').onclick=startDraw;
+</script>
+
+<style>
+#tools{overflow-y:auto}
+#mq{position:absolute;background:rgba(47,91,234,.12);border:1px solid var(--ac);z-index:8;pointer-events:none}
+.card.dw{background:transparent!important;border:0;box-shadow:none;cursor:grab}
+.card.dw .bar{position:absolute;top:0;left:0;right:0;z-index:2;opacity:0;transition:opacity .15s}
+.card.dw:hover .bar,.card.dw.sel .bar,.card.dw:hover .rz{opacity:1}
+.card.dw .rz{opacity:0}.card.dw .fn{display:none}
+</style>
+<script>
+/* ---- selection ---- */
+const SEL=new Set();
+function selBar(){
+  if(SEL.size){if(selL){selL=null;lines()}
+    fb(`<span>${SEL.size} عنصر محدد</span><button data-k="d">🗑 حذف المحدد (ومن Drive)</button><button data-k="n">إلغاء التحديد</button>`);
+    fbH=e=>{const k=e.target.dataset.k;if(k==='d')delCards(B.cards.filter(c=>SEL.has(c.id)));if(k==='n')setSel([])};fbH.sel=1}
+  else if(fbH&&fbH.sel){fb('');fbH=null}}
+function setSel(ids){SEL.clear();ids.forEach(i=>SEL.add(i));for(const id in els)els[id].classList.toggle('sel',SEL.has(id));selBar()}
+const _sl=showLB;showLB=function(){SEL.clear();for(const id in els)els[id].classList.remove('sel');_sl()};
+document.querySelector('[data-t=draw]').onclick=()=>{setSel([]);startDraw()};
+
+/* rubber-band selection */
+view.addEventListener('pointerdown',e=>{
+  if(e.button!==0||$('#dc')||![view,zw,stage].includes(e.target))return;
+  e.preventDefault();if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();
+  const a=sp(e),mq=document.createElement('div');mq.id='mq';stage.appendChild(mq);let moved=0;
+  const mv=m=>{const b=sp(m),x=Math.min(a[0],b[0]),y=Math.min(a[1],b[1]),w=Math.abs(a[0]-b[0]),h=Math.abs(a[1]-b[1]);
+    if(w+h>6)moved=1;Object.assign(mq.style,{left:x+'px',top:y+'px',width:w+'px',height:h+'px'});
+    if(moved)setSel(B.cards.filter(c=>{const el=els[c.id];return el&&c.x<x+w&&c.x+el.offsetWidth>x&&c.y<y+h&&c.y+el.offsetHeight>y}).map(c=>c.id))};
+  const up=()=>{removeEventListener('pointermove',mv);removeEventListener('pointerup',up);mq.remove();if(!moved)setSel([])};
+  addEventListener('pointermove',mv);addEventListener('pointerup',up)});
+addEventListener('keydown',e=>{
+  if($('#bd').hidden||(e.target.closest&&e.target.closest('input,[contenteditable],textarea')))return;
+  if(e.ctrlKey&&(e.key==='a'||e.key==='A')){e.preventDefault();setSel(B.cards.map(c=>c.id))}
+  if((e.key==='Delete'||e.key==='Backspace')&&SEL.size){e.preventDefault();delCards(B.cards.filter(c=>SEL.has(c.id)))}
+  if(e.key==='Escape')setSel([])});
+
+/* ---- delete (board + Google Drive), single or many ---- */
+async function delCards(arr){
+  if(!arr.length)return;const files=arr.filter(c=>c.t==='file'&&c.fid);
+  if(!confirm(arr.length>1?`حذف ${arr.length} عنصرًا نهائيًا من اللوحة ومن Google Drive؟`:'حذف نهائي من اللوحة ومن Google Drive؟'))return;
+  const fail=new Set();
+  await Promise.all(files.map(c=>api(`${D}/${c.fid}`,{method:'DELETE'}).catch(e=>{if(!/404|notFound/.test(e.message)){fail.add(c.id);console.error(e)}})));
+  const ids=new Set(arr.filter(c=>!fail.has(c.id)).map(c=>c.id));
+  B.lines.forEach(l=>l.p&&l.p.forEach((e,i)=>{if(e.c&&ids.has(e.c)){const q=ep(e);l.p[i]={x:q[0],y:q[1]}}}));
+  B.cards=B.cards.filter(c=>!ids.has(c.id));ids.forEach(i=>SEL.delete(i));save();render();selBar();
+  toast(fail.size?`تعذر حذف ${fail.size} ملف من Drive — لم تُحذف بطاقاته`:files.length?'✓ حُذف من اللوحة ومن Drive':'✓ تم الحذف')}
+delCard=c=>delCards([c]);
+async function cleanup(){
+  if(!P||!P.bid)return toast('لا توجد لوحة محفوظة بعد');await flush();
+  try{const fs=await list(`'${P.id}' in parents and trashed=false`,'files(id,name)'),used=new Set(B.cards.map(c=>c.fid).filter(Boolean)),o=fs.filter(f=>f.name!=='board.json'&&!used.has(f.id));
+    if(!o.length)return toast('لا توجد ملفات زائدة في Drive');
+    if(!B.cards.length&&!confirm('تنبيه: اللوحة تبدو فارغة وقد لا تكون حُمّلت. المتابعة قد تحذف كل الملفات. هل أنت متأكد؟'))return;
+    if(!confirm(`يوجد ${o.length} ملف في مجلد المشروع على Drive غير موجود في اللوحة:\n\n`+o.slice(0,10).map(f=>'• '+f.name).join('\n')+(o.length>10?'\n…':'')+'\n\nحذفها نهائيًا؟'))return;
+    await Promise.all(o.map(f=>api(`${D}/${f.id}`,{method:'DELETE'}).catch(()=>{})));toast('✓ حُذف '+o.length+' ملف من Drive')}
+  catch(e){console.error(e);toast('تعذر التنظيف')}}
+$('#tools').insertAdjacentHTML('beforeend','<button data-t="clean"><b>🧹</b>تنظيف Drive</button>');
+document.querySelector('[data-t=clean]').onclick=cleanup;
+
+/* ---- card wrapper: group drag, transparent drawings, table resize ---- */
+function dragCard(e,c,el){
+  if(!SEL.has(c.id))setSel([]);
+  const grp=SEL.has(c.id)?B.cards.filter(k=>SEL.has(k.id)):[c],st=grp.map(k=>[k,k.x,k.y]),sx=e.clientX,sy=e.clientY;
+  el.setPointerCapture(e.pointerId);el.classList.add('drag');
+  const mv=m=>{st.forEach(([k,x,y])=>{k.x=Math.max(0,x+(m.clientX-sx)/Z);k.y=Math.max(0,y+(m.clientY-sy)/Z);const q=els[k.id];if(q){q.style.left=k.x+'px';q.style.top=k.y+'px'}});lines()};
+  const up=()=>{el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',up);el.classList.remove('drag');save()};
+  el.addEventListener('pointermove',mv);el.addEventListener('pointerup',up)}
+const _ce2=cardEl;
+cardEl=function(c){
+  const el=_ce2(c);
+  if(SEL.has(c.id))el.classList.add('sel');
+  el.addEventListener('pointerdown',()=>{if(SEL.size&&!SEL.has(c.id))setSel([])},true);
+  el.firstChild.onpointerdown=e=>{if(e.button||e.target.closest('button'))return;dragCard(e,c,el)};
+  if(c.t==='file'&&/^رسم-/.test(c.name||'')){
+    el.classList.add('dw');
+    el.addEventListener('pointerdown',e=>{if(e.button||e.target.closest('.bar,.rz'))return;e.preventDefault();dragCard(e,c,el)})}
+  if(c.t==='table'){
+    el.style.minWidth='120px';const h=document.createElement('div');h.className='rz';el.appendChild(h);
+    h.onpointerdown=e=>{e.preventDefault();e.stopPropagation();h.setPointerCapture(e.pointerId);
+      const sx=e.clientX,sy=e.clientY,sw=el.offsetWidth,sh=el.querySelector('table').offsetHeight;
+      h.onpointermove=m=>{c.w=Math.max(160,sw+(m.clientX-sx)/Z);c.hh=Math.max(60,sh+(m.clientY-sy)/Z);el.style.width=c.w+'px';
+        const t=el.querySelector('table');t.style.tableLayout='fixed';t.style.height=c.hh+'px';lines()};
+      h.onpointerup=()=>{h.onpointermove=h.onpointerup=null;save()}}}
+  return el};
 </script>
 
 </body>
