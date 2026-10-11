@@ -230,5 +230,181 @@ function lines(){
   sv.innerHTML=h}
 $('#sv').onclick=e=>{const i=e.target.dataset&&e.target.dataset.i;if(i!=null&&confirm('حذف خط التوصيل؟')){B.lines.splice(+i,1);save();lines()}};
 </script>
+<style>
+#zw{position:relative;background:radial-gradient(var(--dot) 1.2px,transparent 1.2px) 0 0/22px 22px}
+#stage{transform-origin:0 0}
+#sv{z-index:5!important}
+.hd{fill:#fff;stroke:var(--ac);stroke-width:2;pointer-events:all;cursor:grab}
+.hit{cursor:pointer}
+#fb{position:fixed;top:64px;left:50%;transform:translateX(-50%);z-index:30;background:var(--pn);border:1px solid var(--ln);border-radius:12px;padding:8px 12px;display:flex;gap:8px;align-items:center;box-shadow:0 6px 20px rgba(0,0,0,.25);flex-wrap:wrap;max-width:94vw}
+#fb i,.tb i{display:inline-block;width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid var(--ln);flex:none}
+#fb input[type=color]{width:34px;height:28px;padding:0;border:0;background:none}
+#zl{position:fixed;bottom:12px;left:12px;z-index:30;background:var(--pn);border:1px solid var(--ln);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:13px}
+.rz{position:absolute;right:0;bottom:0;width:20px;height:20px;cursor:nwse-resize;background:linear-gradient(135deg,transparent 50%,var(--ac) 50%);touch-action:none}
+.tb{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;align-items:center}.tb button{font-size:12px;padding:2px 7px}
+.card table{border-collapse:collapse;width:100%}
+.card td{border:1px solid var(--ln);min-width:56px;padding:6px 8px;outline:none;font-size:14px;vertical-align:top}
+.card td.on{outline:2px solid var(--ac);outline-offset:-2px}
+</style>
+<div id="fb" hidden></div><div id="zl" title="اضغط للعودة 100%">100%</div>
+<script>
+const LC=['#4a5368','#e03131','#f08c00','#2f9e44','#1971c2','#9c36b5','#e64980','#111111'];
+const DC=['#111827','#e03131','#f08c00','#2f9e44','#1971c2','#9c36b5','#e64980','#ffffff'];
+const TINT=['','#ffe3e3','#fff3bf','#d3f9d8','#d0ebff','#e5dbff','#ffd8a8'];
+let Z=+localStorage.getItem('z')||1,selL=null,fbH=null;
+const stage=$('#stage'),zw=document.createElement('div');zw.id='zw';view.appendChild(zw);zw.appendChild(stage);view.style.background='var(--bg)';
+const sp=e=>{const r=stage.getBoundingClientRect();return[(e.clientX-r.left)/Z,(e.clientY-r.top)/Z]};
+function applyZ(){zw.style.width=5000*Z+'px';zw.style.height=3500*Z+'px';zw.style.backgroundSize=22*Z+'px '+22*Z+'px';stage.style.transform=`scale(${Z})`;$('#zl').textContent=Math.round(Z*100)+'%';try{localStorage.setItem('z',Z)}catch(e){}}
+function setZ(n,cx,cy){n=Math.min(2.5,Math.max(.2,n));const r=view.getBoundingClientRect(),px=cx-r.left,py=cy-r.top,sx=(view.scrollLeft+px)/Z,sy=(view.scrollTop+py)/Z;Z=n;applyZ();view.scrollLeft=sx*Z-px;view.scrollTop=sy*Z-py;if(B)lines()}
+applyZ();
+addEventListener('wheel',e=>{if(!e.ctrlKey)return;e.preventDefault();if($('#bd').hidden||$('#dc'))return;setZ(Z*Math.exp(-e.deltaY*.0015),e.clientX,e.clientY)},{passive:false});
+$('#zl').onclick=()=>{const r=view.getBoundingClientRect();setZ(1,r.left+r.width/2,r.top+r.height/2)};
+/* smooth middle-button pan */
+let pan=null;const st=d=>Math.abs(d)<2?d:d*.16;
+function loop(){const p=pan;if(!p)return;const dx=p.tx-view.scrollLeft,dy=p.ty-view.scrollTop;view.scrollLeft+=st(dx);view.scrollTop+=st(dy);if(p.up&&Math.abs(dx)<1&&Math.abs(dy)<1){pan=null;return}requestAnimationFrame(loop)}
+view.addEventListener('mousedown',e=>{if(e.button===1)e.preventDefault()});
+view.addEventListener('pointerdown',e=>{
+  if(e.button===1){e.preventDefault();pan={x:e.clientX,y:e.clientY,sx:view.scrollLeft,sy:view.scrollTop,tx:view.scrollLeft,ty:view.scrollTop};view.style.cursor='grabbing';loop();return}
+  if(selL&&!e.target.closest('.hd,.hit')){selL=null;fb('');lines()}});
+addEventListener('pointermove',e=>{if(pan&&!pan.up){pan.tx=pan.sx-(e.clientX-pan.x)*.7;pan.ty=pan.sy-(e.clientY-pan.y)*.7}});
+addEventListener('pointerup',e=>{if(pan&&e.button===1){pan.up=1;view.style.cursor=''}});
+addEventListener('keydown',e=>{
+  if(e.ctrlKey&&['+','=','-','0'].includes(e.key)){e.preventDefault();if($('#bd').hidden)return;const r=view.getBoundingClientRect();setZ(e.key==='0'?1:Z*(e.key==='-'?.87:1.15),r.left+r.width/2,r.top+r.height/2)}
+  if(e.key==='Delete'&&selL&&!e.target.closest('input,[contenteditable]')){B.lines=B.lines.filter(l=>l.id!==selL);selL=null;fb('');save();lines()}});
+vpos=function(){return{x:(view.scrollLeft+40+Math.random()*140)/Z,y:(view.scrollTop+30+Math.random()*100)/Z}};
+view.ondrop=e=>{e.preventDefault();if(!P)return;const q=sp(e);addFiles([...e.dataTransfer.files],{x:q[0],y:q[1]})};
+$('#homeB').addEventListener('click',()=>{const d=$('#dc');d&&d.remove();fb('');fbH=null;selL=null});
+
+/* floating bar */
+function fb(h){const f=$('#fb');f.innerHTML=h;f.hidden=!h}
+$('#fb').onclick=$('#fb').oninput=e=>fbH&&fbH(e);
+
+/* connectors: 2 end dots + middle curve dot + color */
+const ep=e=>{const el=e.c&&els[e.c];return el?[el.offsetLeft+e.rx*el.offsetWidth,el.offsetTop+e.ry*el.offsetHeight]:[e.x,e.y]};
+lines=function(){
+  B.lines=(B.lines||[]).filter(l=>l.p);let h='';
+  B.lines.forEach(l=>{const a=ep(l.p[0]),b=ep(l.p[1]),mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2,d=`M${a} Q${mx+2*l.mo.x},${my+2*l.mo.y} ${b}`;
+    h+=`<marker id="m${l.id}" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0L9,4.5L0,9z" style="fill:${l.col}"/></marker><path class="ln" d="${d}" style="stroke:${l.col}" marker-end="url(#m${l.id})"/><path class="hit" data-l="${l.id}" d="${d}"/>`;
+    if(l.id===selL)h+=[[a,0],[[mx+l.mo.x,my+l.mo.y],2],[b,1]].map(([q,i])=>`<circle class="hd" data-l="${l.id}" data-h="${i}" cx="${q[0]}" cy="${q[1]}" r="${7/Z}"/>`).join('')});
+  $('#sv').innerHTML=h};
+function attach(l,i,q){
+  for(let k=B.cards.length-1;k>=0;k--){const c=B.cards[k],el=els[c.id];if(!el)continue;
+    const w=el.offsetWidth,hh=el.offsetHeight;
+    if(q[0]>=c.x&&q[0]<=c.x+w&&q[1]>=c.y&&q[1]<=c.y+hh){let rx=(q[0]-c.x)/w,ry=(q[1]-c.y)/hh;
+      const m=Math.min(rx,1-rx,ry,1-ry);if(m===rx)rx=0;else if(m===1-rx)rx=1;else if(m===ry)ry=0;else ry=1;
+      l.p[i]={c:c.id,rx,ry};return}}
+  l.p[i]={x:q[0],y:q[1]}}
+$('#sv').onclick=null;
+$('#sv').onpointerdown=e=>{
+  const t=e.target;if(e.button)return;
+  if(t.classList.contains('hit')){selL=t.dataset.l;showLB();lines();return}
+  if(!t.classList.contains('hd'))return;
+  e.preventDefault();const l=B.lines.find(x=>x.id===t.dataset.l),i=+t.dataset.h;
+  const mv=m=>{const q=sp(m);if(i===2){const a=ep(l.p[0]),b=ep(l.p[1]);l.mo={x:q[0]-(a[0]+b[0])/2,y:q[1]-(a[1]+b[1])/2}}else l.p[i]={x:q[0],y:q[1]};lines()};
+  const up=m=>{removeEventListener('pointermove',mv);removeEventListener('pointerup',up);if(i!==2)attach(l,i,sp(m));save();lines()};
+  addEventListener('pointermove',mv);addEventListener('pointerup',up)};
+function showLB(){
+  const l=B.lines.find(x=>x.id===selL);if(!l)return fb('');
+  fb('<span>لون الخط</span>'+LC.map(c=>`<i data-c="${c}" style="background:${c}"></i>`).join('')+`<input type="color" value="${l.col}"><button data-k="del">حذف الخط</button>`);
+  fbH=e=>{const t=e.target;
+    if(t.dataset.k==='del'){B.lines=B.lines.filter(x=>x!==l);selL=null;fb('');save();lines();return}
+    const c=t.tagName==='I'?t.dataset.c:t.type==='color'?t.value:null;if(c){l.col=c;save();lines()}}}
+$('#lineB').onclick=()=>{
+  const p=[(view.scrollLeft+view.clientWidth/2)/Z,(view.scrollTop+view.clientHeight/2)/Z];
+  const l={id:uid(),p:[{x:p[0]-100,y:p[1]+40},{x:p[0]+100,y:p[1]-40}],mo:{x:0,y:0},col:LC[0]};
+  B.lines.push(l);selL=l.id;save();lines();showLB()};
+
+/* delete = also from Google Drive */
+async function delCard(c){
+  if(!confirm('حذف نهائي من اللوحة ومن Google Drive؟'))return;
+  if(c.t==='file'&&c.fid){try{await api(`${D}/${c.fid}`,{method:'DELETE'})}catch(e){if(!/404|notFound/.test(e.message)){toast('تعذر الحذف من Drive');return}}}
+  B.lines.forEach(l=>l.p&&l.p.forEach((e,i)=>{if(e.c===c.id){const q=ep(e);l.p[i]={x:q[0],y:q[1]}}}));
+  B.cards=B.cards.filter(k=>k!==c);save();render()}
+const _act=act;
+act=async function(p,a,c){
+  if(a!=='d')return _act(p,a,c);
+  if(!confirm('حذف المشروع نهائيًا مع كل ملفاته من Drive؟ لا يمكن التراجع.'))return;
+  try{await api(`${D}/${p.id}`,{method:'DELETE'});openHome()}catch(e){toast('تعذر الحذف')}};
+
+/* tables */
+const mk=()=>({t:'',bg:'',cs:1,rs:1,h:0}),grid=(r,c)=>Array.from({length:r},()=>Array.from({length:c},mk));
+function tbl(c,b){
+  const s={a:null,b:null},R=()=>{const a=s.a||[0,0],z=s.b||a;return[Math.min(a[0],z[0]),Math.min(a[1],z[1]),Math.max(a[0],z[0]),Math.max(a[1],z[1])]};
+  const flat=()=>c.cells.forEach(r=>r.forEach(x=>{x.cs=x.rs=1;x.h=0}));
+  const um=(r,k)=>{const x=c.cells[r][k];for(let i=0;i<x.rs;i++)for(let j=0;j<x.cs;j++)c.cells[r+i][k+j].h=0;x.cs=x.rs=1};
+  const mark=()=>{const[r1,c1,r2,c2]=R();b.querySelectorAll('td').forEach(td=>{const r=+td.dataset.r,k=+td.dataset.c;td.classList.toggle('on',r>=r1&&r<=r2&&k>=c1&&k<=c2)})};
+  const act2=k=>{const[r1,c1,r2,c2]=R();
+    if(k==='ar'){flat();c.cells.splice(r2+1,0,c.cells[0].map(mk))}
+    if(k==='dr'){if(r2-r1+1>=c.cells.length)return;flat();c.cells.splice(r1,r2-r1+1)}
+    if(k==='ac'){flat();c.cells.forEach(r=>r.splice(c2+1,0,mk()))}
+    if(k==='dc'){if(c2-c1+1>=c.cells[0].length)return;flat();c.cells.forEach(r=>r.splice(c1,c2-c1+1))}
+    if(k==='mg'){c.cells.forEach((row,r)=>row.forEach((x,j)=>{if(!x.h&&(x.cs>1||x.rs>1)&&r<=r2&&r+x.rs-1>=r1&&j<=c2&&j+x.cs-1>=c1)um(r,j)}));
+      for(let r=r1;r<=r2;r++)for(let j=c1;j<=c2;j++)c.cells[r][j].h=1;const x=c.cells[r1][c1];x.h=0;x.cs=c2-c1+1;x.rs=r2-r1+1}
+    if(k==='um'){const x=c.cells[r1][c1];if(x.cs>1||x.rs>1)um(r1,c1)}
+    if(k==='ar'||k==='dr'||k==='ac'||k==='dc'){s.a=s.b=null}save();draw()};
+  const draw=()=>{b.innerHTML='';const tb=document.createElement('div');tb.className='tb';
+    tb.innerHTML=[['+ صف','ar'],['− صف','dr'],['+ عمود','ac'],['− عمود','dc'],['دمج','mg'],['فك','um']].map(([t,k])=>`<button data-k="${k}">${t}</button>`).join('')+TINT.map(x=>`<i data-bg="${x}" style="background:${x||'transparent'}" title="تظليل"></i>`).join('');
+    tb.onclick=e=>{const k=e.target.dataset.k;if(k)return act2(k);if(e.target.dataset.bg!==undefined){const[r1,c1,r2,c2]=R();
+      for(let r=r1;r<=r2;r++)for(let j=c1;j<=c2;j++)c.cells[r][j].bg=e.target.dataset.bg;save();draw()}};
+    const t=document.createElement('table');
+    c.cells.forEach((row,r)=>{const tr=t.insertRow();row.forEach((x,k)=>{if(x.h)return;const td=tr.insertCell();
+      td.colSpan=x.cs;td.rowSpan=x.rs;td.style.background=x.bg||'';if(x.bg)td.style.color='#1b2333';
+      td.contentEditable='plaintext-only';td.textContent=x.t;td.dataset.r=r;td.dataset.c=k;
+      td.oninput=()=>{x.t=td.innerText;save()};
+      td.onmousedown=e=>{if(e.shiftKey&&s.a){e.preventDefault();s.b=[r,k];mark()}};
+      td.onfocus=()=>{s.a=s.b=[r,k];mark()}})});
+    b.append(tb,t);mark();setTimeout(lines,0)};
+  draw()}
+
+/* wrap card renderer: zoom-aware drag, resize, table, Drive delete */
+const _ce=cardEl;
+cardEl=function(c){
+  const el=_ce(c),b=el.querySelector('.bd');
+  if(c.w)el.style.width=c.w+'px';
+  if(c.t==='table'){if(!c.w)el.style.width='auto';el.style.minWidth='260px';tbl(c,b)}
+  el.querySelector('[data-a=x]').onclick=()=>delCard(c);
+  const bar=el.firstChild;
+  bar.onpointerdown=e=>{if(e.button||e.target.closest('button'))return;bar.setPointerCapture(e.pointerId);el.classList.add('drag');
+    const sx=e.clientX,sy=e.clientY,ox=c.x,oy=c.y;
+    bar.onpointermove=m=>{c.x=Math.max(0,ox+(m.clientX-sx)/Z);c.y=Math.max(0,oy+(m.clientY-sy)/Z);el.style.left=c.x+'px';el.style.top=c.y+'px';lines()};
+    bar.onpointerup=()=>{bar.onpointermove=bar.onpointerup=null;el.classList.remove('drag');save()}};
+  if(c.t==='file'&&/^image\//.test(c.mime||'')){
+    const h=document.createElement('div');h.className='rz';el.appendChild(h);
+    h.onpointerdown=e=>{e.preventDefault();e.stopPropagation();h.setPointerCapture(e.pointerId);const sx=e.clientX,sw=el.offsetWidth;
+      h.onpointermove=m=>{c.w=Math.max(60,sw+(m.clientX-sx)/Z);el.style.width=c.w+'px';lines()};
+      h.onpointerup=()=>{h.onpointermove=h.onpointerup=null;save()}}}
+  return el};
+
+/* free drawing -> becomes an image card (uploaded to Drive) */
+function startDraw(){
+  if($('#dc'))return;const r=view.getBoundingClientRect(),cv=document.createElement('canvas');cv.id='dc';cv.width=r.width;cv.height=r.height;
+  Object.assign(cv.style,{position:'fixed',left:r.left+'px',top:r.top+'px',width:r.width+'px',height:r.height+'px',zIndex:20,cursor:'crosshair',touchAction:'none',background:'rgba(127,135,155,.06)'});
+  document.body.appendChild(cv);const g=cv.getContext('2d');let col=DC[0],w=4,S=[],cur=null;
+  const paint=(x,dx,dy)=>S.forEach(s=>{x.strokeStyle=s.col;x.lineWidth=s.w;x.lineCap=x.lineJoin='round';x.beginPath();
+    s.p.forEach(([a,b],i)=>i?x.lineTo(a-dx,b-dy):x.moveTo(a-dx,b-dy));if(s.p.length===1)x.lineTo(s.p[0][0]-dx+.01,s.p[0][1]-dy);x.stroke()});
+  const redraw=()=>{g.clearRect(0,0,cv.width,cv.height);paint(g,0,0)};
+  const end=()=>{cv.remove();fb('');fbH=null};
+  cv.onpointerdown=e=>{cv.setPointerCapture(e.pointerId);cur={col,w,p:[[e.clientX-r.left,e.clientY-r.top]]};S.push(cur);redraw()};
+  cv.onpointermove=e=>{if(!cur)return;cur.p.push([e.clientX-r.left,e.clientY-r.top]);redraw()};
+  cv.onpointerup=()=>{cur=null};
+  const fin=async()=>{
+    if(!S.length)return end();let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+    S.forEach(s=>s.p.forEach(([a,b])=>{x0=Math.min(x0,a);y0=Math.min(y0,b);x1=Math.max(x1,a);y1=Math.max(y1,b)}));
+    const pad=Math.max(...S.map(s=>s.w))/2+3;x0-=pad;y0-=pad;x1+=pad;y1+=pad;
+    const bw=x1-x0,bh=y1-y0,o=document.createElement('canvas');o.width=bw*2;o.height=bh*2;const og=o.getContext('2d');og.scale(2,2);paint(og,x0,y0);
+    const blob=await new Promise(res=>o.toBlob(res,'image/png')),f=new File([blob],'رسم-'+Date.now()+'.png',{type:'image/png'});end();
+    toast('جارٍ رفع الرسم إلى Drive…');
+    try{const u=await upload(f,P.id);blobs[u.id]=Promise.resolve(URL.createObjectURL(f));
+      addCard({t:'file',fid:u.id,name:u.name,mime:'image/png',link:u.webViewLink,w:bw/Z},{x:(view.scrollLeft+x0)/Z,y:(view.scrollTop+y0)/Z})}
+    catch(e){toast('فشل رفع الرسم')}};
+  fb(DC.map(c=>`<i data-c="${c}" style="background:${c}"></i>`).join('')+`<input type="color" value="#111827"><input type="range" min="1" max="30" value="4"><button data-k="u">↶ تراجع</button><button data-k="ok">✓ تم</button><button data-k="x">إلغاء</button>`);
+  fbH=e=>{const t=e.target;
+    if(t.tagName==='I')col=t.dataset.c;else if(t.type==='color')col=t.value;else if(t.type==='range')w=+t.value;
+    else if(t.dataset.k==='u'){S.pop();redraw()}else if(t.dataset.k==='ok')fin();else if(t.dataset.k==='x')end()}}
+$('#tools').insertAdjacentHTML('beforeend','<button data-t="table"><b>▦</b>جدول</button><button data-t="draw"><b>✎</b>رسم</button>');
+document.querySelector('[data-t=table]').onclick=()=>addCard({t:'table',cells:grid(3,3)});
+document.querySelector('[data-t=draw]').onclick=startDraw;
+</script>
+
 </body>
 </html>
