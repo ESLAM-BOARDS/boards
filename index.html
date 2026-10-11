@@ -491,5 +491,39 @@ cardEl=function(c){
   return el};
 </script>
 
+<script>
+/* ---- remembered sign-in: cached token + silent renewal + minimal gate ---- */
+const SC='https://www.googleapis.com/auth/drive.file';
+function saveTok(r){tok=r.access_token;try{localStorage.setItem('tk',JSON.stringify({t:tok,e:Date.now()+(r.expires_in-120)*1000}));localStorage.setItem('signed','1')}catch(e){}}
+function tokReq(prompt){return new Promise((ok,no)=>{
+  const t=google.accounts.oauth2.initTokenClient({client_id:localStorage.getItem('cid'),scope:SC,prompt,
+    callback:r=>r.error?no(r):(saveTok(r),ok()),error_callback:e=>no(e)});
+  t.requestAccessToken({prompt})})}
+auth=async function(interactive){
+  const seen=localStorage.getItem('signed');
+  if(!interactive&&seen){try{return await tokReq('none')}catch(e){}}
+  return tokReq(seen?'':'consent')};
+async function boot(){
+  const f=await list(`name='المشاريع' and mimeType='${FOLDER}' and trashed=false and 'root' in parents`);
+  root=f.length?f[0].id:(await mkFolder('المشاريع',null,PAL[4])).id;await openHome()}
+const gerr=document.createElement('p');gerr.style.cssText='color:#e03131;font-size:13px;margin:0;direction:ltr;word-break:break-all';
+const gchg=document.createElement('button');gchg.textContent='تغيير Client ID';gchg.style.cssText='font-size:12px;border:0;background:none;color:var(--mu);cursor:pointer';
+$('#gate').append(gerr,gchg);
+gchg.onclick=()=>{localStorage.removeItem('cid');localStorage.removeItem('tk');location.reload()};
+$('#go').onclick=async()=>{
+  gerr.textContent='';let cid=localStorage.getItem('cid');
+  if(!$('#cid').hidden){cid=$('#cid').value.trim();if(!cid)return toast('أدخل Client ID');localStorage.setItem('cid',cid)}
+  if(!window.google)return toast('تعذر تحميل خدمة Google — تحقق من الاتصال');
+  try{await auth(true);await boot()}
+  catch(e){console.error(e);gerr.textContent='فشل: '+(e.error||e.type||e.message||JSON.stringify(e)).toString().slice(0,200)}};
+(async()=>{
+  const cid=localStorage.getItem('cid');if(!cid)return;
+  $('#cid').hidden=true;gchg.hidden=false;$('#gate p').textContent='جارٍ تسجيل الدخول…';
+  try{const s=JSON.parse(localStorage.getItem('tk')||'null');if(s&&s.e>Date.now()){tok=s.t;await boot();return}}catch(e){console.error(e)}
+  for(let i=0;i<60&&!window.google;i++)await new Promise(r=>setTimeout(r,100));
+  try{await tokReq(localStorage.getItem('signed')?'none':'consent');await boot();return}catch(e){console.error(e)}
+  show('gate');$('#gate p').textContent='اضغط الزر للدخول بحسابك.'})();
+</script>
+
 </body>
 </html>
