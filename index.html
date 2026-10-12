@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-y07+iyfhC07nM2lsQDGMth63B5CucUZIJZnJSvRW09Q=' 'sha256-OXRUVF5NI7DyUkvVxBt+2B2quzFCBkOtIAf5n3+ow2Q=' 'sha256-PW6ndNNhQe4K+yQO7XkOBDQMnBnHj8yxK3UPo3mU3t0=' 'sha256-/8CJD0my9eN7QoIxDD8/AiuZkNGwSzVYT0+p9Gu7h7k=' 'sha256-5+qZONTA43Kpdsn4HWl6jhoagFZgk76AtyVTBgF1OX8=' 'sha256-R7UUc2AvWRbk8ewlfy5Rmv/7rY8SZl+87fxDOfjbUfE=' 'sha256-9QyV7r1OPJGR1M/gITXRoiaqSRbeh0FM0nDdnUX3tI0=' https://accounts.google.com; style-src 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' blob: data:; media-src blob:; connect-src https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com; frame-src https://accounts.google.com blob:; base-uri 'none'; object-src 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-y07+iyfhC07nM2lsQDGMth63B5CucUZIJZnJSvRW09Q=' 'sha256-thraxHGhV2WuZztKeH6GAw96VbOJ25pJ5vfwgjvenMo=' 'sha256-v4yWIDo8cNh+8d+qG1qbgwOMNzqHuSOr2T2BiclmV8g=' 'sha256-/8CJD0my9eN7QoIxDD8/AiuZkNGwSzVYT0+p9Gu7h7k=' 'sha256-5+qZONTA43Kpdsn4HWl6jhoagFZgk76AtyVTBgF1OX8=' 'sha256-DTB5PTtlkmvrqErHZCpamCExX2rTjjswD+Nb8CFioBc=' 'sha256-aaPDRVJ/hOh3nNyl26DKQfOmcIGYeTTpDlTdFghXRqQ=' 'sha256-JUhk38ca5NECHwWPn3S/MsRba1TLJllBIPmOsfNcdzs=' https://accounts.google.com; style-src 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' blob: data:; media-src blob:; connect-src https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com; frame-src https://accounts.google.com blob:; base-uri 'none'; object-src 'none'; form-action 'self'">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>لوحة مشاريعي</title>
@@ -271,7 +271,7 @@ view.addEventListener('pointerdown',e=>{
 addEventListener('pointermove',e=>{if(pan&&!pan.up){pan.tx=pan.sx-(e.clientX-pan.x)*.7;pan.ty=pan.sy-(e.clientY-pan.y)*.7}});
 addEventListener('pointerup',e=>{if(pan&&e.button===1){pan.up=1;view.style.cursor=''}});
 addEventListener('keydown',e=>{
-  if(e.ctrlKey&&['+','=','-','0'].includes(e.key)){e.preventDefault();if($('#bd').hidden)return;const r=view.getBoundingClientRect();setZ(e.key==='0'?1:Z*(e.key==='-'?.87:1.15),r.left+r.width/2,r.top+r.height/2)}
+  if(e.ctrlKey&&/^(Equal|Minus|Digit0|Numpad(Add|Subtract|0))$/.test(e.code)||['+','=','-','0'].includes(e.key)){e.preventDefault();if($('#bd').hidden)return;const r=view.getBoundingClientRect();setZ(/Digit0|Numpad0/.test(e.code)||e.key==='0'?1:Z*(/Minus|Subtract/.test(e.code)||e.key==='-'?.87:1.15),r.left+r.width/2,r.top+r.height/2)}
   if(e.key==='Delete'&&selL&&!e.target.closest('input,[contenteditable]')){B.lines=B.lines.filter(l=>l.id!==selL);selL=null;fb('');save();lines()}});
 vpos=function(){return{x:(view.scrollLeft+40+Math.random()*140)/Z,y:(view.scrollTop+30+Math.random()*100)/Z}};
 view.ondrop=e=>{e.preventDefault();if(!P)return;const q=sp(e);addFiles([...e.dataTransfer.files],{x:q[0],y:q[1]})};
@@ -440,7 +440,7 @@ view.addEventListener('pointerdown',e=>{
   addEventListener('pointermove',mv);addEventListener('pointerup',up)});
 addEventListener('keydown',e=>{
   if($('#bd').hidden||(e.target.closest&&e.target.closest('input,[contenteditable],textarea')))return;
-  if(e.ctrlKey&&(e.key==='a'||e.key==='A')){e.preventDefault();setSel(B.cards.map(c=>c.id))}
+  if((e.ctrlKey||e.metaKey)&&(e.code==='KeyA'||e.key==='a'||e.key==='A')){e.preventDefault();setSel(B.cards.map(c=>c.id))}
   if((e.key==='Delete'||e.key==='Backspace')&&SEL.size){e.preventDefault();delCards(B.cards.filter(c=>SEL.has(c.id)))}
   if(e.key==='Escape')setSel([])});
 
@@ -643,10 +643,10 @@ document.addEventListener('copy',e=>{if(!SEL.size||(e.target.closest&&e.target.c
 const _pp=document.onpaste;
 document.onpaste=e=>{if(P&&CB&&!(e.target.closest&&e.target.closest('input,[contenteditable]'))&&(e.clipboardData.getData('text')||'')==='__cards__'){e.preventDefault();pasteCB();return}_pp&&_pp(e)};
 addEventListener('keydown',e=>{
-  if($('#bd').hidden||(e.target.closest&&e.target.closest('input,[contenteditable],textarea,select')))return;const k=e.key.toLowerCase();
-  if(e.ctrlKey&&k==='z'&&!e.shiftKey){e.preventDefault();goH(hist,redoS)}
-  if(e.ctrlKey&&(k==='y'||(k==='z'&&e.shiftKey))){e.preventDefault();goH(redoS,hist)}
-  if(e.ctrlKey&&k==='d'&&SEL.size){e.preventDefault();setCB();pasteCB()}
+  if($('#bd').hidden||(e.target.closest&&e.target.closest('input,[contenteditable],textarea,select')))return;const k=e.code==='KeyZ'?'z':e.code==='KeyY'?'y':e.code==='KeyD'?'d':e.key.toLowerCase(),mod=e.ctrlKey||e.metaKey;
+  if(mod&&k==='z'&&!e.shiftKey){e.preventDefault();goH(hist,redoS)}
+  if(mod&&(k==='y'||(k==='z'&&e.shiftKey))){e.preventDefault();goH(redoS,hist)}
+  if(mod&&k==='d'&&SEL.size){e.preventDefault();setCB();pasteCB()}
   if(k==='escape'&&$('#lb'))$('#lb').remove()});
 
 /* ===== fit-all + minimap ===== */
@@ -706,6 +706,7 @@ const _rd=render;render=function(){_rd();setTimeout(layoutCols,40);setTimeout(la
 
 /* ===== drag with snap + alignment guides (hold Alt to disable) ===== */
 function dragCard(e,c,el){
+  if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();
   if(!SEL.has(c.id))setSel([]);
   let grp=SEL.has(c.id)?B.cards.filter(k=>SEL.has(k.id)):[c];
   grp=grp.concat(B.cards.filter(k=>k.col&&grp.some(g=>g.id===k.col)&&!grp.includes(k)));
@@ -773,6 +774,28 @@ $('#hd').insertAdjacentHTML('beforeend','<button id="xp">🖼 PNG</button><butto
 $('#xp').onclick=async()=>{try{const cv=await renderBoard();if(!cv)return toast('اللوحة فارغة');cv.toBlob(b=>dl(b,(P.name||'board')+'.png'))}catch(e){console.error(e);toast('تعذر التصدير')}};
 $('#xf').onclick=async()=>{try{const cv=await renderBoard();if(!cv)return toast('اللوحة فارغة');
   const jpg=Uint8Array.from(atob(cv.toDataURL('image/jpeg',.92).split(',')[1]),c=>c.charCodeAt(0));dl(pdfFrom(jpg,cv.width,cv.height),(P.name||'board')+'.pdf')}catch(e){console.error(e);toast('تعذر التصدير')}};
+</script>
+
+<style>
+.card.hh{display:flex;flex-direction:column}
+.card.hh>.bd{flex:1;display:flex;flex-direction:column;overflow:auto;min-height:0}
+.card.hh .txt{flex:1}
+</style>
+<script>
+/* ===== resize handle on every card (width; notes also height) ===== */
+const _ce5=cardEl;
+cardEl=function(c){
+  const el=_ce5(c);
+  if(!el.querySelector('.rz')&&!c.col){
+    if(c.t==='note'&&c.h){el.style.height=c.h+'px';el.classList.add('hh')}
+    const h=document.createElement('div');h.className='rz';h.title='اسحب لتغيير الحجم';el.appendChild(h);
+    h.onpointerdown=e=>{e.preventDefault();e.stopPropagation();h.setPointerCapture(e.pointerId);
+      const sx=e.clientX,sy=e.clientY,sw=el.offsetWidth,sh=el.offsetHeight;
+      h.onpointermove=m=>{c.w=Math.max(80,sw+(m.clientX-sx)/Z);el.style.width=c.w+'px';
+        if(c.t==='note'){c.h=Math.max(50,sh+(m.clientY-sy)/Z);el.style.height=c.h+'px';el.classList.add('hh')}
+        if(c.t==='col')layoutCols();else lines()};
+      h.onpointerup=()=>{h.onpointermove=h.onpointerup=null;save()}}}
+  return el};
 </script>
 
 </body>
