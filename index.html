@@ -2,6 +2,8 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-g8T8jIl/iY3FT8CJ4MI+VXn2SzbmI2x/bbVI5u9sQD8=' 'sha256-OXRUVF5NI7DyUkvVxBt+2B2quzFCBkOtIAf5n3+ow2Q=' 'sha256-Cazq1b/J0Vwmd9bQ1Guvh9WvP2GGvfyXSQrGsDEfM6c=' 'sha256-/8CJD0my9eN7QoIxDD8/AiuZkNGwSzVYT0+p9Gu7h7k=' 'sha256-5+qZONTA43Kpdsn4HWl6jhoagFZgk76AtyVTBgF1OX8=' 'sha256-R7UUc2AvWRbk8ewlfy5Rmv/7rY8SZl+87fxDOfjbUfE=' https://accounts.google.com; style-src 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' blob: data:; media-src blob:; connect-src https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com; frame-src https://accounts.google.com; base-uri 'none'; object-src 'none'; form-action 'self'">
+<meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>لوحة مشاريعي</title>
 <style>
@@ -122,7 +124,7 @@ async function openHome(){
   try{projs=await list(`'${root}' in parents and mimeType='${FOLDER}' and trashed=false`)}catch(e){return toast('تعذر تحميل المشاريع')}
   const h=$('#home');h.innerHTML='<div class="pc new" id="newP">+ مشروع جديد</div>';
   projs.forEach(p=>{
-    const c=(p.appProperties&&p.appProperties.color)||PAL[4],d=document.createElement('div');d.className='pc';d.style.setProperty('--c',c);
+    const c=/^#[0-9a-f]{6}$/i.test((p.appProperties||{}).color||'')?p.appProperties.color:PAL[4],d=document.createElement('div');d.className='pc';d.style.setProperty('--c',c);
     d.innerHTML=`<div class="band"></div><h3>${esc(p.name)}</h3><div class="ac"><button data-a="c">اللون</button><button data-a="r">الاسم</button><button data-a="d">حذف</button></div>`;
     d.onclick=e=>{const a=e.target.dataset.a;if(!a)return openProject(p);e.stopPropagation();act(p,a,c)};h.appendChild(d)});
   $('#newP').onclick=newProject;
@@ -202,7 +204,7 @@ function cardEl(c){
     const up=()=>{c.title=t.value;c.url=u.value.trim();a.textContent=c.title||c.url||'—';/^https?:\/\//.test(c.url)?a.href=c.url:a.removeAttribute('href');save()};t.oninput=u.oninput=up}
   if(c.t==='file'){b.style.padding=0;const m=c.mime||'';let h='';
     if(m.startsWith('image/'))h='<img alt="">';else if(m.startsWith('audio/'))h='<div style="padding:10px"><audio controls></audio></div>';else if(m.startsWith('video/'))h='<video controls></video>';
-    b.innerHTML=h+`<a class="fn" target="_blank" rel="noopener noreferrer" href="${esc(c.link||'#')}">${m.startsWith('image/')||m.startsWith('audio/')||m.startsWith('video/')?'':'📎 '}${esc(c.name)}</a>`;
+    b.innerHTML=h+`<a class="fn" target="_blank" rel="noopener noreferrer" href="${/^https:\/\//.test(c.link||'')?esc(c.link):'#'}">${m.startsWith('image/')||m.startsWith('audio/')||m.startsWith('video/')?'':'📎 '}${esc(c.name)}</a>`;
     const m2=b.querySelector('img,audio,video');
     if(m2){m2.onload=m2.onloadedmetadata=lines;blobURL(c.fid).then(u=>m2.src=u).catch(()=>toast('تعذر عرض '+c.name))}}
   el.addEventListener('click',e=>{if(!conn)return;e.preventDefault();e.stopPropagation();
@@ -282,7 +284,7 @@ $('#fb').onclick=$('#fb').oninput=e=>fbH&&fbH(e);
 /* connectors: 2 end dots + middle curve dot + color */
 const ep=e=>{const el=e.c&&els[e.c];return el?[el.offsetLeft+e.rx*el.offsetWidth,el.offsetTop+e.ry*el.offsetHeight]:[e.x,e.y]};
 lines=function(){
-  B.lines=(B.lines||[]).filter(l=>l.p);let h='';
+  B.lines=(B.lines||[]).filter(l=>l.p);B.lines.forEach(l=>{l.id=String(l.id).replace(/[^\w-]/g,'');if(!/^#[0-9a-f]{3,8}$/i.test(l.col))l.col=LC[0]});let h='';
   B.lines.forEach(l=>{const a=ep(l.p[0]),b=ep(l.p[1]),mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2,d=`M${a} Q${mx+2*l.mo.x},${my+2*l.mo.y} ${b}`;
     h+=`<marker id="m${l.id}" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0L9,4.5L0,9z" style="fill:${l.col}"/></marker><path class="ln" d="${d}" style="stroke:${l.col}" marker-end="url(#m${l.id})"/><path class="hit" data-l="${l.id}" d="${d}"/>`;
     if(l.id===selL)h+=[[a,0],[[mx+l.mo.x,my+l.mo.y],2],[b,1]].map(([q,i])=>`<circle class="hd" data-l="${l.id}" data-h="${i}" cx="${q[0]}" cy="${q[1]}" r="${7/Z}"/>`).join('')});
@@ -316,15 +318,15 @@ $('#lineB').onclick=()=>{
 
 /* delete = also from Google Drive */
 async function delCard(c){
-  if(!confirm('حذف نهائي من اللوحة ومن Google Drive؟'))return;
-  if(c.t==='file'&&c.fid){try{await api(`${D}/${c.fid}`,{method:'DELETE'})}catch(e){if(!/404|notFound/.test(e.message)){toast('تعذر الحذف من Drive');return}}}
+  if(!confirm('حذف من اللوحة ونقل الملف إلى سلة Google Drive (يمكن استرجاعه 30 يومًا)؟'))return;
+  if(c.t==='file'&&c.fid){try{await rmDrive(c.fid)}catch(e){if(!/404|notFound/.test(e.message)){toast('تعذر الحذف من Drive');return}}}
   B.lines.forEach(l=>l.p&&l.p.forEach((e,i)=>{if(e.c===c.id){const q=ep(e);l.p[i]={x:q[0],y:q[1]}}}));
   B.cards=B.cards.filter(k=>k!==c);save();render()}
 const _act=act;
 act=async function(p,a,c){
   if(a!=='d')return _act(p,a,c);
-  if(!confirm('حذف المشروع نهائيًا مع كل ملفاته من Drive؟ لا يمكن التراجع.'))return;
-  try{await api(`${D}/${p.id}`,{method:'DELETE'});openHome()}catch(e){toast('تعذر الحذف')}};
+  if(!confirm('نقل المشروع وكل ملفاته إلى سلة Drive؟ (يمكن استرجاعه 30 يومًا)'))return;
+  try{await rmDrive(p.id);openHome()}catch(e){toast('تعذر الحذف')}};
 
 /* tables */
 const mk=()=>({t:'',bg:'',cs:1,rs:1,h:0}),grid=(r,c)=>Array.from({length:r},()=>Array.from({length:c},mk));
@@ -349,7 +351,7 @@ function tbl(c,b){
     const t=document.createElement('table');
     c.cells.forEach((row,r)=>{const tr=t.insertRow();row.forEach((x,k)=>{if(x.h)return;const td=tr.insertCell();
       td.colSpan=x.cs;td.rowSpan=x.rs;td.style.background=x.bg||'';if(x.bg)td.style.color='#1b2333';
-      td.contentEditable='plaintext-only';td.textContent=x.t;td.dataset.r=r;td.dataset.c=k;
+      td.contentEditable='plaintext-only';td.textContent=x.t;sty(td,x.st);td.dataset.r=r;td.dataset.c=k;
       td.oninput=()=>{x.t=td.innerText;save()};
       td.onmousedown=e=>{if(e.shiftKey&&s.a){e.preventDefault();s.b=[r,k];mark()}};
       td.onfocus=()=>{s.a=s.b=[r,k];mark()}})});
@@ -445,21 +447,21 @@ addEventListener('keydown',e=>{
 /* ---- delete (board + Google Drive), single or many ---- */
 async function delCards(arr){
   if(!arr.length)return;const files=arr.filter(c=>c.t==='file'&&c.fid);
-  if(!confirm(arr.length>1?`حذف ${arr.length} عنصرًا نهائيًا من اللوحة ومن Google Drive؟`:'حذف نهائي من اللوحة ومن Google Drive؟'))return;
+  if(!confirm(arr.length>1?`حذف ${arr.length} عنصرًا من اللوحة ونقل ملفاتها إلى سلة Drive؟`:'حذف من اللوحة ونقل الملف إلى سلة Google Drive (يمكن استرجاعه 30 يومًا)؟'))return;
   const fail=new Set();
-  await Promise.all(files.map(c=>api(`${D}/${c.fid}`,{method:'DELETE'}).catch(e=>{if(!/404|notFound/.test(e.message)){fail.add(c.id);console.error(e)}})));
+  await Promise.all(files.map(c=>rmDrive(c.fid).catch(e=>{if(!/404|notFound/.test(e.message)){fail.add(c.id);console.error(e)}})));
   const ids=new Set(arr.filter(c=>!fail.has(c.id)).map(c=>c.id));
   B.lines.forEach(l=>l.p&&l.p.forEach((e,i)=>{if(e.c&&ids.has(e.c)){const q=ep(e);l.p[i]={x:q[0],y:q[1]}}}));
   B.cards=B.cards.filter(c=>!ids.has(c.id));ids.forEach(i=>SEL.delete(i));save();render();selBar();
-  toast(fail.size?`تعذر حذف ${fail.size} ملف من Drive — لم تُحذف بطاقاته`:files.length?'✓ حُذف من اللوحة ومن Drive':'✓ تم الحذف')}
+  toast(fail.size?`تعذر حذف ${fail.size} ملف من Drive — لم تُحذف بطاقاته`:files.length?'✓ حُذف من اللوحة ونُقل إلى سلة Drive':'✓ تم الحذف')}
 delCard=c=>delCards([c]);
 async function cleanup(){
   if(!P||!P.bid)return toast('لا توجد لوحة محفوظة بعد');await flush();
   try{const fs=await list(`'${P.id}' in parents and trashed=false`,'files(id,name)'),used=new Set(B.cards.map(c=>c.fid).filter(Boolean)),o=fs.filter(f=>f.name!=='board.json'&&!used.has(f.id));
     if(!o.length)return toast('لا توجد ملفات زائدة في Drive');
     if(!B.cards.length&&!confirm('تنبيه: اللوحة تبدو فارغة وقد لا تكون حُمّلت. المتابعة قد تحذف كل الملفات. هل أنت متأكد؟'))return;
-    if(!confirm(`يوجد ${o.length} ملف في مجلد المشروع على Drive غير موجود في اللوحة:\n\n`+o.slice(0,10).map(f=>'• '+f.name).join('\n')+(o.length>10?'\n…':'')+'\n\nحذفها نهائيًا؟'))return;
-    await Promise.all(o.map(f=>api(`${D}/${f.id}`,{method:'DELETE'}).catch(()=>{})));toast('✓ حُذف '+o.length+' ملف من Drive')}
+    if(!confirm(`يوجد ${o.length} ملف في مجلد المشروع على Drive غير موجود في اللوحة:\n\n`+o.slice(0,10).map(f=>'• '+f.name).join('\n')+(o.length>10?'\n…':'')+'\n\nنقلها إلى سلة Drive؟'))return;
+    await Promise.all(o.map(f=>rmDrive(f.id).catch(()=>{})));toast('✓ نُقل '+o.length+' ملف إلى سلة Drive')}
   catch(e){console.error(e);toast('تعذر التنظيف')}}
 $('#tools').insertAdjacentHTML('beforeend','<button data-t="clean"><b>🧹</b>تنظيف Drive</button>');
 document.querySelector('[data-t=clean]').onclick=cleanup;
@@ -493,8 +495,8 @@ cardEl=function(c){
 
 <script>
 /* ---- remembered sign-in: cached token + silent renewal + minimal gate ---- */
-const SC='https://www.googleapis.com/auth/drive.file';
-function saveTok(r){tok=r.access_token;try{localStorage.setItem('tk',JSON.stringify({t:tok,e:Date.now()+(r.expires_in-120)*1000}));localStorage.setItem('signed','1')}catch(e){}}
+const SC='https://www.googleapis.com/auth/drive.file';try{localStorage.removeItem('tk')}catch(e){}
+function saveTok(r){tok=r.access_token;try{sessionStorage.setItem('tk',JSON.stringify({t:tok,e:Date.now()+(r.expires_in-120)*1000}));localStorage.setItem('signed','1')}catch(e){}}
 function tokReq(prompt){return new Promise((ok,no)=>{
   const t=google.accounts.oauth2.initTokenClient({client_id:localStorage.getItem('cid'),scope:SC,prompt,
     callback:r=>r.error?no(r):(saveTok(r),ok()),error_callback:e=>no(e)});
@@ -509,7 +511,7 @@ async function boot(){
 const gerr=document.createElement('p');gerr.style.cssText='color:#e03131;font-size:13px;margin:0;direction:ltr;word-break:break-all';
 const gchg=document.createElement('button');gchg.textContent='تغيير Client ID';gchg.style.cssText='font-size:12px;border:0;background:none;color:var(--mu);cursor:pointer';
 $('#gate').append(gerr,gchg);
-gchg.onclick=()=>{localStorage.removeItem('cid');localStorage.removeItem('tk');location.reload()};
+gchg.onclick=()=>{localStorage.removeItem('cid');sessionStorage.removeItem('tk');localStorage.removeItem('tk');location.reload()};
 $('#go').onclick=async()=>{
   gerr.textContent='';let cid=localStorage.getItem('cid');
   if(!$('#cid').hidden){cid=$('#cid').value.trim();if(!cid)return toast('أدخل Client ID');localStorage.setItem('cid',cid)}
@@ -519,10 +521,148 @@ $('#go').onclick=async()=>{
 (async()=>{
   const cid=localStorage.getItem('cid');if(!cid)return;
   $('#cid').hidden=true;gchg.hidden=false;$('#gate p').textContent='جارٍ تسجيل الدخول…';
-  try{const s=JSON.parse(localStorage.getItem('tk')||'null');if(s&&s.e>Date.now()){tok=s.t;await boot();return}}catch(e){console.error(e)}
+  try{const s=JSON.parse(sessionStorage.getItem('tk')||'null');if(s&&s.e>Date.now()){tok=s.t;await boot();return}}catch(e){console.error(e)}
   for(let i=0;i<60&&!window.google;i++)await new Promise(r=>setTimeout(r,100));
   try{await tokReq(localStorage.getItem('signed')?'none':'consent');await boot();return}catch(e){console.error(e)}
   show('gate');$('#gate p').textContent='اضغط الزر للدخول بحسابك.'})();
+</script>
+
+<script>
+/* PERM=false: delete = move to Drive trash (recoverable 30 days). true: permanent delete */
+const PERM=false;
+const rmDrive=id=>PERM?api(`${D}/${id}`,{method:'DELETE'}):api(`${D}/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:'{"trashed":true}'});
+$('#hd').insertAdjacentHTML('beforeend','<button id="out" title="خروج وإلغاء صلاحية التطبيق">خروج</button>');
+$('#out').onclick=async()=>{
+  try{await flush()}catch(e){}
+  const t=tok,done=()=>{try{sessionStorage.removeItem('tk');localStorage.removeItem('tk');localStorage.removeItem('signed')}catch(e){}location.reload()};
+  if(t&&window.google)google.accounts.oauth2.revoke(t,done);else done();setTimeout(done,1500)};
+$('#gate').insertAdjacentHTML('beforeend','<a href="privacy.html" target="_blank" rel="noopener noreferrer" style="font-size:12px;color:var(--mu)">سياسة الخصوصية</a>');
+</script>
+
+<style>
+#tf{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:30;background:var(--pn);border:1px solid var(--ln);border-radius:12px;padding:6px 10px;display:flex;gap:6px;align-items:center;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:96vw;flex-wrap:wrap}
+#tf select,#tf button{font:inherit;padding:3px 8px;border:1px solid var(--ln);border-radius:6px;background:var(--bg);color:var(--ink)}
+#tf i[data-c]{width:18px;height:18px;border-radius:50%;cursor:pointer;border:2px solid var(--ln);display:inline-block}
+#tf input[type=color]{width:28px;height:26px;padding:0;border:0;background:none}
+.card.tx{background:transparent!important;border:0;box-shadow:none;overflow:visible}
+.card.tx .bar{position:absolute;top:-22px;left:0;right:0;opacity:0}.card.tx:hover .bar{opacity:1}
+#q{width:130px}
+#fit{position:fixed;bottom:12px;left:72px;z-index:30;background:var(--pn);border:1px solid var(--ln);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:13px}
+#mm{position:fixed;bottom:48px;left:12px;width:170px;height:115px;background:var(--pn);border:1px solid var(--ln);border-radius:8px;z-index:30;cursor:pointer}
+#lb{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:60;display:grid;place-items:center;cursor:zoom-out}#lb img{max-width:92vw;max-height:92vh}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@400;700&family=Montserrat:wght@400;700&family=Tajawal:wght@400;700&display=swap">
+<script>
+/* ===== text formatting: 5 fonts, size, colour; selection-level (notes) + whole-element ===== */
+const FONTS=['Cairo','Tajawal','Montserrat','IBM Plex Sans Arabic','Amiri'],SIZES=[12,14,16,18,22,28,36,48,64],CL=['#111827','#e03131','#f08c00','#2f9e44','#1971c2','#9c36b5','#e64980','#868e96'];
+function stCss(s){const o={};if(!s)return o;if(s.font)o.fontFamily=`'${s.font}',Cairo,sans-serif`;if(s.size)o.fontSize=s.size+'px';if(s.color)o.color=s.color;
+  if('b'in s)o.fontWeight=s.b?'700':'400';if('i'in s)o.fontStyle=s.i?'italic':'normal';return o}
+const sty=(el,s)=>Object.assign(el.style,stCss(s));
+function clean(h){ /* whitelist sanitizer for rich note HTML */
+  const d=new DOMParser().parseFromString('<body>'+h+'</body>','text/html').body,o=document.createElement('div'),ok={B:'b',I:'i',U:'u',SPAN:'span',BR:'br',DIV:'div',STRONG:'b',EM:'i'};
+  const walk=(n,out)=>n.childNodes.forEach(k=>{
+    if(k.nodeType===3){out.appendChild(document.createTextNode(k.nodeValue));return}
+    if(k.nodeType!==1)return;if(!ok[k.tagName]){if(!/^(SCRIPT|STYLE)$/.test(k.tagName))walk(k,out);return}
+    const e=document.createElement(ok[k.tagName]);
+    if(k.tagName==='SPAN'){const s=k.style;
+      if(/^(#[0-9a-f]{3,8}|rgb\([\d\s,.]+\))$/i.test(s.color))e.style.color=s.color;
+      const f=(s.fontFamily||'').replace(/["']/g,'').split(',')[0].trim();if(FONTS.includes(f))e.style.fontFamily=`'${f}',Cairo,sans-serif`;
+      if(/^\d+(\.\d+)?px$/.test(s.fontSize))e.style.fontSize=s.fontSize;
+      if(s.fontWeight==='700'||s.fontWeight==='bold')e.style.fontWeight='700';if(s.fontStyle==='italic')e.style.fontStyle='italic'}
+    walk(k,e);out.appendChild(e)});
+  walk(d,o);return o.innerHTML}
+document.body.insertAdjacentHTML('beforeend',`<div id="tf" hidden><select id="tff">${FONTS.map(f=>`<option>${f}</option>`).join('')}</select><select id="tfs">${SIZES.map(s=>`<option>${s}</option>`).join('')}</select>${CL.map(c=>`<i data-c="${c}" style="background:${c}"></i>`).join('')}<input type="color" id="tfc" value="#111827"><button data-k="b"><b>B</b></button><button data-k="i"><em>I</em></button></div><button id="fit">⤢ عرض الكل</button><canvas id="mm" width="170" height="115" hidden></canvas>`);
+let tgt=null,lr=null;
+const owner=()=>{const c=tgt.closest('.card')._c;return tgt.tagName==='TD'?{o:c.cells[+tgt.dataset.r][+tgt.dataset.c],rich:0}:{o:c,rich:1}};
+function syncTf(){if(!tgt)return;const s=owner().o.st||{};$('#tff').value=s.font||'Cairo';$('#tfs').value=s.size||16}
+document.addEventListener('selectionchange',()=>{const s=getSelection();if(!s.rangeCount)return;let n=s.anchorNode;n=n&&(n.nodeType===1?n:n.parentElement);
+  const e=n&&n.closest&&n.closest('.txt,td[contenteditable]');if(e&&e.closest('.card')._c){tgt=e;lr=s.getRangeAt(0).cloneRange();$('#tf').hidden=false;syncTf()}});
+document.addEventListener('pointerdown',e=>{if(!e.target.closest('.card,#tf')){tgt=null;$('#tf').hidden=true}},true);
+function fmt(k,v){
+  if(!tgt)return;const{o,rich}=owner(),s=getSelection();tgt.focus();if(lr&&rich){s.removeAllRanges();s.addRange(lr)}
+  if(rich&&!s.isCollapsed){const x=document.execCommand.bind(document);x('styleWithCSS',false,true);
+    if(k==='font')x('fontName',false,v);if(k==='color')x('foreColor',false,v);if(k==='b')x('bold');if(k==='i')x('italic');
+    if(k==='size'){x('fontSize',false,'7');tgt.querySelectorAll('span').forEach(p=>{if(p.style.fontSize.includes('xxx-large'))p.style.fontSize=v+'px'})}
+    o.html=clean(tgt.innerHTML)}
+  else{o.st=o.st||{};if(k==='b'||k==='i')o.st[k]=o.st[k]?0:1;else o.st[k]=v;sty(tgt,o.st)}
+  save();syncTf()}
+$('#tf').addEventListener('mousedown',e=>{if(e.target.tagName!=='SELECT'&&e.target.type!=='color')e.preventDefault()});
+$('#tf').addEventListener('click',e=>{const t=e.target;if(t.dataset.c)fmt('color',t.dataset.c);const k=t.closest('button');if(k)fmt(k.dataset.k)});
+$('#tff').onchange=e=>fmt('font',e.target.value);$('#tfs').onchange=e=>fmt('size',+e.target.value);$('#tfc').oninput=e=>fmt('color',e.target.value);
+$('#tools').insertAdjacentHTML('beforeend','<button data-t="text"><b>T</b>نص حر</button>');
+document.querySelector('[data-t=text]').onclick=()=>addCard({t:'note',c:'n0',free:1,text:'',st:{size:28,b:1}});
+
+/* ===== search ===== */
+let QS='',qi=-1;
+const ctext=c=>[c.text,c.title,c.url,c.name,...(c.items||[]).map(i=>i.t),...(c.cells||[]).flat().map(x=>x.t)].filter(Boolean).join(' ').toLowerCase();
+const match=c=>ctext(c).includes(QS);
+$('#hd').insertAdjacentHTML('beforeend','<input id="q" placeholder="🔍 بحث في اللوحة">');
+$('#q').oninput=e=>{QS=e.target.value.trim().toLowerCase();qi=-1;if(B)B.cards.forEach(c=>{const el=els[c.id];if(el)el.style.opacity=!QS||match(c)?'':.25})};
+$('#q').onkeydown=e=>{if(e.key!=='Enter'||!QS||!B)return;const m=B.cards.filter(match);if(!m.length)return toast('لا نتائج');qi=(qi+1)%m.length;view.scrollTo({left:m[qi].x*Z-120,top:m[qi].y*Z-120,behavior:'smooth'})};
+
+/* ===== card wrapper: rich notes, free text, image lightbox ===== */
+const _ce3=cardEl;
+cardEl=function(c){
+  const el=_ce3(c);el._c=c;
+  if(c.t==='note'){const t=el.querySelector('.txt');t.contentEditable='true';t.dir='auto';if(c.html)t.innerHTML=clean(c.html);sty(t,c.st);
+    t.addEventListener('input',()=>{c.html=clean(t.innerHTML);save()});
+    t.addEventListener('paste',e=>{e.preventDefault();document.execCommand('insertText',false,e.clipboardData.getData('text/plain'))});
+    if(c.free)el.classList.add('tx')}
+  if(QS&&!match(c))el.style.opacity=.25;
+  const im=el.querySelector('img');if(im&&c.t==='file'&&!/^رسم-/.test(c.name||''))im.ondblclick=()=>lightbox(im.src);
+  return el};
+function lightbox(src){const d=document.createElement('div');d.id='lb';d.innerHTML='<img alt="">';d.firstChild.src=src;d.onclick=()=>d.remove();document.body.appendChild(d)}
+
+/* ===== undo / redo (restores / re-trashes Drive files too) ===== */
+let hist=[],redoS=[],lastS=null,lastT=0,rs=0;
+const snap=()=>JSON.stringify({cards:B.cards,lines:B.lines}),fids=a=>new Set(a.filter(c=>c.fid).map(c=>c.fid));
+const _sv=save;
+save=function(){if(B&&!rs){const s=snap();if(lastS===null)lastS=s;else if(s!==lastS){if(Date.now()-lastT>800){hist.push(lastS);if(hist.length>60)hist.shift();redoS=[]}lastT=Date.now();lastS=s}}_sv()};
+const _op=openProject;openProject=async function(p){await _op(p);hist=[];redoS=[];lastS=snap();qmm()};
+function goH(from,to){
+  if(!from.length||!B)return;to.push(snap());const b=fids(B.cards),s=JSON.parse(from.pop()),a=fids(s.cards);
+  a.forEach(f=>{if(!b.has(f))api(`${D}/${f}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:'{"trashed":false}'}).catch(()=>{})});
+  b.forEach(f=>{if(!a.has(f))rmDrive(f).catch(()=>{})});
+  B.cards=s.cards;B.lines=s.lines;lastS=snap();rs=1;save();rs=0;render();setSel([])}
+$('#hd').insertAdjacentHTML('beforeend','<button id="un" title="تراجع Ctrl+Z">↶</button><button id="re" title="إعادة Ctrl+Y">↷</button><button id="bk" title="نسخة احتياطية JSON">⬇ نسخة</button>');
+$('#un').onclick=()=>goH(hist,redoS);$('#re').onclick=()=>goH(redoS,hist);
+$('#bk').onclick=()=>{if(!B)return;const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({name:P.name,cards:B.cards,lines:B.lines},null,1)],{type:'application/json'}));a.download=(P.name||'board')+'.json';a.click()};
+
+/* ===== copy / paste / duplicate ===== */
+let CB=null;
+function setCB(){const ids=new Set(SEL),cp=x=>JSON.parse(JSON.stringify(x));CB={n:0,cards:cp(B.cards.filter(c=>ids.has(c.id))),lines:cp(B.lines.filter(l=>l.p.every(e=>e.c&&ids.has(e.c))))}}
+async function pasteCB(){
+  if(!CB||!P)return;const off=30*(++CB.n),map={},nc=[];
+  for(const c of CB.cards){const n=JSON.parse(JSON.stringify(c));n.id=uid();n.x+=off;n.y+=off;map[c.id]=n.id;
+    if(c.t==='file'&&c.fid){try{const r=await J(`${D}/${c.fid}/copy?fields=id,name,mimeType,webViewLink`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({parents:[P.id]})});
+      n.fid=r.id;n.name=r.name;n.link=r.webViewLink;blobs[r.id]=blobs[c.fid]}catch(e){toast('تعذر نسخ ملف في Drive');continue}}
+    nc.push(n)}
+  B.cards.push(...nc);CB.lines.forEach(l=>{const q=JSON.parse(JSON.stringify(l));q.id=uid();q.p=q.p.map(e=>({...e,c:map[e.c]}));if(q.p.every(e=>e.c))B.lines.push(q)});
+  save();render();setSel(nc.map(n=>n.id))}
+document.addEventListener('copy',e=>{if(!SEL.size||(e.target.closest&&e.target.closest('input,[contenteditable],textarea')))return;e.preventDefault();setCB();e.clipboardData.setData('text/plain','__cards__');toast('تم نسخ '+SEL.size+' عنصر')});
+const _pp=document.onpaste;
+document.onpaste=e=>{if(P&&CB&&!(e.target.closest&&e.target.closest('input,[contenteditable]'))&&(e.clipboardData.getData('text')||'')==='__cards__'){e.preventDefault();pasteCB();return}_pp&&_pp(e)};
+addEventListener('keydown',e=>{
+  if($('#bd').hidden||(e.target.closest&&e.target.closest('input,[contenteditable],textarea,select')))return;const k=e.key.toLowerCase();
+  if(e.ctrlKey&&k==='z'&&!e.shiftKey){e.preventDefault();goH(hist,redoS)}
+  if(e.ctrlKey&&(k==='y'||(k==='z'&&e.shiftKey))){e.preventDefault();goH(redoS,hist)}
+  if(e.ctrlKey&&k==='d'&&SEL.size){e.preventDefault();setCB();pasteCB()}
+  if(k==='escape'&&$('#lb'))$('#lb').remove()});
+
+/* ===== fit-all + minimap ===== */
+function bbox(){let x0=1e9,y0=1e9,x1=0,y1=0;B.cards.forEach(c=>{const e=els[c.id];if(!e)return;x0=Math.min(x0,c.x);y0=Math.min(y0,c.y);x1=Math.max(x1,c.x+e.offsetWidth);y1=Math.max(y1,c.y+e.offsetHeight)});return[x0,y0,x1,y1]}
+$('#fit').onclick=()=>{if(!B||!B.cards.length)return;const[x0,y0,x1,y1]=bbox();Z=Math.max(.2,Math.min(view.clientWidth/(x1-x0+80),view.clientHeight/(y1-y0+80),1.5));applyZ();view.scrollLeft=(x0-40)*Z;view.scrollTop=(y0-40)*Z;lines()};
+const mm=$('#mm'),mg=mm.getContext('2d');let mmT=0;
+function drawMM(){
+  if(!B||$('#bd').hidden){mm.hidden=true;return}mm.hidden=false;const[,,x1,y1]=B.cards.length?bbox():[0,0,0,0];
+  const W=Math.max(x1+300,(view.scrollLeft+view.clientWidth)/Z),H=Math.max(y1+300,(view.scrollTop+view.clientHeight)/Z),k=Math.min(170/W,115/H);mm._k=k;
+  mg.clearRect(0,0,170,115);mg.fillStyle='#7b8aa8';B.cards.forEach(c=>{const e=els[c.id];if(e)mg.fillRect(c.x*k,c.y*k,Math.max(2,e.offsetWidth*k),Math.max(2,e.offsetHeight*k))});
+  mg.strokeStyle='#2f5bea';mg.lineWidth=1.5;mg.strokeRect(view.scrollLeft/Z*k,view.scrollTop/Z*k,view.clientWidth/Z*k,view.clientHeight/Z*k)}
+const qmm=()=>{if(mmT)return;mmT=requestAnimationFrame(()=>{mmT=0;drawMM()})};
+const _ln=lines;lines=function(){_ln();qmm()};
+view.addEventListener('scroll',qmm);
+mm.onclick=e=>{const r=mm.getBoundingClientRect();view.scrollLeft=(e.clientX-r.left)/mm._k*Z-view.clientWidth/2;view.scrollTop=(e.clientY-r.top)/mm._k*Z-view.clientHeight/2};
+$('#homeB').addEventListener('click',()=>{mm.hidden=true;$('#tf').hidden=true});
 </script>
 
 </body>
