@@ -2,7 +2,12 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-y07+iyfhC07nM2lsQDGMth63B5CucUZIJZnJSvRW09Q=' 'sha256-thraxHGhV2WuZztKeH6GAw96VbOJ25pJ5vfwgjvenMo=' 'sha256-v4yWIDo8cNh+8d+qG1qbgwOMNzqHuSOr2T2BiclmV8g=' 'sha256-/8CJD0my9eN7QoIxDD8/AiuZkNGwSzVYT0+p9Gu7h7k=' 'sha256-5+qZONTA43Kpdsn4HWl6jhoagFZgk76AtyVTBgF1OX8=' 'sha256-DTB5PTtlkmvrqErHZCpamCExX2rTjjswD+Nb8CFioBc=' 'sha256-aaPDRVJ/hOh3nNyl26DKQfOmcIGYeTTpDlTdFghXRqQ=' 'sha256-JUhk38ca5NECHwWPn3S/MsRba1TLJllBIPmOsfNcdzs=' https://accounts.google.com; style-src 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' blob: data:; media-src blob:; connect-src https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com; frame-src https://accounts.google.com blob:; base-uri 'none'; object-src 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-y07+iyfhC07nM2lsQDGMth63B5CucUZIJZnJSvRW09Q=' 'sha256-IqrlR8XsyVRC4kn+QpQYM1IALaJQFO/ZWzoQxiGPXW8=' 'sha256-v4yWIDo8cNh+8d+qG1qbgwOMNzqHuSOr2T2BiclmV8g=' 'sha256-/8CJD0my9eN7QoIxDD8/AiuZkNGwSzVYT0+p9Gu7h7k=' 'sha256-5+qZONTA43Kpdsn4HWl6jhoagFZgk76AtyVTBgF1OX8=' 'sha256-DTB5PTtlkmvrqErHZCpamCExX2rTjjswD+Nb8CFioBc=' 'sha256-aaPDRVJ/hOh3nNyl26DKQfOmcIGYeTTpDlTdFghXRqQ=' 'sha256-JUhk38ca5NECHwWPn3S/MsRba1TLJllBIPmOsfNcdzs=' 'sha256-KbX9x4yzZSqeh8DrIqejd3TpX5Q1ZyqhM/K1lNFnTH0=' 'sha256-ijCp94w03RdkmP9hb1/+rsK/q5NpbjV2uP2/RpPbJSE=' 'sha256-2CQIBRqejb2AG4OVQS0gxPcUG796Cp+QuR+hDaEWQQ4=' https://accounts.google.com; style-src 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' blob: data:; media-src blob:; connect-src https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com; frame-src https://accounts.google.com blob:; worker-src 'self'; manifest-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#2f5bea">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>لوحة مشاريعي</title>
@@ -271,7 +276,7 @@ view.addEventListener('pointerdown',e=>{
 addEventListener('pointermove',e=>{if(pan&&!pan.up){pan.tx=pan.sx-(e.clientX-pan.x)*.7;pan.ty=pan.sy-(e.clientY-pan.y)*.7}});
 addEventListener('pointerup',e=>{if(pan&&e.button===1){pan.up=1;view.style.cursor=''}});
 addEventListener('keydown',e=>{
-  if(e.ctrlKey&&/^(Equal|Minus|Digit0|Numpad(Add|Subtract|0))$/.test(e.code)||['+','=','-','0'].includes(e.key)){e.preventDefault();if($('#bd').hidden)return;const r=view.getBoundingClientRect();setZ(/Digit0|Numpad0/.test(e.code)||e.key==='0'?1:Z*(/Minus|Subtract/.test(e.code)||e.key==='-'?.87:1.15),r.left+r.width/2,r.top+r.height/2)}
+  if((e.ctrlKey||e.metaKey)&&/^(Equal|Minus|Digit0|Numpad(Add|Subtract|0))$/.test(e.code))e.preventDefault();
   if(e.key==='Delete'&&selL&&!e.target.closest('input,[contenteditable]')){B.lines=B.lines.filter(l=>l.id!==selL);selL=null;fb('');save();lines()}});
 vpos=function(){return{x:(view.scrollLeft+40+Math.random()*140)/Z,y:(view.scrollTop+30+Math.random()*100)/Z}};
 view.ondrop=e=>{e.preventDefault();if(!P)return;const q=sp(e);addFiles([...e.dataTransfer.files],{x:q[0],y:q[1]})};
@@ -795,6 +800,105 @@ cardEl=function(c){
         if(c.t==='note'){c.h=Math.max(50,sh+(m.clientY-sy)/Z);el.style.height=c.h+'px';el.classList.add('hh')}
         if(c.t==='col')layoutCols();else lines()};
       h.onpointerup=()=>{h.onpointermove=h.onpointerup=null;save()}}}
+  return el};
+</script>
+
+<script>
+/* ===== note card colours ===== */
+const NP=['#fff3b8','#ffe066','#ffd8a8','#ffa8a8','#ffd6df','#e5dbff','#d3e3ff','#a5d8ff','#cdf2dc','#b2f2bb','#ffffff','#dee2e6'];
+const textOn=h=>{const m=/^#([0-9a-f]{6})$/i.exec(h||'');if(!m)return'';const n=parseInt(m[1],16);return(.299*(n>>16)+.587*((n>>8)&255)+.114*(n&255))/255>.55?'#1b2333':'#f4f6fa'};
+function paintNote(el,c){if(c.t!=='note')return;
+  if(/^#[0-9a-f]{6}$/i.test(c.bg||'')){el.style.background=c.bg;el.style.color=textOn(c.bg);el.classList.remove('tx')}
+  else{el.style.background=`var(--${c.c||'n1'})`;el.style.color=''}}
+function noteColors(c){
+  const ids=SEL.has(c.id)?[...SEL]:[c.id],cs=B.cards.filter(k=>ids.includes(k.id)&&k.t==='note');
+  fb('<span>لون الملاحظة</span>'+NP.map(x=>`<i data-c="${x}" style="background:${x}"></i>`).join('')+`<input type="color" value="${/^#[0-9a-f]{6}$/i.test(c.bg||'')?c.bg:'#fff3b8'}"><button data-k="r">الافتراضي</button><button data-k="x">إغلاق</button>`);
+  fbH=e=>{const t=e.target,k=t.dataset.k;
+    if(k==='x'){fb('');fbH=null;return}
+    const col=t.tagName==='I'?t.dataset.c:t.type==='color'?t.value:null;if(!col&&k!=='r')return;
+    cs.forEach(n=>{if(col)n.bg=col;else delete n.bg;const q=els[n.id];if(q)paintNote(q,n)});save()}}
+const _ce6=cardEl;
+cardEl=function(c){
+  const el=_ce6(c);
+  if(c.t==='note'){paintNote(el,c);const b=el.querySelector('[data-a=c]');if(b){b.textContent='🎨';b.title='لون البطاقة';b.onclick=()=>noteColors(c)}}
+  return el};
+</script>
+
+<style>
+#mic,#vlg{position:fixed;bottom:12px;z-index:30;background:var(--pn);border:1px solid var(--ln);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:14px}
+#mic{left:190px}#vlg{left:238px}
+#mic.on{background:#e03131;color:#fff;animation:pl 1s infinite}
+@keyframes pl{50%{opacity:.6}}
+#vi{position:fixed;bottom:50px;left:190px;max-width:50vw;background:var(--pn);border:1px solid var(--ln);border-radius:8px;padding:4px 10px;color:var(--mu);z-index:30}
+</style>
+<script>
+/* ===== voice typing (Arabic / English) ===== */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let vl=localStorage.getItem('vlang')||'ar-EG',rec=null,vOn=0,vTgt=null,lastEd=null;
+document.body.insertAdjacentHTML('beforeend','<button id="mic" title="كتابة بالصوت" hidden>🎤</button><button id="vlg" title="لغة الإملاء: عربي / English" hidden></button><div id="vi" hidden></div>');
+const edOk=x=>!!x&&(x.isContentEditable||(x.tagName==='INPUT'&&/^(text|search|url)$/.test(x.type))||x.tagName==='TEXTAREA');
+const vlab=()=>{$('#vlg').textContent=vl.startsWith('ar')?'ع':'EN'};vlab();
+document.addEventListener('focusin',e=>{const t=e.target;if(edOk(t)&&!(t.closest&&t.closest('#gate')))lastEd=t});
+function vStart(){
+  if(!SR)return toast('الإملاء الصوتي يعمل في Chrome و Edge');
+  let t=edOk(document.activeElement)?document.activeElement:(lastEd&&document.contains(lastEd)?lastEd:null);
+  if(!t&&B){addCard({t:'note',c:'n1',text:''});const q=els[B.cards[B.cards.length-1].id];t=q&&q.querySelector('.txt')}
+  if(!t)return toast('اختر مكان الكتابة أولًا');
+  if(t!==document.activeElement){t.focus();if(t.isContentEditable){const s=getSelection(),r=document.createRange();r.selectNodeContents(t);r.collapse(false);s.removeAllRanges();s.addRange(r)}}
+  vTgt=t;rec=new SR();rec.lang=vl;rec.continuous=true;rec.interimResults=true;
+  rec.onresult=e=>{let it='';for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];
+      if(r.isFinal){vTgt.focus();document.execCommand('insertText',false,r[0].transcript.trim()+' ')}else it+=r[0].transcript}
+    $('#vi').textContent=it;$('#vi').hidden=!it};
+  rec.onerror=e=>{if(/not-allowed|service-not-allowed/.test(e.error)){toast('اسمح بالميكروفون من أيقونة القفل بجوار العنوان');vStop()}else if(e.error==='network'){toast('الإملاء الصوتي يحتاج اتصالًا بالإنترنت');vStop()}};
+  rec.onend=()=>{if(vOn){try{rec.start()}catch(e){vStop()}}};
+  vOn=1;$('#mic').classList.add('on');rec.start()}
+function vStop(){vOn=0;try{rec&&rec.stop()}catch(e){}$('#mic').classList.remove('on');$('#vi').hidden=true}
+$('#mic').onclick=()=>vOn?vStop():vStart();
+$('#vlg').onclick=()=>{vl=vl.startsWith('ar')?'en-US':'ar-EG';localStorage.setItem('vlang',vl);vlab();if(vOn){vStop();vStart()}};
+['#mic','#vlg'].forEach(s=>$(s).addEventListener('mousedown',e=>e.preventDefault()));
+const _sh=show;show=function(id){_sh(id);const b=id!=='bd';['#mic','#vlg','#fit'].forEach(s=>$(s).hidden=b);if(b)vStop()};$('#fit').hidden=true;
+
+/* ===== install as a desktop app (PWA) ===== */
+let dip=null;
+$('#hd').insertAdjacentHTML('beforeend','<button id="inst" hidden>⬇ تثبيت التطبيق</button>');
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();dip=e;$('#inst').hidden=false});
+$('#inst').onclick=async()=>{if(!dip)return;dip.prompt();try{await dip.userChoice}catch(e){}dip=null;$('#inst').hidden=true};
+addEventListener('appinstalled',()=>{$('#inst').hidden=true;toast('✓ تم تثبيت التطبيق')});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+
+<script>
+/* ===== voice memo: record -> upload to Drive -> audio card ===== */
+let mr=null,chunks=[],rt=null,rst=0,rStream=null,rCancel=0;
+$('#tools').insertAdjacentHTML('beforeend','<button data-t="rec" id="recB"><b>🎙</b>تسجيل صوتي</button>');
+const fmtT=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+async function recStart(){
+  if(!navigator.mediaDevices||!window.MediaRecorder)return toast('التسجيل غير مدعوم في هذا المتصفح');
+  if(vOn)vStop();
+  try{rStream=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){return toast('اسمح بالميكروفون من أيقونة القفل بجوار العنوان')}
+  const mt=['audio/webm;codecs=opus','audio/webm','audio/mp4'].find(t=>MediaRecorder.isTypeSupported(t))||'';
+  chunks=[];rCancel=0;mr=new MediaRecorder(rStream,mt?{mimeType:mt}:{});
+  mr.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+  mr.onstop=async()=>{
+    clearInterval(rt);rStream.getTracks().forEach(t=>t.stop());$('#recB').classList.remove('on');fb('');fbH=null;
+    if(rCancel||!chunks.length||!P)return;
+    const type=(mr.mimeType||'audio/webm').split(';')[0],ext=type.includes('mp4')?'m4a':'webm',d=new Date(),p=n=>String(n).padStart(2,'0'),
+      nm=`تسجيل-${d.toISOString().slice(0,10)} ${p(d.getHours())}-${p(d.getMinutes())}-${p(d.getSeconds())}.${ext}`,f=new File([new Blob(chunks,{type})],nm,{type});
+    toast('جارٍ رفع التسجيل إلى Drive…');
+    try{const r=await upload(f,P.id);blobs[r.id]=Promise.resolve(URL.createObjectURL(f));
+      addCard({t:'file',fid:r.id,name:r.name,mime:type,link:r.webViewLink});toast('✓ تم حفظ التسجيل في Drive')}
+    catch(e){console.error(e);toast('فشل رفع التسجيل')}};
+  mr.start(1000);rst=Date.now();$('#recB').classList.add('on');
+  fb(`<span id="rtm">● يُسجَّل… ${fmtT(0)}</span><button data-k="s">⏹ إيقاف وحفظ</button><button data-k="x">إلغاء</button>`);
+  fbH=e=>{const k=e.target.dataset.k;if(k==='s')recStop();if(k==='x'){rCancel=1;recStop()}};
+  rt=setInterval(()=>{const el=$('#rtm');if(el)el.textContent='● يُسجَّل… '+fmtT(Math.floor((Date.now()-rst)/1000))},500)}
+function recStop(){if(mr&&mr.state!=='inactive')mr.stop()}
+$('#recB').onclick=()=>mr&&mr.state==='recording'?recStop():recStart();
+$('#homeB').addEventListener('click',()=>{rCancel=1;recStop()});
+/* MediaRecorder webm has no duration header: force the player to learn it so the seek bar works */
+const _ce7=cardEl;
+cardEl=function(c){const el=_ce7(c),a=el.querySelector('audio');
+  if(a)a.addEventListener('loadedmetadata',()=>{if(a.duration===Infinity){a.currentTime=1e101;a.addEventListener('timeupdate',function f(){a.removeEventListener('timeupdate',f);a.currentTime=0})}});
   return el};
 </script>
 
