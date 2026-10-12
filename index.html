@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-y07+iyfhC07nM2lsQDGMth63B5CucUZIJZnJSvRW09Q=' 'sha256-IqrlR8XsyVRC4kn+QpQYM1IALaJQFO/ZWzoQxiGPXW8=' 'sha256-v4yWIDo8cNh+8d+qG1qbgwOMNzqHuSOr2T2BiclmV8g=' 'sha256-/8CJD0my9eN7QoIxDD8/AiuZkNGwSzVYT0+p9Gu7h7k=' 'sha256-5+qZONTA43Kpdsn4HWl6jhoagFZgk76AtyVTBgF1OX8=' 'sha256-DTB5PTtlkmvrqErHZCpamCExX2rTjjswD+Nb8CFioBc=' 'sha256-aaPDRVJ/hOh3nNyl26DKQfOmcIGYeTTpDlTdFghXRqQ=' 'sha256-JUhk38ca5NECHwWPn3S/MsRba1TLJllBIPmOsfNcdzs=' 'sha256-KbX9x4yzZSqeh8DrIqejd3TpX5Q1ZyqhM/K1lNFnTH0=' 'sha256-ijCp94w03RdkmP9hb1/+rsK/q5NpbjV2uP2/RpPbJSE=' 'sha256-2CQIBRqejb2AG4OVQS0gxPcUG796Cp+QuR+hDaEWQQ4=' https://accounts.google.com; style-src 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' blob: data:; media-src blob:; connect-src https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com; frame-src https://accounts.google.com blob:; worker-src 'self'; manifest-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-y07+iyfhC07nM2lsQDGMth63B5CucUZIJZnJSvRW09Q=' 'sha256-FE1jP1dR0D1Rdd/GhQjx6riVQY++H5BZX6Y6lfa1wzw=' 'sha256-v4yWIDo8cNh+8d+qG1qbgwOMNzqHuSOr2T2BiclmV8g=' 'sha256-/8CJD0my9eN7QoIxDD8/AiuZkNGwSzVYT0+p9Gu7h7k=' 'sha256-5+qZONTA43Kpdsn4HWl6jhoagFZgk76AtyVTBgF1OX8=' 'sha256-DTB5PTtlkmvrqErHZCpamCExX2rTjjswD+Nb8CFioBc=' 'sha256-aaPDRVJ/hOh3nNyl26DKQfOmcIGYeTTpDlTdFghXRqQ=' 'sha256-JUhk38ca5NECHwWPn3S/MsRba1TLJllBIPmOsfNcdzs=' 'sha256-KbX9x4yzZSqeh8DrIqejd3TpX5Q1ZyqhM/K1lNFnTH0=' 'sha256-ijCp94w03RdkmP9hb1/+rsK/q5NpbjV2uP2/RpPbJSE=' 'sha256-2CQIBRqejb2AG4OVQS0gxPcUG796Cp+QuR+hDaEWQQ4=' https://accounts.google.com; style-src 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' blob: data:; media-src blob:; connect-src https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com; frame-src https://accounts.google.com blob:; worker-src 'self'; manifest-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#2f5bea">
 <link rel="icon" href="icon-192.png">
@@ -268,13 +268,13 @@ addEventListener('wheel',e=>{if(!e.ctrlKey)return;e.preventDefault();if($('#bd')
 $('#zl').onclick=()=>{const r=view.getBoundingClientRect();setZ(1,r.left+r.width/2,r.top+r.height/2)};
 /* smooth middle-button pan */
 let pan=null;const st=d=>Math.abs(d)<2?d:d*.16;
-function loop(){const p=pan;if(!p)return;const dx=p.tx-view.scrollLeft,dy=p.ty-view.scrollTop;view.scrollLeft+=st(dx);view.scrollTop+=st(dy);if(p.up&&Math.abs(dx)<1&&Math.abs(dy)<1){pan=null;return}requestAnimationFrame(loop)}
+function loop(){const p=pan;if(!p)return;const mx=view.scrollWidth-view.clientWidth,my=view.scrollHeight-view.clientHeight,tx=Math.min(Math.max(p.tx,0),mx),ty=Math.min(Math.max(p.ty,0),my),dx=tx-view.scrollLeft,dy=ty-view.scrollTop;view.scrollLeft+=st(dx);view.scrollTop+=st(dy);if(p.up&&((Math.abs(dx)<1&&Math.abs(dy)<1)||++p.n>90)){pan=null;view.style.cursor='';return}requestAnimationFrame(loop)}
 view.addEventListener('mousedown',e=>{if(e.button===1)e.preventDefault()});
 view.addEventListener('pointerdown',e=>{
-  if(e.button===1){e.preventDefault();pan={x:e.clientX,y:e.clientY,sx:view.scrollLeft,sy:view.scrollTop,tx:view.scrollLeft,ty:view.scrollTop};view.style.cursor='grabbing';loop();return}
+  if(e.button===1){e.preventDefault();pan={x:e.clientX,y:e.clientY,sx:view.scrollLeft,sy:view.scrollTop,tx:view.scrollLeft,ty:view.scrollTop,n:0};view.style.cursor='grabbing';loop();return}
   if(selL&&!e.target.closest('.hd,.hit')){selL=null;fb('');lines()}});
 addEventListener('pointermove',e=>{if(pan&&!pan.up){pan.tx=pan.sx-(e.clientX-pan.x)*.7;pan.ty=pan.sy-(e.clientY-pan.y)*.7}});
-addEventListener('pointerup',e=>{if(pan&&e.button===1){pan.up=1;view.style.cursor=''}});
+const endPan=()=>{if(pan){pan.up=1;view.style.cursor=''}};addEventListener('pointerup',e=>{if(e.button===1)endPan()});addEventListener('mouseup',e=>{if(e.button===1)endPan()});addEventListener('pointercancel',endPan);addEventListener('blur',endPan);view.addEventListener('wheel',()=>{if(pan)pan=null},{passive:true});
 addEventListener('keydown',e=>{
   if((e.ctrlKey||e.metaKey)&&/^(Equal|Minus|Digit0|Numpad(Add|Subtract|0))$/.test(e.code))e.preventDefault();
   if(e.key==='Delete'&&selL&&!e.target.closest('input,[contenteditable]')){B.lines=B.lines.filter(l=>l.id!==selL);selL=null;fb('');save();lines()}});
