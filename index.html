@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-v7fxjONjQJ8vB5nIP8RCleOGgrlgucoWm+dMcBUZXnY=' 'sha256-FE1jP1dR0D1Rdd/GhQjx6riVQY++H5BZX6Y6lfa1wzw=' 'sha256-6HnqrIaIA4KYW/uW6LGQk8skfbfSvvduGCqu8Y2lAIA=' 'sha256-/8CJD0my9eN7QoIxDD8/AiuZkNGwSzVYT0+p9Gu7h7k=' 'sha256-5+qZONTA43Kpdsn4HWl6jhoagFZgk76AtyVTBgF1OX8=' 'sha256-xlAJkqFY33tUT+Xu5qQuXv+u5teuwFG/NEFrr5oJKdk=' 'sha256-UbtVEJcFI2jajpWe1UlcdtZt1LSANaod9H6uJ8ceLyQ=' 'sha256-JUhk38ca5NECHwWPn3S/MsRba1TLJllBIPmOsfNcdzs=' 'sha256-KbX9x4yzZSqeh8DrIqejd3TpX5Q1ZyqhM/K1lNFnTH0=' 'sha256-ijCp94w03RdkmP9hb1/+rsK/q5NpbjV2uP2/RpPbJSE=' 'sha256-2CQIBRqejb2AG4OVQS0gxPcUG796Cp+QuR+hDaEWQQ4=' 'sha256-K5tRbx6qmi6YUTHCUVQEGfrLNTyfai3Xsov6JRHgRBM=' https://accounts.google.com; style-src 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' blob: data:; media-src blob:; connect-src https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com; frame-src https://accounts.google.com blob:; worker-src 'self'; manifest-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-v7fxjONjQJ8vB5nIP8RCleOGgrlgucoWm+dMcBUZXnY=' 'sha256-FE1jP1dR0D1Rdd/GhQjx6riVQY++H5BZX6Y6lfa1wzw=' 'sha256-6HnqrIaIA4KYW/uW6LGQk8skfbfSvvduGCqu8Y2lAIA=' 'sha256-/8CJD0my9eN7QoIxDD8/AiuZkNGwSzVYT0+p9Gu7h7k=' 'sha256-5+qZONTA43Kpdsn4HWl6jhoagFZgk76AtyVTBgF1OX8=' 'sha256-xlAJkqFY33tUT+Xu5qQuXv+u5teuwFG/NEFrr5oJKdk=' 'sha256-UbtVEJcFI2jajpWe1UlcdtZt1LSANaod9H6uJ8ceLyQ=' 'sha256-JUhk38ca5NECHwWPn3S/MsRba1TLJllBIPmOsfNcdzs=' 'sha256-KbX9x4yzZSqeh8DrIqejd3TpX5Q1ZyqhM/K1lNFnTH0=' 'sha256-ijCp94w03RdkmP9hb1/+rsK/q5NpbjV2uP2/RpPbJSE=' 'sha256-2CQIBRqejb2AG4OVQS0gxPcUG796Cp+QuR+hDaEWQQ4=' 'sha256-K5tRbx6qmi6YUTHCUVQEGfrLNTyfai3Xsov6JRHgRBM=' 'sha256-jGK/R7v6rppaxXTMu4jHSeeSVFij66RNYjextW4ZdAk=' https://accounts.google.com; style-src 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' blob: data:; media-src blob:; connect-src https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com; frame-src https://accounts.google.com blob:; worker-src 'self'; manifest-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#2f5bea">
 <link rel="icon" href="icon-192.png">
@@ -954,6 +954,47 @@ cardEl=function(c){const el=_ce8(c);
     i.textContent='📁';n.textContent=c.name||'مجلد';s.textContent=`${c.files||0} ملف`+(c.dirs?` · ${c.dirs} مجلد فرعي`:'')+' — اضغط للفتح في Drive';
     a.append(i,n,s);b.appendChild(a)}
   return el};
+</script>
+
+<style>
+#mic2{margin-top:8px;padding:4px 10px;border:1px solid var(--ln);border-radius:8px;background:var(--bg);cursor:pointer}
+#mic2.on{background:#e03131;color:#fff}
+</style>
+<script>
+/* ===== voice typing v2: works in every text field, explicit mic permission, clear error messages ===== */
+const VERR={'not-allowed':'تم رفض إذن الميكروفون — اضغط أيقونة القفل بجوار عنوان الموقع واسمح بالميكروفون ثم أعد المحاولة','service-not-allowed':'المتصفح يمنع خدمة التعرف على الصوت — استخدم Google Chrome أو Edge','network':'تعذر الاتصال بخدمة Google للتعرف على الصوت — تحقق من الإنترنت','audio-capture':'لم يُعثر على ميكروفون — تحقق من الميكروفون المختار في Windows','language-not-supported':'هذه اللغة غير مدعومة في المتصفح'};
+const vMsg=t=>{const v=$('#vi');v.textContent=t||'';v.hidden=!t},vBtns=on=>['#mic','#mic2'].forEach(s=>{const b=$(s);b&&b.classList.toggle('on',!!on)});
+const pickT=()=>{const a=document.activeElement;if(edOk(a)&&!(a.closest&&a.closest('#gate')))return a;return lastEd&&document.contains(lastEd)?lastEd:null};
+function typeInto(t,txt){
+  if(document.activeElement!==t)t.focus();
+  let ok=false;try{ok=document.execCommand('insertText',false,txt)}catch(e){}
+  if(ok)return;
+  if(t.isContentEditable){const s=getSelection();let r=s.rangeCount&&t.contains(s.anchorNode)?s.getRangeAt(0):null;
+    if(!r){r=document.createRange();r.selectNodeContents(t);r.collapse(false)}r.deleteContents();const n=document.createTextNode(txt);r.insertNode(n);r.setStartAfter(n);r.collapse(true);s.removeAllRanges();s.addRange(r)}
+  else if(t.setRangeText){const a=t.selectionStart==null?t.value.length:t.selectionStart,b=t.selectionEnd==null?a:t.selectionEnd;t.setRangeText(txt,a,b,'end')}
+  t.dispatchEvent(new Event('input',{bubbles:true}))}
+vStop=function(){vOn=0;try{rec&&rec.stop()}catch(e){}vBtns(0);vMsg('')};
+vStart=async function(){
+  if(!SR)return toast('الإملاء الصوتي يعمل في Chrome و Edge فقط');
+  let t=pickT();
+  if(!t&&B&&!$('#bd').hidden){addCard({t:'note',c:'n1',text:''});const q=els[B.cards[B.cards.length-1].id];t=q&&q.querySelector('.txt')}
+  if(!t)return toast('اضغط داخل مكان الكتابة أولًا ثم ابدأ الإملاء');
+  try{const st=await navigator.mediaDevices.getUserMedia({audio:true});st.getTracks().forEach(x=>x.stop())}catch(e){return toast(VERR['not-allowed'])}
+  if(t!==document.activeElement){t.focus();if(t.isContentEditable){const s=getSelection(),r=document.createRange();r.selectNodeContents(t);r.collapse(false);s.removeAllRanges();s.addRange(r)}}
+  vTgt=t;rec=new SR();rec.lang=vl;rec.continuous=true;rec.interimResults=true;let heard=0;
+  rec.onstart=()=>vMsg('🎤 أستمع… تحدّث الآن');rec.onaudiostart=()=>{heard=1};
+  rec.onresult=e=>{heard=1;const a=document.activeElement;if(edOk(a)&&!(a.closest&&a.closest('#gate')))vTgt=a;
+    if(!document.contains(vTgt)){const l=pickT();if(!l){vStop();return}vTgt=l}
+    let it='';for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];if(r.isFinal){const x=r[0].transcript.trim();if(x)typeInto(vTgt,x+' ')}else it+=r[0].transcript}
+    vMsg(it?'… '+it:'🎤 أستمع… تحدّث الآن')};
+  rec.onerror=e=>{if(e.error==='no-speech'||e.error==='aborted')return;toast(VERR[e.error]||('خطأ في الإملاء: '+e.error));vStop()};
+  rec.onend=()=>{if(vOn)setTimeout(()=>{if(vOn){try{rec.start()}catch(x){vStop();toast('توقف الإملاء — اضغط 🎤 للمتابعة')}}},300)};
+  vOn=1;vBtns(1);try{rec.start()}catch(e){vStop();return toast('تعذر بدء الإملاء: '+e.message)}
+  setTimeout(()=>{if(vOn&&!heard)toast('لا يصل صوت — تأكد من الميكروفون المختار في Windows ومن إذن Chrome له')},5000)};
+/* mic inside the "new project" dialog + Alt+M shortcut anywhere */
+$('#pn').insertAdjacentHTML('afterend','<button type="button" id="mic2" title="إملاء صوتي">🎤 إملاء</button>');
+$('#mic2').addEventListener('mousedown',e=>e.preventDefault());$('#mic2').onclick=()=>vOn?vStop():vStart();
+addEventListener('keydown',e=>{if(e.altKey&&e.code==='KeyM'){e.preventDefault();vOn?vStop():vStart()}});
 </script>
 
 </body>
