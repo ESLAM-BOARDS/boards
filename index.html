@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-y07+iyfhC07nM2lsQDGMth63B5CucUZIJZnJSvRW09Q=' 'sha256-FE1jP1dR0D1Rdd/GhQjx6riVQY++H5BZX6Y6lfa1wzw=' 'sha256-v4yWIDo8cNh+8d+qG1qbgwOMNzqHuSOr2T2BiclmV8g=' 'sha256-/8CJD0my9eN7QoIxDD8/AiuZkNGwSzVYT0+p9Gu7h7k=' 'sha256-5+qZONTA43Kpdsn4HWl6jhoagFZgk76AtyVTBgF1OX8=' 'sha256-DTB5PTtlkmvrqErHZCpamCExX2rTjjswD+Nb8CFioBc=' 'sha256-aaPDRVJ/hOh3nNyl26DKQfOmcIGYeTTpDlTdFghXRqQ=' 'sha256-JUhk38ca5NECHwWPn3S/MsRba1TLJllBIPmOsfNcdzs=' 'sha256-KbX9x4yzZSqeh8DrIqejd3TpX5Q1ZyqhM/K1lNFnTH0=' 'sha256-ijCp94w03RdkmP9hb1/+rsK/q5NpbjV2uP2/RpPbJSE=' 'sha256-2CQIBRqejb2AG4OVQS0gxPcUG796Cp+QuR+hDaEWQQ4=' https://accounts.google.com; style-src 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' blob: data:; media-src blob:; connect-src https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com; frame-src https://accounts.google.com blob:; worker-src 'self'; manifest-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-v7fxjONjQJ8vB5nIP8RCleOGgrlgucoWm+dMcBUZXnY=' 'sha256-FE1jP1dR0D1Rdd/GhQjx6riVQY++H5BZX6Y6lfa1wzw=' 'sha256-6HnqrIaIA4KYW/uW6LGQk8skfbfSvvduGCqu8Y2lAIA=' 'sha256-/8CJD0my9eN7QoIxDD8/AiuZkNGwSzVYT0+p9Gu7h7k=' 'sha256-5+qZONTA43Kpdsn4HWl6jhoagFZgk76AtyVTBgF1OX8=' 'sha256-xlAJkqFY33tUT+Xu5qQuXv+u5teuwFG/NEFrr5oJKdk=' 'sha256-UbtVEJcFI2jajpWe1UlcdtZt1LSANaod9H6uJ8ceLyQ=' 'sha256-JUhk38ca5NECHwWPn3S/MsRba1TLJllBIPmOsfNcdzs=' 'sha256-KbX9x4yzZSqeh8DrIqejd3TpX5Q1ZyqhM/K1lNFnTH0=' 'sha256-ijCp94w03RdkmP9hb1/+rsK/q5NpbjV2uP2/RpPbJSE=' 'sha256-2CQIBRqejb2AG4OVQS0gxPcUG796Cp+QuR+hDaEWQQ4=' 'sha256-K5tRbx6qmi6YUTHCUVQEGfrLNTyfai3Xsov6JRHgRBM=' https://accounts.google.com; style-src 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' blob: data:; media-src blob:; connect-src https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com; frame-src https://accounts.google.com blob:; worker-src 'self'; manifest-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#2f5bea">
 <link rel="icon" href="icon-192.png">
@@ -196,13 +196,13 @@ function cardEl(c){
   if(c.t==='note'){b.innerHTML='<div class="txt" contenteditable="plaintext-only" data-p="اكتب فكرتك…"></div>';const t=b.firstChild;t.textContent=c.text;t.oninput=()=>{c.text=t.innerText;save()}}
   if(c.t==='todo'){const draw=f=>{b.innerHTML='';
     c.items.forEach((it,i)=>{const r=document.createElement('div');r.className='row';
-      r.innerHTML=`<input type="checkbox" ${it.d?'checked':''}><input type="text" placeholder="مهمة" value="${esc(it.t)}" class="${it.d?'d':''}">`;
-      const[cb,tx]=r.querySelectorAll('input');
-      cb.onchange=()=>{it.d=+cb.checked;tx.classList.toggle('d',!!it.d);save()};tx.oninput=()=>{it.t=tx.value;save()};
-      tx.onkeydown=e=>{if(e.key==='Enter'){c.items.splice(i+1,0,{t:'',d:0});save();draw(i+1)}
+      r.innerHTML=`<input type="checkbox" ${it.d?'checked':''}><textarea rows="1" placeholder="مهمة" class="${it.d?'d':''}">${esc(it.t)}</textarea>`;
+      const cb=r.querySelector('input'),tx=r.querySelector('textarea'),fit=()=>{if(tx.scrollHeight){tx.style.height='auto';tx.style.height=tx.scrollHeight+'px'}};setTimeout(fit,0);setTimeout(fit,400);
+      cb.onchange=()=>{it.d=+cb.checked;tx.classList.toggle('d',!!it.d);save()};tx.oninput=()=>{it.t=tx.value;fit();save()};
+      tx.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();c.items.splice(i+1,0,{t:'',d:0});save();draw(i+1)}
         if(e.key==='Backspace'&&!tx.value&&c.items.length>1){c.items.splice(i,1);save();draw(Math.max(0,i-1))}};b.appendChild(r)});
     const a=document.createElement('button');a.className='add';a.textContent='+ مهمة';a.onclick=()=>{c.items.push({t:'',d:0});save();draw(c.items.length-1)};b.appendChild(a);
-    if(f!=null){const x=b.querySelectorAll('input[type=text]')[f];x&&x.focus()}setTimeout(lines,0)};draw()}
+    if(f!=null){const x=b.querySelectorAll('textarea')[f];x&&x.focus()}setTimeout(lines,0)};draw()}
   if(c.t==='link'){b.className='bd lk';const ok=/^https?:\/\//.test(c.url);
     b.innerHTML=`<input class="t" placeholder="عنوان الرابط" value="${esc(c.title)}"><input class="u" dir="ltr" placeholder="https://…" value="${esc(c.url)}"><a target="_blank" rel="noopener noreferrer" ${ok?`href="${esc(c.url)}"`:''}>${esc(c.title||c.url||'—')}</a>`;
     const[t,u]=b.querySelectorAll('input'),a=b.querySelector('a');
@@ -451,7 +451,7 @@ addEventListener('keydown',e=>{
 
 /* ---- delete (board + Google Drive), single or many ---- */
 async function delCards(arr){
-  if(!arr.length)return;const files=arr.filter(c=>c.t==='file'&&c.fid);
+  if(!arr.length)return;const files=arr.filter(c=>(c.t==='file'||c.t==='folder')&&c.fid);
   if(!confirm(arr.length>1?`حذف ${arr.length} عنصرًا من اللوحة ونقل ملفاتها إلى سلة Drive؟`:'حذف من اللوحة ونقل الملف إلى سلة Google Drive (يمكن استرجاعه 30 يومًا)؟'))return;
   const fail=new Set();
   await Promise.all(files.map(c=>rmDrive(c.fid).catch(e=>{if(!/404|notFound/.test(e.message)){fail.add(c.id);console.error(e)}})));
@@ -638,7 +638,7 @@ let CB=null;
 function setCB(){const ids=new Set(SEL),cp=x=>JSON.parse(JSON.stringify(x));CB={n:0,cards:cp(B.cards.filter(c=>ids.has(c.id))),lines:cp(B.lines.filter(l=>l.p.every(e=>e.c&&ids.has(e.c))))}}
 async function pasteCB(){
   if(!CB||!P)return;const off=30*(++CB.n),map={},nc=[];
-  for(const c of CB.cards){const n=JSON.parse(JSON.stringify(c));n.id=uid();n.x+=off;n.y+=off;map[c.id]=n.id;
+  for(const c of CB.cards){const n=JSON.parse(JSON.stringify(c));n.id=uid();n.x+=off;n.y+=off;if(c.t==='folder'){toast('نسخ المجلدات غير مدعوم');continue}map[c.id]=n.id;
     if(c.t==='file'&&c.fid){try{const r=await J(`${D}/${c.fid}/copy?fields=id,name,mimeType,webViewLink`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({parents:[P.id]})});
       n.fid=r.id;n.name=r.name;n.link=r.webViewLink;blobs[r.id]=blobs[c.fid]}catch(e){toast('تعذر نسخ ملف في Drive');continue}}
     nc.push(n)}
@@ -692,11 +692,11 @@ function leave(){if(!stk.length)return;syncRoot();stk.pop();const t=stk.length?R
 $('#homeB').insertAdjacentHTML('afterend','<button id="bkb" hidden>↰ رجوع</button>');$('#bkb').onclick=leave;
 const _op2=openProject;openProject=async function(p){await _op2(p);ROOT=B;ROOT.boards=ROOT.boards||{};stk=[];$('#bkb').hidden=true};
 const _oh=openHome;openHome=async function(){syncRoot();if(ROOT)B=ROOT;const r=_oh();ROOT=null;stk=[];return r};
-function purge(id){const s=ROOT&&ROOT.boards[id];if(!s)return;s.cards.forEach(k=>{if(k.t==='file'&&k.fid)rmDrive(k.fid).catch(()=>{});if(k.t==='board')purge(k.sub)});delete ROOT.boards[id];save()}
+function purge(id){const s=ROOT&&ROOT.boards[id];if(!s)return;s.cards.forEach(k=>{if((k.t==='file'||k.t==='folder')&&k.fid)rmDrive(k.fid).catch(()=>{});if(k.t==='board')purge(k.sub)});delete ROOT.boards[id];save()}
 const _dc=delCards;delCards=async function(arr){const bs=arr.filter(c=>c.t==='board');await _dc(arr);bs.forEach(c=>{if(!B.cards.includes(c))purge(c.sub)})};
-$('#tools').insertAdjacentHTML('beforeend','<button data-t="board"><b>▣</b>لوحة فرعية</button><button data-t="col"><b>▥</b>عمود</button>');
+$('#tools').insertAdjacentHTML('beforeend','<button data-t="board"><b>▣</b>لوحة فرعية</button>');
 document.querySelector('[data-t=board]').onclick=()=>{const id=uid();ROOT.boards[id]={name:'لوحة فرعية',cards:[],lines:[]};addCard({t:'board',sub:id})};
-document.querySelector('[data-t=col]').onclick=()=>addCard({t:'col',title:'',w:260,h:200});
+
 
 /* ===== columns: cards dropped on a column stack inside it ===== */
 function layoutCols(){
@@ -755,8 +755,8 @@ async function renderBoard(){
     if(!tr(cs.backgroundColor)){g.fillStyle=cs.backgroundColor;g.fillRect(c.x,c.y,w,h);g.strokeStyle='#c9d1df';g.lineWidth=1;g.strokeRect(c.x,c.y,w,h)}
     el.querySelectorAll('img').forEach(im=>{if(im.complete&&im.naturalWidth){const[a,b,cw,ch]=rel(im.getBoundingClientRect());g.drawImage(im,a,b,cw,ch)}});
     el.querySelectorAll('td').forEach(td=>{const[a,b,cw,ch]=rel(td.getBoundingClientRect()),tc=getComputedStyle(td);if(!tr(tc.backgroundColor)){g.fillStyle=tc.backgroundColor;g.fillRect(a,b,cw,ch)}g.strokeStyle='#c9d1df';g.strokeRect(a,b,cw,ch)});
-    el.querySelectorAll('.txt,td,.fn,.ct,.lk a,.lk input,.row input[type=text]').forEach(n=>{
-      const t=(n.tagName==='INPUT'?n.value:n.innerText)||'';if(!t.trim())return;
+    el.querySelectorAll('.txt,td,.fn,.ct,.lk a,.lk input,.row input[type=text],.row textarea').forEach(n=>{
+      const t=(/^(INPUT|TEXTAREA)$/.test(n.tagName)?n.value:n.innerText)||'';if(!t.trim())return;
       const[a,b,cw]=rel(n.getBoundingClientRect()),f=getComputedStyle(n),px=parseFloat(f.fontSize),ar=/[\u0600-\u06FF]/.test(t),mw=cw-12,tx=ar?a+cw-6:a+6;
       g.font=`${f.fontStyle} ${f.fontWeight} ${px}px ${f.fontFamily}`;g.fillStyle=f.color;g.direction=ar?'rtl':'ltr';g.textAlign=ar?'right':'left';g.textBaseline='top';
       let y=b+4;t.split('\n').forEach(p=>{let ln='';p.split(' ').forEach(wd=>{const z=ln?ln+' '+wd:wd;if(g.measureText(z).width>mw&&ln){g.fillText(ln,tx,y);y+=px*1.5;ln=wd}else ln=z});g.fillText(ln,tx,y);y+=px*1.5})});
@@ -899,6 +899,60 @@ $('#homeB').addEventListener('click',()=>{rCancel=1;recStop()});
 const _ce7=cardEl;
 cardEl=function(c){const el=_ce7(c),a=el.querySelector('audio');
   if(a)a.addEventListener('loadedmetadata',()=>{if(a.duration===Infinity){a.currentTime=1e101;a.addEventListener('timeupdate',function f(){a.removeEventListener('timeupdate',f);a.currentTime=0})}});
+  return el};
+</script>
+
+<style>
+.fo{display:block;padding:14px 10px;text-align:center;color:inherit;text-decoration:none}
+.fo:hover{background:rgba(127,135,155,.14)}
+.fo span{font-size:42px;display:block}.fo b{display:block;margin:4px 0;word-break:break-all}.fo small{color:var(--mu)}
+.row{align-items:flex-start}.row input[type=checkbox]{margin-top:5px}
+.row textarea{flex:1;border:0;background:none;color:inherit;font:inherit;outline:none;resize:none;overflow:hidden;padding:2px;line-height:1.5;min-height:24px}
+</style>
+<script>
+/* ===== columns removed: drop old column cards but keep their children in place ===== */
+function stripCols(r){const f=a=>{const n=(a||[]).filter(c=>c.t!=='col');n.forEach(c=>{delete c.col});return n};r.cards=f(r.cards);Object.values(r.boards||{}).forEach(b=>{b.cards=f(b.cards)})}
+const _op3=openProject;openProject=async function(p){await _op3(p);if(ROOT){stripCols(ROOT);B=ROOT;hist=[];redoS=[];lastS=snap();render()}};
+
+/* ===== upload a whole folder (button or drag & drop) -> same folder tree in Drive ===== */
+const rdAll=r=>new Promise((ok,no)=>{const out=[],go=()=>r.readEntries(a=>{if(!a.length)ok(out);else{out.push(...a);go()}},no);go()});
+const entFile=en=>new Promise((ok,no)=>en.file(ok,no));
+async function walk(en,path,out){
+  if(en.isFile){out.push({dirs:path,file:await entFile(en)});return}
+  const here=[...path,en.name];out.push({dirs:here,file:null});
+  for(const k of await rdAll(en.createReader()))await walk(k,here,out)}
+async function uploadTree(list,pos){
+  if(!P||!list.length)return;const pid=P.id,junk=/^(\.DS_Store|Thumbs\.db|desktop\.ini)$/i;
+  list=list.filter(x=>!x.file||!junk.test(x.file.name));const files=list.filter(x=>x.file),top=list[0].dirs[0];if(!top)return;
+  if(files.length>200&&!confirm(`المجلد يحتوي ${files.length} ملفًا وقد يستغرق الرفع وقتًا. متابعة؟`))return;
+  const ids={},ds=new Set();list.forEach(x=>{for(let i=1;i<=x.dirs.length;i++)ds.add(x.dirs.slice(0,i).join('/'))});
+  try{
+    toast('جارٍ إنشاء المجلدات في Drive…');
+    for(const k of [...ds].sort((a,b)=>a.split('/').length-b.split('/').length)){const d=k.split('/');ids[k]=(await mkFolder(d[d.length-1],d.length>1?ids[d.slice(0,-1).join('/')]:pid)).id}
+    let i=0,done=0,fail=0;
+    await Promise.all([0,1,2].map(async()=>{while(i<files.length){const x=files[i++];try{await upload(x.file,ids[x.dirs.join('/')])}catch(e){fail++;console.error(e)}toast(`رفع المجلد «${top}»: ${++done}/${files.length}`)}}));
+    if(P&&P.id===pid)addCard({t:'folder',fid:ids[top],name:top,files:files.length-fail,dirs:ds.size-1,link:'https://drive.google.com/drive/folders/'+ids[top]},pos);
+    toast(fail?`تم رفع المجلد مع فشل ${fail} ملف`:`✓ تم رفع المجلد «${top}» (${files.length} ملف)`)}
+  catch(e){console.error(e);toast('فشل رفع المجلد')}}
+$('#tools').insertAdjacentHTML('beforeend','<button data-t="folder"><b>📁</b>رفع مجلد</button><input type="file" id="fdi" webkitdirectory multiple hidden>');
+document.querySelector('[data-t=folder]').onclick=()=>$('#fdi').click();
+$('#fdi').onchange=async e=>{const fs=[...e.target.files];e.target.value='';if(!fs.length)return toast('المجلد فارغ');
+  await uploadTree(fs.map(f=>({dirs:f.webkitRelativePath.split('/').slice(0,-1),file:f})))};
+view.ondrop=async e=>{
+  e.preventDefault();if(!P)return;const q=sp(e),pos={x:q[0],y:q[1]},flat=[...e.dataTransfer.files],
+    ens=[...(e.dataTransfer.items||[])].map(i=>i.webkitGetAsEntry&&i.webkitGetAsEntry()).filter(Boolean);
+  if(!ens.some(x=>x.isDirectory))return addFiles(flat,pos);
+  const loose=[],dirs=[];for(const en of ens){if(en.isDirectory)dirs.push(en);else loose.push(await entFile(en))}
+  if(loose.length)addFiles(loose,pos);
+  for(const [i,en] of dirs.entries()){const out=[];await walk(en,[],out);await uploadTree(out,{x:pos.x+i*30,y:pos.y+i*30})}};
+const _ce8=cardEl;
+cardEl=function(c){const el=_ce8(c);
+  if(c.t==='folder'){const b=el.querySelector('.bd');b.style.padding='0';b.innerHTML='';
+    const a=document.createElement('a'),i=document.createElement('span'),n=document.createElement('b'),s=document.createElement('small');
+    a.className='fo';a.target='_blank';a.rel='noopener noreferrer';a.title='فتح المجلد في Google Drive';
+    if(/^[\w-]+$/.test(c.fid||''))a.href='https://drive.google.com/drive/folders/'+c.fid;
+    i.textContent='📁';n.textContent=c.name||'مجلد';s.textContent=`${c.files||0} ملف`+(c.dirs?` · ${c.dirs} مجلد فرعي`:'')+' — اضغط للفتح في Drive';
+    a.append(i,n,s);b.appendChild(a)}
   return el};
 </script>
 
