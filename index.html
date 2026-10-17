@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-v7fxjONjQJ8vB5nIP8RCleOGgrlgucoWm+dMcBUZXnY=' 'sha256-FE1jP1dR0D1Rdd/GhQjx6riVQY++H5BZX6Y6lfa1wzw=' 'sha256-6HnqrIaIA4KYW/uW6LGQk8skfbfSvvduGCqu8Y2lAIA=' 'sha256-/8CJD0my9eN7QoIxDD8/AiuZkNGwSzVYT0+p9Gu7h7k=' 'sha256-5+qZONTA43Kpdsn4HWl6jhoagFZgk76AtyVTBgF1OX8=' 'sha256-xlAJkqFY33tUT+Xu5qQuXv+u5teuwFG/NEFrr5oJKdk=' 'sha256-UbtVEJcFI2jajpWe1UlcdtZt1LSANaod9H6uJ8ceLyQ=' 'sha256-JUhk38ca5NECHwWPn3S/MsRba1TLJllBIPmOsfNcdzs=' 'sha256-KbX9x4yzZSqeh8DrIqejd3TpX5Q1ZyqhM/K1lNFnTH0=' 'sha256-ijCp94w03RdkmP9hb1/+rsK/q5NpbjV2uP2/RpPbJSE=' 'sha256-2CQIBRqejb2AG4OVQS0gxPcUG796Cp+QuR+hDaEWQQ4=' 'sha256-K5tRbx6qmi6YUTHCUVQEGfrLNTyfai3Xsov6JRHgRBM=' 'sha256-NTBZ8/ckWq0mFtjgnYbrVnbqpv9e1bWCvGzTecNoRi8=' 'sha256-WEXv7f/nEkFT57Rc5hpVMtHUY8hePhPMpuzju6rBTUc=' https://accounts.google.com; style-src 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' blob: data:; media-src blob:; connect-src https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com; frame-src https://accounts.google.com blob:; worker-src 'self'; manifest-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-v7fxjONjQJ8vB5nIP8RCleOGgrlgucoWm+dMcBUZXnY=' 'sha256-FE1jP1dR0D1Rdd/GhQjx6riVQY++H5BZX6Y6lfa1wzw=' 'sha256-6HnqrIaIA4KYW/uW6LGQk8skfbfSvvduGCqu8Y2lAIA=' 'sha256-/8CJD0my9eN7QoIxDD8/AiuZkNGwSzVYT0+p9Gu7h7k=' 'sha256-5+qZONTA43Kpdsn4HWl6jhoagFZgk76AtyVTBgF1OX8=' 'sha256-xlAJkqFY33tUT+Xu5qQuXv+u5teuwFG/NEFrr5oJKdk=' 'sha256-UbtVEJcFI2jajpWe1UlcdtZt1LSANaod9H6uJ8ceLyQ=' 'sha256-JUhk38ca5NECHwWPn3S/MsRba1TLJllBIPmOsfNcdzs=' 'sha256-KbX9x4yzZSqeh8DrIqejd3TpX5Q1ZyqhM/K1lNFnTH0=' 'sha256-ijCp94w03RdkmP9hb1/+rsK/q5NpbjV2uP2/RpPbJSE=' 'sha256-2CQIBRqejb2AG4OVQS0gxPcUG796Cp+QuR+hDaEWQQ4=' 'sha256-K5tRbx6qmi6YUTHCUVQEGfrLNTyfai3Xsov6JRHgRBM=' 'sha256-NTBZ8/ckWq0mFtjgnYbrVnbqpv9e1bWCvGzTecNoRi8=' 'sha256-WEXv7f/nEkFT57Rc5hpVMtHUY8hePhPMpuzju6rBTUc=' 'sha256-JAseOZfjBWDxlZfrbBtHp0j/mgCeZQ35N9Xi5LCnUqs=' https://accounts.google.com; style-src 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' blob: data:; media-src blob:; connect-src https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com; frame-src https://accounts.google.com blob:; worker-src 'self'; manifest-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#2f5bea">
 <link rel="icon" href="icon-192.png">
@@ -1029,6 +1029,49 @@ async function diagTest(){
 document.body.insertAdjacentHTML('beforeend','<button id="vdg" title="تشخيص الإملاء الصوتي" hidden>ℹ</button>');
 $('#vdg').onclick=openDiag;
 const _sh2=show;show=function(id){_sh2(id);$('#vdg').hidden=id!=='bd'};
+</script>
+
+<style>
+#vm{position:fixed;bottom:44px;left:190px;width:140px;height:7px;background:var(--ln);border-radius:4px;z-index:30;overflow:hidden}
+#vm i{display:block;height:100%;width:0;background:#2f9e44;transition:width .06s}
+#vi{bottom:58px!important}
+</style>
+<script>
+/* ===== voice typing v3: live mic level meter, tells you whether the microphone hears anything ===== */
+document.body.insertAdjacentHTML('beforeend','<div id="vm" hidden><i></i></div>');
+let vStream=null,vCtx=null,vRaf=0,vLvl=0,vPeak=0,vBusy=0;
+function meterStart(st){
+  try{vCtx=new (window.AudioContext||window.webkitAudioContext)();if(vCtx.resume)vCtx.resume();
+    const an=vCtx.createAnalyser();an.fftSize=512;vCtx.createMediaStreamSource(st).connect(an);const buf=new Uint8Array(an.fftSize);
+    const tick=()=>{an.getByteTimeDomainData(buf);let m=0;for(let i=0;i<buf.length;i++)m=Math.max(m,Math.abs(buf[i]-128));vLvl=m/128;vPeak=Math.max(vPeak,vLvl);
+      const b=$('#vm i');if(b)b.style.width=Math.min(100,vLvl*300)+'%';vRaf=requestAnimationFrame(tick)};tick();$('#vm').hidden=false}catch(e){vlog.push('تعذر قياس مستوى الصوت: '+e.message)}}
+function meterStop(){cancelAnimationFrame(vRaf);try{vCtx&&vCtx.close()}catch(e){}vCtx=null;if(vStream){vStream.getTracks().forEach(x=>x.stop());vStream=null}$('#vm').hidden=true}
+vStop=function(){vOn=0;vBusy=0;try{rec&&rec.stop()}catch(e){}meterStop();vBtns(0);vMsg('')};
+vStart=async function(){
+  if(vBusy)return;
+  if(!SR){toast('هذا المتصفح لا يدعم الإملاء الصوتي');return openDiag()}
+  if(typeof mr!=='undefined'&&mr&&mr.state==='recording')return toast('أوقف التسجيل الصوتي أولًا لأن الميكروفون مشغول به');
+  let t=pickT();
+  if(!t&&B&&!$('#bd').hidden){addCard({t:'note',c:'n1',text:''});const q=els[B.cards[B.cards.length-1].id];t=q&&q.querySelector('.txt')}
+  if(!t)return toast('اضغط داخل مكان الكتابة أولًا ثم ابدأ الإملاء');
+  vBusy=1;
+  try{vStream=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){vBusy=0;vlog.push('getUserMedia فشل: '+e.name);toast(VERR['not-allowed']);return openDiag()}
+  const label=((vStream.getAudioTracks()[0]||{}).label||'غير معروف');vlog.push('الميكروفون المستخدم: '+label);vPeak=0;vLvl=0;meterStart(vStream);
+  if(t!==document.activeElement){t.focus();if(t.isContentEditable){const s=getSelection(),r=document.createRange();r.selectNodeContents(t);r.collapse(false);s.removeAllRanges();s.addRange(r)}}
+  vTgt=t;rec=new SR();rec.lang=vl;rec.continuous=true;rec.interimResults=true;let got=0;logEv(rec);
+  const ready='🎤 أستمع… تحدّث الآن  ('+label.slice(0,28)+')',ends=[];
+  rec.onstart=()=>vMsg(ready);
+  rec.onresult=e=>{const a=document.activeElement;if(edOk(a)&&!(a.closest&&a.closest('#gate')))vTgt=a;
+    if(!document.contains(vTgt)){const l=pickT();if(!l){vStop();return}vTgt=l}
+    let it='';for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];if(r.isFinal){const x=r[0].transcript.trim();if(x){got=1;typeInto(vTgt,x+' ')}}else{got=1;it+=r[0].transcript}}
+    vMsg(it?'… '+it:ready)};
+  rec.onerror=e=>{if(e.error==='no-speech'||e.error==='aborted')return;toast(VERR[e.error]||('خطأ في الإملاء: '+e.error));vStop();openDiag()};
+  rec.onend=()=>{if(!vOn)return;const n=Date.now();ends.push(n);while(ends.length&&n-ends[0]>4000)ends.shift();
+    if(ends.length>=3){vStop();toast('خدمة التعرف توقفت بشكل متكرر — تحقق من الإنترنت ثم اضغط 🎤 مجددًا');return openDiag()}
+    setTimeout(()=>{if(vOn){try{rec.start()}catch(x){vStop();toast('توقف الإملاء — اضغط 🎤 للمتابعة')}}},300)};
+  vOn=1;vBusy=0;vBtns(1);try{rec.start()}catch(e){vStop();return toast('تعذر بدء الإملاء: '+e.message)}
+  setTimeout(()=>{if(vOn&&vPeak<.02){toast('الميكروفون «'+label.slice(0,30)+'» لا يلتقط أي صوت — تأكد أنه غير مكتوم واختر الميكروفون الصحيح من إعدادات Chrome');openDiag()}},4000);
+  setTimeout(()=>{if(vOn&&!got&&vPeak>=.05)toast('الميكروفون يسمعك لكن خدمة التعرف لا ترد — تحقق من الإنترنت أو بدّل اللغة (ع / EN)')},15000)};
 </script>
 
 </body>
