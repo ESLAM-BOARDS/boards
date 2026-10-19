@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-v7fxjONjQJ8vB5nIP8RCleOGgrlgucoWm+dMcBUZXnY=' 'sha256-FE1jP1dR0D1Rdd/GhQjx6riVQY++H5BZX6Y6lfa1wzw=' 'sha256-6HnqrIaIA4KYW/uW6LGQk8skfbfSvvduGCqu8Y2lAIA=' 'sha256-/8CJD0my9eN7QoIxDD8/AiuZkNGwSzVYT0+p9Gu7h7k=' 'sha256-5+qZONTA43Kpdsn4HWl6jhoagFZgk76AtyVTBgF1OX8=' 'sha256-xlAJkqFY33tUT+Xu5qQuXv+u5teuwFG/NEFrr5oJKdk=' 'sha256-UbtVEJcFI2jajpWe1UlcdtZt1LSANaod9H6uJ8ceLyQ=' 'sha256-JUhk38ca5NECHwWPn3S/MsRba1TLJllBIPmOsfNcdzs=' 'sha256-KbX9x4yzZSqeh8DrIqejd3TpX5Q1ZyqhM/K1lNFnTH0=' 'sha256-ijCp94w03RdkmP9hb1/+rsK/q5NpbjV2uP2/RpPbJSE=' 'sha256-2CQIBRqejb2AG4OVQS0gxPcUG796Cp+QuR+hDaEWQQ4=' 'sha256-K5tRbx6qmi6YUTHCUVQEGfrLNTyfai3Xsov6JRHgRBM=' 'sha256-NTBZ8/ckWq0mFtjgnYbrVnbqpv9e1bWCvGzTecNoRi8=' 'sha256-WEXv7f/nEkFT57Rc5hpVMtHUY8hePhPMpuzju6rBTUc=' 'sha256-JAseOZfjBWDxlZfrbBtHp0j/mgCeZQ35N9Xi5LCnUqs=' https://accounts.google.com; style-src 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' blob: data:; media-src blob:; connect-src https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com; frame-src https://accounts.google.com blob:; worker-src 'self'; manifest-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-sIBh3jfciI1gc91CMhXr+N2WjGRehP7VMs9zKgrHIPk=' https://accounts.google.com; style-src 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' blob: data:; media-src blob:; connect-src https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com; frame-src https://accounts.google.com blob:; worker-src 'self'; manifest-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#2f5bea">
 <link rel="icon" href="icon-192.png">
@@ -12,6 +12,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>لوحة مشاريعي</title>
 <style>
+
 :root{--bg:#eceff4;--dot:#c7cedb;--pn:#fff;--ink:#1b2333;--mu:#6b7488;--ln:#d7dde8;--ac:#2f5bea;--n0:#fff;--n1:#fff3b8;--n2:#cdf2dc;--n3:#ffd6df;--n4:#d3e3ff}
 @media (prefers-color-scheme:dark){:root{--bg:#161a23;--dot:#2b3242;--pn:#222836;--ink:#e8ecf4;--mu:#97a0b4;--ln:#343c4e;--ac:#7b9bff;--n0:#2a3142;--n1:#5a5120;--n2:#1f4a35;--n3:#5a2a37;--n4:#26407a}}
 *{box-sizing:border-box}html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:Tajawal,Tahoma,"Segoe UI",sans-serif}
@@ -53,6 +54,100 @@ section{flex:1;min-height:0}
 #toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:10px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:99}#toast.on{opacity:1}
 dialog{border:1px solid var(--ln);border-radius:14px;background:var(--pn);color:var(--ink);padding:20px;min-width:300px}
 .sw{display:flex;gap:8px;margin:14px 0;flex-wrap:wrap}.sw i{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid transparent}.sw i.on{border-color:var(--ink)}
+
+
+#zw{position:relative;background:radial-gradient(var(--dot) 1.2px,transparent 1.2px) 0 0/22px 22px}
+#stage{transform-origin:0 0}
+#sv{z-index:5!important}
+.hd{fill:#fff;stroke:var(--ac);stroke-width:2;pointer-events:all;cursor:grab}
+.hit{cursor:pointer}
+#fb{position:fixed;top:64px;left:50%;transform:translateX(-50%);z-index:30;background:var(--pn);border:1px solid var(--ln);border-radius:12px;padding:8px 12px;display:flex;gap:8px;align-items:center;box-shadow:0 6px 20px rgba(0,0,0,.25);flex-wrap:wrap;max-width:94vw}
+#fb i,.tb i{display:inline-block;width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid var(--ln);flex:none}
+#fb input[type=color]{width:34px;height:28px;padding:0;border:0;background:none}
+#zl{position:fixed;bottom:12px;left:12px;z-index:30;background:var(--pn);border:1px solid var(--ln);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:13px}
+.rz{position:absolute;right:0;bottom:0;width:20px;height:20px;cursor:nwse-resize;background:linear-gradient(135deg,transparent 50%,var(--ac) 50%);touch-action:none}
+.tb{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;align-items:center}.tb button{font-size:12px;padding:2px 7px}
+.card table{border-collapse:collapse;width:100%}
+.card td{border:1px solid var(--ln);min-width:56px;padding:6px 8px;outline:none;font-size:14px;vertical-align:top}
+.card td.on{outline:2px solid var(--ac);outline-offset:-2px}
+
+
+#tools{overflow-y:auto}
+#mq{position:absolute;background:rgba(47,91,234,.12);border:1px solid var(--ac);z-index:8;pointer-events:none}
+.card.dw{background:transparent!important;border:0;box-shadow:none;cursor:grab}
+.card.dw .bar{position:absolute;top:0;left:0;right:0;z-index:2;opacity:0;transition:opacity .15s}
+.card.dw:hover .bar,.card.dw.sel .bar,.card.dw:hover .rz{opacity:1}
+.card.dw .rz{opacity:0}.card.dw .fn{display:none}
+
+
+#tf{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:30;background:var(--pn);border:1px solid var(--ln);border-radius:12px;padding:6px 10px;display:flex;gap:6px;align-items:center;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:96vw;flex-wrap:wrap}
+#tf select,#tf button{font:inherit;padding:3px 8px;border:1px solid var(--ln);border-radius:6px;background:var(--bg);color:var(--ink)}
+#tf i[data-c]{width:18px;height:18px;border-radius:50%;cursor:pointer;border:2px solid var(--ln);display:inline-block}
+#tf input[type=color]{width:28px;height:26px;padding:0;border:0;background:none}
+.card.tx{background:transparent!important;border:0;box-shadow:none;overflow:visible}
+.card.tx .bar{position:absolute;top:-22px;left:0;right:0;opacity:0}.card.tx:hover .bar{opacity:1}
+#q{width:130px}
+#fit{position:fixed;bottom:12px;left:72px;z-index:30;background:var(--pn);border:1px solid var(--ln);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:13px}
+#mm{position:fixed;bottom:48px;left:12px;width:170px;height:115px;background:var(--pn);border:1px solid var(--ln);border-radius:8px;z-index:30;cursor:pointer}
+#lb{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:60;display:grid;place-items:center;cursor:zoom-out}#lb img{max-width:92vw;max-height:92vh}
+
+
+#hd{flex-wrap:wrap}
+.gd{position:absolute;background:#e64980;z-index:50;pointer-events:none}
+.ct{width:100%;border:0;background:none;font:inherit;font-weight:700;font-size:15px;color:var(--ink);outline:none}
+.ob{width:100%;margin-top:4px}
+#lb iframe{width:92vw;height:90vh;border:0;background:#fff;cursor:auto}
+#lb .x{position:absolute;top:10px;left:14px;color:#fff;font-size:28px;cursor:pointer}
+
+
+.card.hh{display:flex;flex-direction:column}
+.card.hh>.bd{flex:1;display:flex;flex-direction:column;overflow:auto;min-height:0}
+.card.hh .txt{flex:1}
+
+
+#mic,#vlg{position:fixed;bottom:12px;z-index:30;background:var(--pn);border:1px solid var(--ln);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:14px}
+#mic{left:190px}#vlg{left:238px}
+#mic.on{background:#e03131;color:#fff;animation:pl 1s infinite}
+@keyframes pl{50%{opacity:.6}}
+#vi{position:fixed;bottom:50px;left:190px;max-width:50vw;background:var(--pn);border:1px solid var(--ln);border-radius:8px;padding:4px 10px;color:var(--mu);z-index:30}
+
+
+.fo{display:block;padding:14px 10px;text-align:center;color:inherit;text-decoration:none}
+.fo:hover{background:rgba(127,135,155,.14)}
+.fo span{font-size:42px;display:block}.fo b{display:block;margin:4px 0;word-break:break-all}.fo small{color:var(--mu)}
+.row{align-items:flex-start}.row input[type=checkbox]{margin-top:5px}
+.row textarea{flex:1;border:0;background:none;color:inherit;font:inherit;outline:none;resize:none;overflow:hidden;padding:2px;line-height:1.5;min-height:24px}
+
+
+#mic2{margin-top:8px;padding:4px 10px;border:1px solid var(--ln);border-radius:8px;background:var(--bg);cursor:pointer}
+#mic2.on{background:#e03131;color:#fff}
+
+
+#vdg{position:fixed;bottom:12px;left:282px;z-index:30;background:var(--pn);border:1px solid var(--ln);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:14px}
+#dg{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:70;background:var(--pn);color:var(--ink);border:1px solid var(--ln);border-radius:14px;padding:16px 18px;width:min(560px,92vw);max-height:80vh;overflow:auto;box-shadow:0 12px 40px rgba(0,0,0,.35);line-height:1.9;font-size:14px}
+#dg pre{direction:ltr;text-align:left;background:var(--bg);padding:8px;border-radius:8px;font-size:12px;white-space:pre-wrap;min-height:60px}
+#dg button{padding:4px 12px;border:1px solid var(--ln);border-radius:8px;background:var(--bg);color:var(--ink);cursor:pointer}
+
+
+#vm{position:fixed;bottom:44px;left:190px;width:140px;height:7px;background:var(--ln);border-radius:4px;z-index:30;overflow:hidden}
+#vm i{display:block;height:100%;width:0;background:#2f9e44;transition:width .06s}
+#vi{bottom:58px!important}
+
+
+.anim .card{transition:left .35s,top .35s}
+.flash{animation:fl 1s 2}@keyframes fl{50%{outline:4px solid #e64980}}
+.txt h1{font-size:1.7em;margin:.2em 0}.txt h2{font-size:1.4em;margin:.2em 0}.txt h3{font-size:1.15em;margin:.2em 0}
+.txt blockquote{border-inline-start:3px solid var(--ac);margin:4px 0;padding:0 10px;color:var(--mu)}
+.txt pre,.txt code{font-family:Consolas,monospace;background:rgba(127,135,155,.2);border-radius:4px;padding:0 4px;direction:ltr;text-align:left}.txt pre{padding:6px;white-space:pre-wrap}
+.txt ul,.txt ol{margin:4px 0;padding-inline-start:24px}.txt hr{border:0;border-top:1px solid var(--ln)}.txt a{color:var(--ac)}
+#tf .bk{display:contents}
+#nw{position:fixed;inset:0;z-index:60;background:var(--bg);display:flex;flex-direction:column}
+#nw .nh{display:flex;gap:12px;align-items:center;padding:10px 16px;background:var(--pn);border-bottom:1px solid var(--ln)}
+#nw svg{flex:1;width:100%;touch-action:none;cursor:grab}#nw text{fill:var(--ink);font-size:11px;pointer-events:none}#nw .e{stroke:var(--mu);stroke-width:1.2;opacity:.7}#nw circle{cursor:pointer;stroke:var(--pn);stroke-width:2}
+
+#sl{position:fixed;z-index:80;background:var(--pn);border:1px solid var(--ln);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);padding:4px;min-width:150px}
+#sl div{padding:5px 10px;border-radius:6px;cursor:pointer}#sl .on,#sl div:hover{background:var(--ac);color:#fff}
+
 </style>
 </head>
 <body>
@@ -80,7 +175,25 @@ dialog{border:1px solid var(--ln);border-radius:14px;background:var(--pn);color:
 <dialog id="dlg"><form method="dialog"><b>مشروع جديد</b><br><br><input id="pn" placeholder="اسم المشروع" required style="width:100%"><div class="sw" id="sw"></div><button value="ok">إنشاء</button> <button value="x" formnovalidate>إلغاء</button></form></dialog>
 <div id="toast"></div>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<div id="fb" hidden></div><div id="zl" title="اضغط للعودة 100%">100%</div>
+
+
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@400;700&family=Montserrat:wght@400;700&family=Tajawal:wght@400;700&display=swap">
+
+
+
+
+
+
+
+
+
+
+
 <script>
+/* ════════ 1. core: data model, Drive API, projects, board, cards, undo hooks ════════ */
 const $=s=>document.querySelector(s),uid=()=>Math.random().toString(36).slice(2,9);
 const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const D='https://www.googleapis.com/drive/v3/files',U='https://www.googleapis.com/upload/drive/v3/files';
@@ -126,7 +239,7 @@ $('#go').onclick=async()=>{
 /* ---------- Home: projects ---------- */
 async function openHome(){
   if(P)await flush();P=null;B=null;$('#ttl').textContent='';$('#st').textContent='';show('home');
-  try{projs=await list(`'${root}' in parents and mimeType='${FOLDER}' and trashed=false`)}catch(e){return toast('تعذر تحميل المشاريع')}
+  try{projs=(await list(`'${root}' in parents and mimeType='${FOLDER}' and trashed=false`)).filter(p=>p.name!=='القوالب')}catch(e){return toast('تعذر تحميل المشاريع')}
   const h=$('#home');h.innerHTML='<div class="pc new" id="newP">+ مشروع جديد</div>';
   projs.forEach(p=>{
     const c=/^#[0-9a-f]{6}$/i.test((p.appProperties||{}).color||'')?p.appProperties.color:PAL[4],d=document.createElement('div');d.className='pc';d.style.setProperty('--c',c);
@@ -236,25 +349,9 @@ function lines(){
     h+=`<path class="ln" d="${d}" marker-end="url(#ar)"/><path class="hit" data-i="${i}" d="${d}"/>`});
   sv.innerHTML=h}
 $('#sv').onclick=e=>{const i=e.target.dataset&&e.target.dataset.i;if(i!=null&&confirm('حذف خط التوصيل؟')){B.lines.splice(+i,1);save();lines()}};
-</script>
-<style>
-#zw{position:relative;background:radial-gradient(var(--dot) 1.2px,transparent 1.2px) 0 0/22px 22px}
-#stage{transform-origin:0 0}
-#sv{z-index:5!important}
-.hd{fill:#fff;stroke:var(--ac);stroke-width:2;pointer-events:all;cursor:grab}
-.hit{cursor:pointer}
-#fb{position:fixed;top:64px;left:50%;transform:translateX(-50%);z-index:30;background:var(--pn);border:1px solid var(--ln);border-radius:12px;padding:8px 12px;display:flex;gap:8px;align-items:center;box-shadow:0 6px 20px rgba(0,0,0,.25);flex-wrap:wrap;max-width:94vw}
-#fb i,.tb i{display:inline-block;width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid var(--ln);flex:none}
-#fb input[type=color]{width:34px;height:28px;padding:0;border:0;background:none}
-#zl{position:fixed;bottom:12px;left:12px;z-index:30;background:var(--pn);border:1px solid var(--ln);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:13px}
-.rz{position:absolute;right:0;bottom:0;width:20px;height:20px;cursor:nwse-resize;background:linear-gradient(135deg,transparent 50%,var(--ac) 50%);touch-action:none}
-.tb{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;align-items:center}.tb button{font-size:12px;padding:2px 7px}
-.card table{border-collapse:collapse;width:100%}
-.card td{border:1px solid var(--ln);min-width:56px;padding:6px 8px;outline:none;font-size:14px;vertical-align:top}
-.card td.on{outline:2px solid var(--ac);outline-offset:-2px}
-</style>
-<div id="fb" hidden></div><div id="zl" title="اضغط للعودة 100%">100%</div>
-<script>
+
+
+/* ════════ 2. canvas: zoom, pan, connectors, tables, drawing ════════ */
 const LC=['#4a5368','#e03131','#f08c00','#2f9e44','#1971c2','#9c36b5','#e64980','#111111'];
 const DC=['#111827','#e03131','#f08c00','#2f9e44','#1971c2','#9c36b5','#e64980','#ffffff'];
 const TINT=['','#ffe3e3','#fff3bf','#d3f9d8','#d0ebff','#e5dbff','#ffd8a8'];
@@ -322,11 +419,6 @@ $('#lineB').onclick=()=>{
   B.lines.push(l);selL=l.id;save();lines();showLB()};
 
 /* delete = also from Google Drive */
-async function delCard(c){
-  if(!confirm('حذف من اللوحة ونقل الملف إلى سلة Google Drive (يمكن استرجاعه 30 يومًا)؟'))return;
-  if(c.t==='file'&&c.fid){try{await rmDrive(c.fid)}catch(e){if(!/404|notFound/.test(e.message)){toast('تعذر الحذف من Drive');return}}}
-  B.lines.forEach(l=>l.p&&l.p.forEach((e,i)=>{if(e.c===c.id){const q=ep(e);l.p[i]={x:q[0],y:q[1]}}}));
-  B.cards=B.cards.filter(k=>k!==c);save();render()}
 const _act=act;
 act=async function(p,a,c){
   if(a!=='d')return _act(p,a,c);
@@ -411,17 +503,9 @@ function startDraw(){
 $('#tools').insertAdjacentHTML('beforeend','<button data-t="table"><b>▦</b>جدول</button><button data-t="draw"><b>✎</b>رسم</button>');
 document.querySelector('[data-t=table]').onclick=()=>addCard({t:'table',cells:grid(3,3)});
 document.querySelector('[data-t=draw]').onclick=startDraw;
-</script>
 
-<style>
-#tools{overflow-y:auto}
-#mq{position:absolute;background:rgba(47,91,234,.12);border:1px solid var(--ac);z-index:8;pointer-events:none}
-.card.dw{background:transparent!important;border:0;box-shadow:none;cursor:grab}
-.card.dw .bar{position:absolute;top:0;left:0;right:0;z-index:2;opacity:0;transition:opacity .15s}
-.card.dw:hover .bar,.card.dw.sel .bar,.card.dw:hover .rz{opacity:1}
-.card.dw .rz{opacity:0}.card.dw .fn{display:none}
-</style>
-<script>
+
+/* ════════ 3. selection, group delete (Drive), cleanup, drag ════════ */
 /* ---- selection ---- */
 const SEL=new Set();
 function selBar(){
@@ -459,7 +543,7 @@ async function delCards(arr){
   B.lines.forEach(l=>l.p&&l.p.forEach((e,i)=>{if(e.c&&ids.has(e.c)){const q=ep(e);l.p[i]={x:q[0],y:q[1]}}}));
   B.cards=B.cards.filter(c=>!ids.has(c.id));ids.forEach(i=>SEL.delete(i));save();render();selBar();
   toast(fail.size?`تعذر حذف ${fail.size} ملف من Drive — لم تُحذف بطاقاته`:files.length?'✓ حُذف من اللوحة ونُقل إلى سلة Drive':'✓ تم الحذف')}
-delCard=c=>delCards([c]);
+const delCard=c=>delCards([c]);
 async function cleanup(){
   if(!P||!P.bid)return toast('لا توجد لوحة محفوظة بعد');await flush();
   try{const fs=await list(`'${P.id}' in parents and trashed=false`,'files(id,name)'),used=allFids(),o=fs.filter(f=>f.name!=='board.json'&&!used.has(f.id));
@@ -472,13 +556,6 @@ $('#tools').insertAdjacentHTML('beforeend','<button data-t="clean"><b>🧹</b>ت
 document.querySelector('[data-t=clean]').onclick=cleanup;
 
 /* ---- card wrapper: group drag, transparent drawings, table resize ---- */
-function dragCard(e,c,el){
-  if(!SEL.has(c.id))setSel([]);
-  const grp=SEL.has(c.id)?B.cards.filter(k=>SEL.has(k.id)):[c],st=grp.map(k=>[k,k.x,k.y]),sx=e.clientX,sy=e.clientY;
-  el.setPointerCapture(e.pointerId);el.classList.add('drag');
-  const mv=m=>{st.forEach(([k,x,y])=>{k.x=Math.max(0,x+(m.clientX-sx)/Z);k.y=Math.max(0,y+(m.clientY-sy)/Z);const q=els[k.id];if(q){q.style.left=k.x+'px';q.style.top=k.y+'px'}});lines()};
-  const up=()=>{el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',up);el.classList.remove('drag');save()};
-  el.addEventListener('pointermove',mv);el.addEventListener('pointerup',up)}
 const _ce2=cardEl;
 cardEl=function(c){
   const el=_ce2(c);
@@ -496,9 +573,9 @@ cardEl=function(c){
         const t=el.querySelector('table');t.style.tableLayout='fixed';t.style.height=c.hh+'px';lines()};
       h.onpointerup=()=>{h.onpointermove=h.onpointerup=null;save()}}}
   return el};
-</script>
 
-<script>
+
+/* ════════ 4. sign-in (remembered, silent renewal) ════════ */
 /* ---- remembered sign-in: cached token + silent renewal + minimal gate ---- */
 const SC='https://www.googleapis.com/auth/drive.file';try{localStorage.removeItem('tk')}catch(e){}
 function saveTok(r){tok=r.access_token;try{sessionStorage.setItem('tk',JSON.stringify({t:tok,e:Date.now()+(r.expires_in-120)*1000}));localStorage.setItem('signed','1')}catch(e){}}
@@ -530,9 +607,9 @@ $('#go').onclick=async()=>{
   for(let i=0;i<60&&!window.google;i++)await new Promise(r=>setTimeout(r,100));
   try{await tokReq(localStorage.getItem('signed')?'none':'consent');await boot();return}catch(e){console.error(e)}
   show('gate');$('#gate p').textContent='اضغط الزر للدخول بحسابك.'})();
-</script>
 
-<script>
+
+/* ════════ 5. trash-based delete, sign-out, privacy link ════════ */
 /* PERM=false: delete = move to Drive trash (recoverable 30 days). true: permanent delete */
 const PERM=false;
 const rmDrive=id=>PERM?api(`${D}/${id}`,{method:'DELETE'}):api(`${D}/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:'{"trashed":true}'});
@@ -542,22 +619,9 @@ $('#out').onclick=async()=>{
   const t=tok,done=()=>{try{sessionStorage.removeItem('tk');localStorage.removeItem('tk');localStorage.removeItem('signed')}catch(e){}location.reload()};
   if(t&&window.google)google.accounts.oauth2.revoke(t,done);else done();setTimeout(done,1500)};
 $('#gate').insertAdjacentHTML('beforeend','<a href="privacy.html" target="_blank" rel="noopener noreferrer" style="font-size:12px;color:var(--mu)">سياسة الخصوصية</a>');
-</script>
 
-<style>
-#tf{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:30;background:var(--pn);border:1px solid var(--ln);border-radius:12px;padding:6px 10px;display:flex;gap:6px;align-items:center;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:96vw;flex-wrap:wrap}
-#tf select,#tf button{font:inherit;padding:3px 8px;border:1px solid var(--ln);border-radius:6px;background:var(--bg);color:var(--ink)}
-#tf i[data-c]{width:18px;height:18px;border-radius:50%;cursor:pointer;border:2px solid var(--ln);display:inline-block}
-#tf input[type=color]{width:28px;height:26px;padding:0;border:0;background:none}
-.card.tx{background:transparent!important;border:0;box-shadow:none;overflow:visible}
-.card.tx .bar{position:absolute;top:-22px;left:0;right:0;opacity:0}.card.tx:hover .bar{opacity:1}
-#q{width:130px}
-#fit{position:fixed;bottom:12px;left:72px;z-index:30;background:var(--pn);border:1px solid var(--ln);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:13px}
-#mm{position:fixed;bottom:48px;left:12px;width:170px;height:115px;background:var(--pn);border:1px solid var(--ln);border-radius:8px;z-index:30;cursor:pointer}
-#lb{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:60;display:grid;place-items:center;cursor:zoom-out}#lb img{max-width:92vw;max-height:92vh}
-</style>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@400;700&family=Montserrat:wght@400;700&family=Tajawal:wght@400;700&display=swap">
-<script>
+
+/* ════════ 6. text formatting, search, undo/redo, copy/paste, fit, minimap ════════ */
 /* ===== text formatting: 5 fonts, size, colour; selection-level (notes) + whole-element ===== */
 const FONTS=['Cairo','Tajawal','Montserrat','IBM Plex Sans Arabic','Amiri'],SIZES=[12,14,16,18,22,28,36,48,64],CL=['#111827','#e03131','#f08c00','#2f9e44','#1971c2','#9c36b5','#e64980','#868e96'];
 function stCss(s){const o={};if(!s)return o;if(s.font)o.fontFamily=`'${s.font}',Cairo,sans-serif`;if(s.size)o.fontSize=s.size+'px';if(s.color)o.color=s.color;
@@ -592,7 +656,7 @@ function fmt(k,v){
   else{o.st=o.st||{};if(k==='b'||k==='i')o.st[k]=o.st[k]?0:1;else o.st[k]=v;sty(tgt,o.st)}
   save();syncTf()}
 $('#tf').addEventListener('mousedown',e=>{if(e.target.tagName!=='SELECT'&&e.target.type!=='color')e.preventDefault()});
-$('#tf').addEventListener('click',e=>{const t=e.target;if(t.dataset.c)fmt('color',t.dataset.c);const k=t.closest('button');if(k)fmt(k.dataset.k)});
+$('#tf').addEventListener('click',e=>{const t=e.target;if(t.dataset.c)fmt('color',t.dataset.c);const k=t.closest('button[data-k]');if(k)fmt(k.dataset.k)});
 $('#tff').onchange=e=>fmt('font',e.target.value);$('#tfs').onchange=e=>fmt('size',+e.target.value);$('#tfc').oninput=e=>fmt('color',e.target.value);
 $('#tools').insertAdjacentHTML('beforeend','<button data-t="text"><b>T</b>نص حر</button>');
 document.querySelector('[data-t=text]').onclick=()=>addCard({t:'note',c:'n0',free:1,text:'',st:{size:28,b:1}});
@@ -668,18 +732,9 @@ const _ln=lines;lines=function(){_ln();qmm()};
 view.addEventListener('scroll',qmm);
 mm.onclick=e=>{const r=mm.getBoundingClientRect();view.scrollLeft=(e.clientX-r.left)/mm._k*Z-view.clientWidth/2;view.scrollTop=(e.clientY-r.top)/mm._k*Z-view.clientHeight/2};
 $('#homeB').addEventListener('click',()=>{mm.hidden=true;$('#tf').hidden=true});
-</script>
 
-<style>
-#hd{flex-wrap:wrap}
-.gd{position:absolute;background:#e64980;z-index:50;pointer-events:none}
-.colc{background:rgba(127,135,155,.14)!important;border:1px dashed var(--ln)}
-.ct{width:100%;border:0;background:none;font:inherit;font-weight:700;font-size:15px;color:var(--ink);outline:none}
-.ob{width:100%;margin-top:4px}
-#lb iframe{width:92vw;height:90vh;border:0;background:#fff;cursor:auto}
-#lb .x{position:absolute;top:10px;left:14px;color:#fff;font-size:28px;cursor:pointer}
-</style>
-<script>
+
+/* ════════ 7. nested boards, snap guides, PDF preview, PNG/PDF export ════════ */
 /* ===== nested boards ===== */
 let ROOT=null,stk=[];
 function syncRoot(){if(!ROOT||!B)return;if(stk.length){const s=ROOT.boards[stk[stk.length-1].id];if(s){s.cards=B.cards;s.lines=B.lines}}else{ROOT.cards=B.cards;ROOT.lines=B.lines}}
@@ -698,23 +753,12 @@ $('#tools').insertAdjacentHTML('beforeend','<button data-t="board"><b>▣</b>ل�
 document.querySelector('[data-t=board]').onclick=()=>{const id=uid();ROOT.boards[id]={name:'لوحة فرعية',cards:[],lines:[]};addCard({t:'board',sub:id})};
 
 
-/* ===== columns: cards dropped on a column stack inside it ===== */
-function layoutCols(){
-  if(!B)return;B.cards.filter(c=>c.t==='col').forEach(col=>{const ce=els[col.id];if(!ce)return;const cw=col.w||260;
-    const kids=B.cards.filter(k=>k.col===col.id&&els[k.id]).sort((a,b)=>a.y-b.y);let y=col.y+52;
-    kids.forEach(k=>{const q=els[k.id];k.x=col.x+10;k.y=y;k.w=cw-20;q.style.left=k.x+'px';q.style.top=k.y+'px';q.style.width=k.w+'px';y+=q.offsetHeight+10});
-    col.h=Math.max(160,y-col.y+4);ce.style.height=col.h+'px'});lines()}
-function colDrop(c){const q=els[c.id];if(!q)return;const cx=c.x+q.offsetWidth/2,cy=c.y+q.offsetHeight/2;
-  const col=B.cards.find(k=>k.t==='col'&&k!==c&&cx>=k.x&&cx<=k.x+(k.w||260)&&cy>=k.y&&cy<=k.y+(k.h||160));
-  if(col)c.col=col.id;else delete c.col;layoutCols()}
-const _rd=render;render=function(){_rd();setTimeout(layoutCols,40);setTimeout(layoutCols,700)};
 
 /* ===== drag with snap + alignment guides (hold Alt to disable) ===== */
 function dragCard(e,c,el){
   if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();
   if(!SEL.has(c.id))setSel([]);
   let grp=SEL.has(c.id)?B.cards.filter(k=>SEL.has(k.id)):[c];
-  grp=grp.concat(B.cards.filter(k=>k.col&&grp.some(g=>g.id===k.col)&&!grp.includes(k)));
   const st=grp.map(k=>[k,k.x,k.y]),sx=e.clientX,sy=e.clientY,w=el.offsetWidth,h=el.offsetHeight,ox=c.x,oy=c.y;
   const ot=B.cards.filter(k=>!grp.includes(k)&&els[k.id]).map(k=>{const q=els[k.id];return[k.x,k.x+q.offsetWidth/2,k.x+q.offsetWidth,k.y,k.y+q.offsetHeight/2,k.y+q.offsetHeight]});
   const gv=document.createElement('div'),gh=document.createElement('div');gv.className=gh.className='gd';stage.append(gv,gh);
@@ -726,7 +770,7 @@ function dragCard(e,c,el){
     gv.style.cssText=gx==null?'display:none':`left:${gx}px;top:0;width:${1/Z}px;height:3500px`;gh.style.cssText=gy==null?'display:none':`top:${gy}px;left:0;height:${1/Z}px;width:5000px`;
     st.forEach(([k,x,y])=>{k.x=Math.max(0,x+dx);k.y=Math.max(0,y+dy);const q=els[k.id];if(q){q.style.left=k.x+'px';q.style.top=k.y+'px'}});lines()};
   const up=()=>{el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',up);el.classList.remove('drag');gv.remove();gh.remove();
-    if(c.t==='col')layoutCols();else colDrop(c);save()};
+    save()};
   el.addEventListener('pointermove',mv);el.addEventListener('pointerup',up)}
 
 /* ===== card wrapper: column, board, PDF preview ===== */
@@ -734,8 +778,6 @@ function pdfBox(u){const d=document.createElement('div');d.id='lb';d.innerHTML='
 const _ce4=cardEl;
 cardEl=function(c){
   const el=_ce4(c),b=el.querySelector('.bd');
-  if(c.t==='col'){el.style.zIndex=0;el.style.width=(c.w||260)+'px';el.style.height=(c.h||200)+'px';el.classList.add('colc');
-    b.innerHTML='<input class="ct" placeholder="عنوان العمود">';const i=b.firstChild;i.value=c.title||'';i.oninput=()=>{c.title=i.value;save()}}
   if(c.t==='board'){const s=(ROOT&&ROOT.boards[c.sub])||{cards:[]};
     b.innerHTML=`<input class="ct" placeholder="اسم اللوحة"><div style="color:var(--mu);font-size:12px;margin:6px 0">${(s.cards||[]).length} عنصر</div><button class="ob">فتح اللوحة ▸</button>`;
     const i=b.firstChild;i.value=s.name||'';i.oninput=()=>{s.name=i.value;save()};b.querySelector('.ob').onclick=()=>enter(c.sub)}
@@ -779,14 +821,9 @@ $('#hd').insertAdjacentHTML('beforeend','<button id="xp">🖼 PNG</button><butto
 $('#xp').onclick=async()=>{try{const cv=await renderBoard();if(!cv)return toast('اللوحة فارغة');cv.toBlob(b=>dl(b,(P.name||'board')+'.png'))}catch(e){console.error(e);toast('تعذر التصدير')}};
 $('#xf').onclick=async()=>{try{const cv=await renderBoard();if(!cv)return toast('اللوحة فارغة');
   const jpg=Uint8Array.from(atob(cv.toDataURL('image/jpeg',.92).split(',')[1]),c=>c.charCodeAt(0));dl(pdfFrom(jpg,cv.width,cv.height),(P.name||'board')+'.pdf')}catch(e){console.error(e);toast('تعذر التصدير')}};
-</script>
 
-<style>
-.card.hh{display:flex;flex-direction:column}
-.card.hh>.bd{flex:1;display:flex;flex-direction:column;overflow:auto;min-height:0}
-.card.hh .txt{flex:1}
-</style>
-<script>
+
+/* ════════ 8. resize handles ════════ */
 /* ===== resize handle on every card (width; notes also height) ===== */
 const _ce5=cardEl;
 cardEl=function(c){
@@ -798,12 +835,12 @@ cardEl=function(c){
       const sx=e.clientX,sy=e.clientY,sw=el.offsetWidth,sh=el.offsetHeight;
       h.onpointermove=m=>{c.w=Math.max(80,sw+(m.clientX-sx)/Z);el.style.width=c.w+'px';
         if(c.t==='note'){c.h=Math.max(50,sh+(m.clientY-sy)/Z);el.style.height=c.h+'px';el.classList.add('hh')}
-        if(c.t==='col')layoutCols();else lines()};
+        lines()};
       h.onpointerup=()=>{h.onpointermove=h.onpointerup=null;save()}}}
   return el};
-</script>
 
-<script>
+
+/* ════════ 9. note colours ════════ */
 /* ===== note card colours ===== */
 const NP=['#fff3b8','#ffe066','#ffd8a8','#ffa8a8','#ffd6df','#e5dbff','#d3e3ff','#a5d8ff','#cdf2dc','#b2f2bb','#ffffff','#dee2e6'];
 const textOn=h=>{const m=/^#([0-9a-f]{6})$/i.exec(h||'');if(!m)return'';const n=parseInt(m[1],16);return(.299*(n>>16)+.587*((n>>8)&255)+.114*(n&255))/255>.55?'#1b2333':'#f4f6fa'};
@@ -822,16 +859,9 @@ cardEl=function(c){
   const el=_ce6(c);
   if(c.t==='note'){paintNote(el,c);const b=el.querySelector('[data-a=c]');if(b){b.textContent='🎨';b.title='لون البطاقة';b.onclick=()=>noteColors(c)}}
   return el};
-</script>
 
-<style>
-#mic,#vlg{position:fixed;bottom:12px;z-index:30;background:var(--pn);border:1px solid var(--ln);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:14px}
-#mic{left:190px}#vlg{left:238px}
-#mic.on{background:#e03131;color:#fff;animation:pl 1s infinite}
-@keyframes pl{50%{opacity:.6}}
-#vi{position:fixed;bottom:50px;left:190px;max-width:50vw;background:var(--pn);border:1px solid var(--ln);border-radius:8px;padding:4px 10px;color:var(--mu);z-index:30}
-</style>
-<script>
+
+/* ════════ 10. voice typing (shortcuts) + install as app ════════ */
 /* ===== voice typing (Arabic / English) ===== */
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 let vl=localStorage.getItem('vlang')||'ar-EG',rec=null,vOn=0,vTgt=null,lastEd=null;
@@ -839,20 +869,6 @@ document.body.insertAdjacentHTML('beforeend','<button id="mic" title="كتابة
 const edOk=x=>!!x&&(x.isContentEditable||(x.tagName==='INPUT'&&/^(text|search|url)$/.test(x.type))||x.tagName==='TEXTAREA');
 const vlab=()=>{$('#vlg').textContent=vl.startsWith('ar')?'ع':'EN'};vlab();
 document.addEventListener('focusin',e=>{const t=e.target;if(edOk(t)&&!(t.closest&&t.closest('#gate')))lastEd=t});
-function vStart(){
-  if(!SR)return toast('الإملاء الصوتي يعمل في Chrome و Edge');
-  let t=edOk(document.activeElement)?document.activeElement:(lastEd&&document.contains(lastEd)?lastEd:null);
-  if(!t&&B){addCard({t:'note',c:'n1',text:''});const q=els[B.cards[B.cards.length-1].id];t=q&&q.querySelector('.txt')}
-  if(!t)return toast('اختر مكان الكتابة أولًا');
-  if(t!==document.activeElement){t.focus();if(t.isContentEditable){const s=getSelection(),r=document.createRange();r.selectNodeContents(t);r.collapse(false);s.removeAllRanges();s.addRange(r)}}
-  vTgt=t;rec=new SR();rec.lang=vl;rec.continuous=true;rec.interimResults=true;
-  rec.onresult=e=>{let it='';for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];
-      if(r.isFinal){vTgt.focus();document.execCommand('insertText',false,r[0].transcript.trim()+' ')}else it+=r[0].transcript}
-    $('#vi').textContent=it;$('#vi').hidden=!it};
-  rec.onerror=e=>{if(/not-allowed|service-not-allowed/.test(e.error)){toast('اسمح بالميكروفون من أيقونة القفل بجوار العنوان');vStop()}else if(e.error==='network'){toast('الإملاء الصوتي يحتاج اتصالًا بالإنترنت');vStop()}};
-  rec.onend=()=>{if(vOn){try{rec.start()}catch(e){vStop()}}};
-  vOn=1;$('#mic').classList.add('on');rec.start()}
-function vStop(){vOn=0;try{rec&&rec.stop()}catch(e){}$('#mic').classList.remove('on');$('#vi').hidden=true}
 $('#mic').onclick=()=>vOn?vStop():vStart();
 $('#vlg').onclick=()=>{vl=vl.startsWith('ar')?'en-US':'ar-EG';localStorage.setItem('vlang',vl);vlab();if(vOn){vStop();vStart()}};
 ['#mic','#vlg'].forEach(s=>$(s).addEventListener('mousedown',e=>e.preventDefault()));
@@ -865,9 +881,9 @@ addEventListener('beforeinstallprompt',e=>{e.preventDefault();dip=e;$('#inst').h
 $('#inst').onclick=async()=>{if(!dip)return;dip.prompt();try{await dip.userChoice}catch(e){}dip=null;$('#inst').hidden=true};
 addEventListener('appinstalled',()=>{$('#inst').hidden=true;toast('✓ تم تثبيت التطبيق')});
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
-</script>
 
-<script>
+
+/* ════════ 11. voice memo recording ════════ */
 /* ===== voice memo: record -> upload to Drive -> audio card ===== */
 let mr=null,chunks=[],rt=null,rst=0,rStream=null,rCancel=0;
 $('#tools').insertAdjacentHTML('beforeend','<button data-t="rec" id="recB"><b>🎙</b>تسجيل صوتي</button>');
@@ -900,16 +916,9 @@ const _ce7=cardEl;
 cardEl=function(c){const el=_ce7(c),a=el.querySelector('audio');
   if(a)a.addEventListener('loadedmetadata',()=>{if(a.duration===Infinity){a.currentTime=1e101;a.addEventListener('timeupdate',function f(){a.removeEventListener('timeupdate',f);a.currentTime=0})}});
   return el};
-</script>
 
-<style>
-.fo{display:block;padding:14px 10px;text-align:center;color:inherit;text-decoration:none}
-.fo:hover{background:rgba(127,135,155,.14)}
-.fo span{font-size:42px;display:block}.fo b{display:block;margin:4px 0;word-break:break-all}.fo small{color:var(--mu)}
-.row{align-items:flex-start}.row input[type=checkbox]{margin-top:5px}
-.row textarea{flex:1;border:0;background:none;color:inherit;font:inherit;outline:none;resize:none;overflow:hidden;padding:2px;line-height:1.5;min-height:24px}
-</style>
-<script>
+
+/* ════════ 12. folder upload, multi-line to-do, columns removed (migration) ════════ */
 /* ===== columns removed: drop old column cards but keep their children in place ===== */
 function stripCols(r){const f=a=>{const n=(a||[]).filter(c=>c.t!=='col');n.forEach(c=>{delete c.col});return n};r.cards=f(r.cards);Object.values(r.boards||{}).forEach(b=>{b.cards=f(b.cards)})}
 const _op3=openProject;openProject=async function(p){await _op3(p);if(ROOT){stripCols(ROOT);B=ROOT;hist=[];redoS=[];lastS=snap();render()}};
@@ -954,13 +963,9 @@ cardEl=function(c){const el=_ce8(c);
     i.textContent='📁';n.textContent=c.name||'مجلد';s.textContent=`${c.files||0} ملف`+(c.dirs?` · ${c.dirs} مجلد فرعي`:'')+' — اضغط للفتح في Drive';
     a.append(i,n,s);b.appendChild(a)}
   return el};
-</script>
 
-<style>
-#mic2{margin-top:8px;padding:4px 10px;border:1px solid var(--ln);border-radius:8px;background:var(--bg);cursor:pointer}
-#mic2.on{background:#e03131;color:#fff}
-</style>
-<script>
+
+/* ════════ 13. voice typing helpers ════════ */
 /* ===== voice typing v2: works in every text field, explicit mic permission, clear error messages ===== */
 const VERR={'not-allowed':'تم رفض إذن الميكروفون — اضغط أيقونة القفل بجوار عنوان الموقع واسمح بالميكروفون ثم أعد المحاولة','service-not-allowed':'المتصفح يمنع خدمة التعرف على الصوت — استخدم Google Chrome أو Edge','network':'تعذر الاتصال بخدمة Google للتعرف على الصوت — تحقق من الإنترنت','audio-capture':'لم يُعثر على ميكروفون — تحقق من الميكروفون المختار في Windows','language-not-supported':'هذه اللغة غير مدعومة في المتصفح'};
 const vMsg=t=>{const v=$('#vi');v.textContent=t||'';v.hidden=!t},vBtns=on=>['#mic','#mic2'].forEach(s=>{const b=$(s);b&&b.classList.toggle('on',!!on)});
@@ -973,37 +978,13 @@ function typeInto(t,txt){
     if(!r){r=document.createRange();r.selectNodeContents(t);r.collapse(false)}r.deleteContents();const n=document.createTextNode(txt);r.insertNode(n);r.setStartAfter(n);r.collapse(true);s.removeAllRanges();s.addRange(r)}
   else if(t.setRangeText){const a=t.selectionStart==null?t.value.length:t.selectionStart,b=t.selectionEnd==null?a:t.selectionEnd;t.setRangeText(txt,a,b,'end')}
   t.dispatchEvent(new Event('input',{bubbles:true}))}
-vStop=function(){vOn=0;try{rec&&rec.stop()}catch(e){}vBtns(0);vMsg('')};
-vStart=async function(){
-  if(!SR){toast('هذا المتصفح لا يدعم الإملاء الصوتي');return openDiag()}
-  let t=pickT();
-  if(!t&&B&&!$('#bd').hidden){addCard({t:'note',c:'n1',text:''});const q=els[B.cards[B.cards.length-1].id];t=q&&q.querySelector('.txt')}
-  if(!t)return toast('اضغط داخل مكان الكتابة أولًا ثم ابدأ الإملاء');
-  try{const st=await navigator.mediaDevices.getUserMedia({audio:true});st.getTracks().forEach(x=>x.stop())}catch(e){return toast(VERR['not-allowed'])}
-  if(t!==document.activeElement){t.focus();if(t.isContentEditable){const s=getSelection(),r=document.createRange();r.selectNodeContents(t);r.collapse(false);s.removeAllRanges();s.addRange(r)}}
-  vTgt=t;rec=new SR();rec.lang=vl;rec.continuous=true;rec.interimResults=true;let heard=0;logEv(rec);
-  rec.onstart=()=>vMsg('🎤 أستمع… تحدّث الآن');rec.onaudiostart=()=>{heard=1};
-  rec.onresult=e=>{heard=1;const a=document.activeElement;if(edOk(a)&&!(a.closest&&a.closest('#gate')))vTgt=a;
-    if(!document.contains(vTgt)){const l=pickT();if(!l){vStop();return}vTgt=l}
-    let it='';for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];if(r.isFinal){const x=r[0].transcript.trim();if(x)typeInto(vTgt,x+' ')}else it+=r[0].transcript}
-    vMsg(it?'… '+it:'🎤 أستمع… تحدّث الآن')};
-  rec.onerror=e=>{if(e.error==='no-speech'||e.error==='aborted')return;toast(VERR[e.error]||('خطأ في الإملاء: '+e.error));vStop();openDiag()};
-  rec.onend=()=>{if(vOn)setTimeout(()=>{if(vOn){try{rec.start()}catch(x){vStop();toast('توقف الإملاء — اضغط 🎤 للمتابعة')}}},300)};
-  vOn=1;vBtns(1);try{rec.start()}catch(e){vStop();return toast('تعذر بدء الإملاء: '+e.message)}
-  setTimeout(()=>{if(vOn&&!heard){toast('لا يصل صوت — تأكد من الميكروفون المختار في Windows ومن إذن Chrome له');openDiag()}},5000)};
 /* mic inside the "new project" dialog + Alt+M shortcut anywhere */
 $('#pn').insertAdjacentHTML('afterend','<button type="button" id="mic2" title="إملاء صوتي">🎤 إملاء</button>');
 $('#mic2').addEventListener('mousedown',e=>e.preventDefault());$('#mic2').onclick=()=>vOn?vStop():vStart();
 addEventListener('keydown',e=>{if(e.altKey&&e.code==='KeyM'){e.preventDefault();vOn?vStop():vStart()}});
-</script>
 
-<style>
-#vdg{position:fixed;bottom:12px;left:282px;z-index:30;background:var(--pn);border:1px solid var(--ln);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:14px}
-#dg{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:70;background:var(--pn);color:var(--ink);border:1px solid var(--ln);border-radius:14px;padding:16px 18px;width:min(560px,92vw);max-height:80vh;overflow:auto;box-shadow:0 12px 40px rgba(0,0,0,.35);line-height:1.9;font-size:14px}
-#dg pre{direction:ltr;text-align:left;background:var(--bg);padding:8px;border-radius:8px;font-size:12px;white-space:pre-wrap;min-height:60px}
-#dg button{padding:4px 12px;border:1px solid var(--ln);border-radius:8px;background:var(--bg);color:var(--ink);cursor:pointer}
-</style>
-<script>
+
+/* ════════ 14. voice diagnostics ════════ */
 /* ===== voice typing diagnostics: shows exactly why the browser is not dictating ===== */
 const vlog=[];
 const upd=()=>{const p=$('#dgl');if(p)p.textContent=vlog.slice(-15).join('\n')},tS=()=>((performance.now()/1000)%1000).toFixed(1)+'s ';
@@ -1029,14 +1010,9 @@ async function diagTest(){
 document.body.insertAdjacentHTML('beforeend','<button id="vdg" title="تشخيص الإملاء الصوتي" hidden>ℹ</button>');
 $('#vdg').onclick=openDiag;
 const _sh2=show;show=function(id){_sh2(id);$('#vdg').hidden=id!=='bd'};
-</script>
 
-<style>
-#vm{position:fixed;bottom:44px;left:190px;width:140px;height:7px;background:var(--ln);border-radius:4px;z-index:30;overflow:hidden}
-#vm i{display:block;height:100%;width:0;background:#2f9e44;transition:width .06s}
-#vi{bottom:58px!important}
-</style>
-<script>
+
+/* ════════ 15. voice typing v3 (mic level meter) ════════ */
 /* ===== voice typing v3: live mic level meter, tells you whether the microphone hears anything ===== */
 document.body.insertAdjacentHTML('beforeend','<div id="vm" hidden><i></i></div>');
 let vStream=null,vCtx=null,vRaf=0,vLvl=0,vPeak=0,vBusy=0;
@@ -1046,8 +1022,8 @@ function meterStart(st){
     const tick=()=>{an.getByteTimeDomainData(buf);let m=0;for(let i=0;i<buf.length;i++)m=Math.max(m,Math.abs(buf[i]-128));vLvl=m/128;vPeak=Math.max(vPeak,vLvl);
       const b=$('#vm i');if(b)b.style.width=Math.min(100,vLvl*300)+'%';vRaf=requestAnimationFrame(tick)};tick();$('#vm').hidden=false}catch(e){vlog.push('تعذر قياس مستوى الصوت: '+e.message)}}
 function meterStop(){cancelAnimationFrame(vRaf);try{vCtx&&vCtx.close()}catch(e){}vCtx=null;if(vStream){vStream.getTracks().forEach(x=>x.stop());vStream=null}$('#vm').hidden=true}
-vStop=function(){vOn=0;vBusy=0;try{rec&&rec.stop()}catch(e){}meterStop();vBtns(0);vMsg('')};
-vStart=async function(){
+function vStop(){vOn=0;vBusy=0;try{rec&&rec.stop()}catch(e){}meterStop();vBtns(0);vMsg('')}
+async function vStart(){
   if(vBusy)return;
   if(!SR){toast('هذا المتصفح لا يدعم الإملاء الصوتي');return openDiag()}
   if(typeof mr!=='undefined'&&mr&&mr.state==='recording')return toast('أوقف التسجيل الصوتي أولًا لأن الميكروفون مشغول به');
@@ -1071,8 +1047,183 @@ vStart=async function(){
     setTimeout(()=>{if(vOn){try{rec.start()}catch(x){vStop();toast('توقف الإملاء — اضغط 🎤 للمتابعة')}}},300)};
   vOn=1;vBusy=0;vBtns(1);try{rec.start()}catch(e){vStop();return toast('تعذر بدء الإملاء: '+e.message)}
   setTimeout(()=>{if(vOn&&vPeak<.02){toast('الميكروفون «'+label.slice(0,30)+'» لا يلتقط أي صوت — تأكد أنه غير مكتوم واختر الميكروفون الصحيح من إعدادات Chrome');openDiag()}},4000);
-  setTimeout(()=>{if(vOn&&!got&&vPeak>=.05)toast('الميكروفون يسمعك لكن خدمة التعرف لا ترد — تحقق من الإنترنت أو بدّل اللغة (ع / EN)')},15000)};
-</script>
+  setTimeout(()=>{if(vOn&&!got&&vPeak>=.05)toast('الميكروفون يسمعك لكن خدمة التعرف لا ترد — تحقق من الإنترنت أو بدّل اللغة (ع / EN)')},15000)}
 
+
+/* ════════ 16. rich text, arrange, templates, network view ════════ */
+/* ================= 1) RICH TEXT: headings, lists, quote, code, rule, align, direction, link, markdown shortcuts ================= */
+const OKB={H1:'h1',H2:'h2',H3:'h3',P:'p',DIV:'div',UL:'ul',OL:'ol',LI:'li',BLOCKQUOTE:'blockquote',PRE:'pre',CODE:'code',HR:'hr',B:'b',STRONG:'b',I:'i',EM:'i',U:'u',S:'s',STRIKE:'s',BR:'br',SPAN:'span',A:'a'};
+clean=function(h){
+  const d=new DOMParser().parseFromString('<body>'+h+'</body>','text/html').body,o=document.createElement('div');
+  const walk=(n,out)=>n.childNodes.forEach(k=>{
+    if(k.nodeType===3){out.appendChild(document.createTextNode(k.nodeValue));return}
+    if(k.nodeType!==1)return;const tg=OKB[k.tagName];
+    if(!tg){if(!/^(SCRIPT|STYLE)$/.test(k.tagName))walk(k,out);return}
+    const e=document.createElement(tg),s=k.style;
+    if(tg==='span'){
+      if(/^(#[0-9a-f]{3,8}|rgb\([\d\s,.]+\))$/i.test(s.color))e.style.color=s.color;
+      const f=(s.fontFamily||'').replace(/["']/g,'').split(',')[0].trim();if(FONTS.includes(f))e.style.fontFamily=`'${f}',Cairo,sans-serif`;
+      if(/^\d+(\.\d+)?px$/.test(s.fontSize))e.style.fontSize=s.fontSize;
+      if(s.fontWeight==='700'||s.fontWeight==='bold')e.style.fontWeight='700';if(s.fontStyle==='italic')e.style.fontStyle='italic'}
+    if(/^(h1|h2|h3|p|div|li|blockquote|ul|ol)$/.test(tg)){if(/^(left|right|center|justify)$/.test(s.textAlign))e.style.textAlign=s.textAlign;const dr=k.getAttribute('dir');if(dr==='rtl'||dr==='ltr')e.setAttribute('dir',dr)}
+    if(tg==='a'){const hr=k.getAttribute('href')||'';if(/^https?:\/\//i.test(hr)){e.setAttribute('href',hr);e.target='_blank';e.rel='noopener noreferrer'}}
+    walk(k,e);out.appendChild(e)});
+  walk(d,o);return o.innerHTML};
+const CMD={h1:['formatBlock','h1'],h2:['formatBlock','h2'],h3:['formatBlock','h3'],p:['formatBlock','p'],ul:['insertUnorderedList'],ol:['insertOrderedList'],bq:['formatBlock','blockquote'],pre:['formatBlock','pre'],hr:['insertHorizontalRule'],al:['justifyLeft'],ac:['justifyCenter'],ar:['justifyRight'],u:['underline'],s:['strikeThrough']};
+$('#tf').insertAdjacentHTML('beforeend','<span class="bk" hidden><button data-x="h1">H1</button><button data-x="h2">H2</button><button data-x="h3">H3</button><button data-x="p">¶</button><button data-x="ul">• قائمة</button><button data-x="ol">1. قائمة</button><button data-x="bq">❝</button><button data-x="pre">&lt;/&gt;</button><button data-x="hr">―</button><button data-x="al">⟵</button><button data-x="ac">⟷</button><button data-x="ar">⟶</button><button data-x="dir">RTL/LTR</button><button data-x="u"><u>U</u></button><button data-x="s"><s>S</s></button><button data-x="a">🔗</button></span>');
+$('#tf').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-x]');if(!b||!tgt||!tgt.classList.contains('txt'))return;
+  const k=b.dataset.x,s=getSelection();tgt.focus();if(lr){s.removeAllRanges();s.addRange(lr)}
+  if(k==='dir'){let n=s.anchorNode;while(n&&n.parentNode!==tgt)n=n.parentNode;const el=n&&n.nodeType===1?n:tgt;el.dir=el.dir==='rtl'?'ltr':'rtl'}
+  else if(k==='a'){const u=prompt('الرابط (https://…)');if(u)document.execCommand('createLink',false,u)}
+  else{const c=CMD[k];document.execCommand(c[0],false,c[1])}
+  tgt.closest('.card')._c.html=clean(tgt.innerHTML);save()});
+const bkv=()=>document.querySelectorAll('#tf .bk').forEach(b=>b.hidden=!(tgt&&tgt.classList&&tgt.classList.contains('txt')));
+document.addEventListener('selectionchange',()=>setTimeout(bkv,0));
+const MD={'#':['formatBlock','h1'],'##':['formatBlock','h2'],'###':['formatBlock','h3'],'-':['insertUnorderedList'],'*':['insertUnorderedList'],'1.':['insertOrderedList'],'>':['formatBlock','blockquote']};
+const _ce9=cardEl;
+cardEl=function(c){const el=_ce9(c);
+  if(c.t==='note'){const t=el.querySelector('.txt');
+    t.addEventListener('keydown',e=>{if(e.key!==' ')return;const s=getSelection();if(!s.rangeCount||!s.isCollapsed)return;const n=s.anchorNode;if(!n||n.nodeType!==3)return;
+      const mk=n.textContent.slice(0,s.anchorOffset);if(!MD[mk]||(n.previousSibling&&n.previousSibling.nodeName!=='BR'))return;
+      e.preventDefault();n.textContent=n.textContent.slice(s.anchorOffset);const r=document.createRange();r.setStart(n,0);r.collapse(true);s.removeAllRanges();s.addRange(r);
+      document.execCommand(MD[mk][0],false,MD[mk][1]);c.html=clean(t.innerHTML);save()})}
+  return el};
+
+/* ================= 2) AUTO-ARRANGE + align/distribute ================= */
+const arrT=()=>B.cards.filter(c=>els[c.id]&&(SEL.size>1?SEL.has(c.id):true)),sz=c=>[els[c.id].offsetWidth,els[c.id].offsetHeight];
+function applyPos(T,P){stage.classList.add('anim');T.forEach(c=>{const p=P?P[c.id]:[c.x,c.y];if(p){c.x=Math.max(0,p[0]);c.y=Math.max(0,p[1]);els[c.id].style.left=c.x+'px';els[c.id].style.top=c.y+'px'}});lines();save();setTimeout(()=>{stage.classList.remove('anim');lines()},450)}
+function arrange(kind){
+  const T=arrT();if(T.length<2)return toast('لا توجد بطاقات كافية للترتيب');
+  const x0=Math.min(...T.map(c=>c.x)),y0=Math.min(...T.map(c=>c.y)),G=30,P={},cw=Math.max(...T.map(c=>sz(c)[0]));
+  T.sort((a,b)=>a.y-b.y||a.x-b.x);
+  if(kind==='grid'||kind==='rows'){const cols=kind==='grid'?Math.ceil(Math.sqrt(T.length)):Math.max(1,Math.floor(1600/(cw+G)));let y=y0;
+    for(let i=0;i<T.length;i+=cols){let x=x0,h=0;T.slice(i,i+cols).forEach(c=>{P[c.id]=[x,y];x+=(kind==='grid'?cw:sz(c)[0])+G;h=Math.max(h,sz(c)[1])});y+=h+G}}
+  if(kind==='masonry'){const cols=Math.max(2,Math.ceil(Math.sqrt(T.length))),H=Array(cols).fill(y0);T.forEach(c=>{const k=H.indexOf(Math.min(...H));P[c.id]=[x0+k*(cw+G),H[k]];H[k]+=sz(c)[1]+G})}
+  if(kind==='circle'){const r=Math.max(220,T.length*(cw+40)/(2*Math.PI));T.forEach((c,i)=>{const a=i/T.length*2*Math.PI-Math.PI/2,[w,h]=sz(c);P[c.id]=[x0+r+Math.cos(a)*r-w/2,y0+r+Math.sin(a)*r-h/2]})}
+  if(kind==='tree'){const ids=new Set(T.map(c=>c.id)),ch={},inc=new Set();
+    B.lines.forEach(l=>{const a=l.p[0].c,b=l.p[1].c;if(a&&b&&ids.has(a)&&ids.has(b)){(ch[a]=ch[a]||[]).push(b);inc.add(b)}});
+    if(!Object.keys(ch).length)return toast('الترتيب الشجري يحتاج خطوط توصيل بين البطاقات');
+    const dep={},q=T.filter(c=>!inc.has(c.id)).map(c=>c.id);q.forEach(i=>{dep[i]=0});
+    for(let i=0;i<q.length;i++)(ch[q[i]]||[]).forEach(k=>{if(dep[k]==null){dep[k]=dep[q[i]]+1;q.push(k)}});
+    T.forEach(c=>{if(dep[c.id]==null){dep[c.id]=0;q.push(c.id)}});const yc={};
+    q.forEach(id=>{const c=T.find(k=>k.id===id),d=dep[id];if(yc[d]==null)yc[d]=y0;P[id]=[x0+d*(cw+90),yc[d]];yc[d]+=sz(c)[1]+G})}
+  applyPos(T,P)}
+function align(k){
+  const T=arrT();if(T.length<2)return toast('حدّد بطاقتين على الأقل');
+  const L=Math.min(...T.map(c=>c.x)),R=Math.max(...T.map(c=>c.x+sz(c)[0])),Tp=Math.min(...T.map(c=>c.y)),Bt=Math.max(...T.map(c=>c.y+sz(c)[1]));
+  if(k==='dh'||k==='dv'){const a=k==='dh'?'x':'y',d=k==='dh'?0:1;T.sort((p,q)=>p[a]-q[a]);const f=T[0][a],l=T[T.length-1][a]+sz(T[T.length-1])[d],tot=T.reduce((s,c)=>s+sz(c)[d],0),gap=(l-f-tot)/(T.length-1);let pos=f;T.forEach(c=>{c[a]=pos;pos+=sz(c)[d]+gap})}
+  else T.forEach(c=>{const[w,h]=sz(c);if(k==='l')c.x=L;if(k==='r')c.x=R-w;if(k==='t')c.y=Tp;if(k==='b')c.y=Bt-h;if(k==='cx')c.x=(L+R)/2-w/2;if(k==='cy')c.y=(Tp+Bt)/2-h/2});
+  applyPos(T)}
+$('#tools').insertAdjacentHTML('beforeend','<button data-t="arr"><b>▦</b>ترتيب</button><button data-t="tpl"><b>▤</b>قوالب</button><button data-t="net"><b>◎</b>الشبكة</button>');
+document.querySelector('[data-t=arr]').onclick=()=>{
+  fb('<span>ترتيب:</span><button data-a="grid">شبكة</button><button data-a="rows">صفوف</button><button data-a="masonry">متدرج</button><button data-a="circle">دائري</button><button data-a="tree">شجري (حسب الخطوط)</button><span>| محاذاة:</span><button data-a="l">⇤</button><button data-a="cx">↔</button><button data-a="r">⇥</button><button data-a="t">⇧</button><button data-a="cy">↕</button><button data-a="b">⇩</button><span>| توزيع:</span><button data-a="dh">أفقي</button><button data-a="dv">رأسي</button><button data-a="x">إغلاق</button>');
+  fbH=e=>{const a=e.target.dataset.a;if(!a)return;if(a==='x'){fb('');fbH=null;return}['l','r','t','b','cx','cy','dh','dv'].includes(a)?align(a):arrange(a)}};
+
+/* ================= 3) TEMPLATES: kanban, mind map, inspiration board ================= */
+function tpl(kind){
+  const o=vpos(),X=Math.max(40,o.x),Y=Math.max(40,o.y),mk=(x,y,txt,bg,ex)=>{const c={id:uid(),t:'note',c:'n0',x:X+x,y:Y+y,text:txt,html:esc(txt),bg,w:240,...ex};B.cards.push(c);return c};
+  if(kind==='kanban')[['مطلوب','#ffd6df'],['قيد التنفيذ','#fff3b8'],['مراجعة','#d3e3ff'],['تم','#cdf2dc']].forEach(([n,bg],i)=>{
+    mk(i*280,0,n,bg,{html:'<h2>'+esc(n)+'</h2>',w:250,st:{size:20}});mk(i*280,110,'مهمة 1','#ffffff',{w:250});mk(i*280,220,'مهمة 2','#ffffff',{w:250})});
+  if(kind==='mind'){const cen=mk(380,250,'الفكرة الرئيسية','#ffe066',{html:'<h2>الفكرة الرئيسية</h2>',w:210});
+    ['فرع 1','فرع 2','فرع 3','فرع 4','فرع 5','فرع 6'].forEach((n,i)=>{const a=i/6*2*Math.PI-Math.PI/2,dx=Math.cos(a),dy=Math.sin(a),br=mk(380+dx*400,250+dy*250,n,NP[(i*2+1)%NP.length],{w:170}),
+      s=Math.abs(dx)>Math.abs(dy)*1.2?(dx>0?[1,.5,0,.5]:[0,.5,1,.5]):(dy>0?[.5,1,.5,0]:[.5,0,.5,1]);
+      B.lines.push({id:uid(),p:[{c:cen.id,rx:s[0],ry:s[1]},{c:br.id,rx:s[2],ry:s[3]}],mo:{x:0,y:0},col:LC[1+i%7]})})}
+  if(kind==='mood'){mk(0,0,'لوحة إلهام','',{html:'<h1>لوحة إلهام</h1>',free:1,w:420,st:{size:36,b:1}});
+    ['#ffa8a8','#ffd8a8','#fff3b8','#b2f2bb','#a5d8ff','#e5dbff'].forEach((h,i)=>mk(i*100,110,h,h,{w:90,html:'<div style="text-align:center">'+h+'</div>'}));
+    mk(0,230,'اكتب ما يلهمك هنا…','#ffffff',{w:300});mk(330,230,'اسحب صورك إلى اللوحة ثم اضغط «ترتيب ← متدرج»','#e5dbff',{w:300})}
+  save();render();toast('✓ تمت إضافة القالب')}
+document.querySelector('[data-t=tpl]').onclick=()=>{
+  fb('<span>قوالب:</span><button data-a="kanban">📋 كانبان</button><button data-a="mind">🧠 خريطة ذهنية</button><button data-a="mood">🎨 لوحة إلهام</button><button data-a="save">💾 حفظ هذه اللوحة كقالب</button><button data-a="mine">📂 قوالبي</button><button data-a="x">إغلاق</button>');
+  fbH=e=>{const a=e.target.dataset.a;if(!a)return;if(a==='x'){fb('');fbH=null;return}if(a==='save'){tplSave();return}if(a==='mine'){tplList();return}tpl(a);fb('');fbH=null}};
+
+/* ================= 4) RELATIONSHIP NETWORK (cards = nodes, connector lines = edges) ================= */
+const ctitle=c=>String(c.title||c.name||(c.text||'').split('\n')[0]||(c.items&&c.items[0]&&c.items[0].t)||({note:'ملاحظة',todo:'مهام',link:'رابط',file:'ملف',folder:'مجلد',table:'جدول',board:'لوحة'}[c.t]||c.t)).slice(0,22);
+function jumpTo(c){view.scrollTo({left:Math.max(0,c.x*Z-120),top:Math.max(0,c.y*Z-120),behavior:'smooth'});const q=els[c.id];if(q){q.classList.add('flash');setTimeout(()=>q.classList.remove('flash'),2200)}}
+function netLayout(N,E,W,H){
+  const k=Math.sqrt(W*H/Math.max(1,N.length))*.8;let temp=W/8;
+  for(let it=0;it<250;it++){N.forEach(n=>{n.dx=0;n.dy=0});
+    for(let i=0;i<N.length;i++)for(let j=i+1;j<N.length;j++){const a=N[i],b=N[j];let dx=a.x-b.x,dy=a.y-b.y;const d=Math.hypot(dx,dy)||.01,f=k*k/d;a.dx+=dx/d*f;a.dy+=dy/d*f;b.dx-=dx/d*f;b.dy-=dy/d*f}
+    E.forEach(([i,j])=>{const a=N[i],b=N[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy)||.01,f=d*d/k;a.dx-=dx/d*f;a.dy-=dy/d*f;b.dx+=dx/d*f;b.dy+=dy/d*f});
+    N.forEach(n=>{const d=Math.hypot(n.dx,n.dy)||1,m=Math.min(d,temp);n.x+=n.dx/d*m;n.y+=n.dy/d*m});temp*=.97}}
+function showNet(){
+  const N=B.cards.map((c,i)=>({c,x:Math.cos(i)*200+Math.random()*50,y:Math.sin(i)*200+Math.random()*50})),ix={};N.forEach((n,i)=>{ix[n.c.id]=i});
+  const E=B.lines.map(l=>[l.p[0].c,l.p[1].c]).filter(([a,b])=>a&&b&&ix[a]!=null&&ix[b]!=null).map(([a,b])=>[ix[a],ix[b]]);
+  netLayout(N,E,900,600);
+  const xs=N.map(n=>n.x),ys=N.map(n=>n.y),x0=Math.min(...xs,0)-80,y0=Math.min(...ys,0)-60,x1=Math.max(...xs,1)+80,y1=Math.max(...ys,1)+60,vb=[x0,y0,x1-x0,y1-y0];
+  const col={note:'#f08c00',todo:'#2f9e44',link:'#1971c2',file:'#9c36b5',folder:'#e64980',table:'#868e96',board:'#e03131'},deg=N.map(()=>0);E.forEach(([a,b])=>{deg[a]++;deg[b]++});
+  const w=document.createElement('div');w.id='nw';w.innerHTML='<div class="nh"><b>◎ شبكة العلاقات</b><span></span><span style="flex:1"></span><button>إغلاق ✕</button></div><svg></svg>';
+  w.querySelector('span').textContent=`${N.length} بطاقة · ${E.length} علاقة (خطوط التوصيل) — اضغط على عقدة للانتقال إليها`;
+  const sv=w.querySelector('svg'),NS='http://www.w3.org/2000/svg',mkE=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e};
+  E.forEach(([a,b])=>sv.appendChild(mkE('line',{class:'e',x1:N[a].x,y1:N[a].y,x2:N[b].x,y2:N[b].y})));
+  N.forEach((n,i)=>{const g=mkE('circle',{cx:n.x,cy:n.y,r:7+Math.min(10,deg[i]*2),fill:col[n.c.t]||'#868e96',opacity:deg[i]?1:.55}),t=mkE('text',{x:n.x,y:n.y+22+Math.min(10,deg[i]*2),'text-anchor':'middle'});
+    t.textContent=ctitle(n.c);g.onclick=()=>{w.remove();jumpTo(n.c)};sv.append(g,t)});
+  const setVB=()=>sv.setAttribute('viewBox',vb.join(' '));setVB();
+  sv.addEventListener('wheel',e=>{e.preventDefault();const r=sv.getBoundingClientRect(),f=Math.exp(e.deltaY*.0015),px=vb[0]+(e.clientX-r.left)/r.width*vb[2],py=vb[1]+(e.clientY-r.top)/r.height*vb[3];
+    vb[0]=px-(px-vb[0])*f;vb[1]=py-(py-vb[1])*f;vb[2]*=f;vb[3]*=f;setVB()},{passive:false});
+  sv.addEventListener('pointerdown',e=>{if(e.target.tagName==='circle')return;const sx=e.clientX,sy=e.clientY,o=[vb[0],vb[1]],r=sv.getBoundingClientRect();
+    const mv=m=>{vb[0]=o[0]-(m.clientX-sx)/r.width*vb[2];vb[1]=o[1]-(m.clientY-sy)/r.height*vb[3];setVB()},up=()=>{removeEventListener('pointermove',mv);removeEventListener('pointerup',up)};addEventListener('pointermove',mv);addEventListener('pointerup',up)});
+  w.querySelector('button').onclick=()=>w.remove();document.body.appendChild(w)}
+document.querySelector('[data-t=net]').onclick=()=>{if(!B.cards.length)return toast('اللوحة فارغة');showNet()};
+
+
+/* ════════ 17. slash menu, my templates (Drive) ════════ */
+/* slash menu in notes: type "/" then pick a block (heading, list, quote, code, rule) */
+const SLASH=[['عنوان كبير','h1'],['عنوان متوسط','h2'],['عنوان صغير','h3'],['نص عادي','p'],['قائمة نقطية','ul'],['قائمة رقمية','ol'],['اقتباس','bq'],['كود','pre'],['خط فاصل','hr']];
+let slEl=null,slI=0,slItems=[],slNode=null,slOff=0,slQ='';
+const slClose=()=>{if(slEl){slEl.remove();slEl=null}};
+function slRun(k){
+  const n=slNode,t=n.parentElement.closest('.txt'),c=t.closest('.card')._c,m=/\/([^\s\/]*)$/.exec(n.textContent.slice(0,slOff));if(!m)return slClose();
+  n.textContent=n.textContent.slice(0,m.index)+n.textContent.slice(slOff);
+  const r=document.createRange(),s=getSelection();r.setStart(n,m.index);r.collapse(true);s.removeAllRanges();s.addRange(r);slClose();
+  const cm=CMD[k];document.execCommand(cm[0],false,cm[1]);c.html=clean(t.innerHTML);save()}
+function slShow(){
+  slItems=SLASH.filter(x=>!slQ||x[0].includes(slQ));if(!slItems.length)return slClose();slI=Math.min(slI,slItems.length-1);
+  if(!slEl){slEl=document.createElement('div');slEl.id='sl';document.body.appendChild(slEl)}
+  const rg=getSelection().getRangeAt(0),r=rg.getBoundingClientRect?rg.getBoundingClientRect():{left:60,bottom:60};
+  slEl.style.left=Math.max(8,r.left)+'px';slEl.style.top=(r.bottom+6)+'px';slEl.innerHTML='';
+  slItems.forEach((x,i)=>{const b=document.createElement('div');b.textContent=x[0];if(i===slI)b.className='on';b.onmousedown=e=>{e.preventDefault();slRun(x[1])};slEl.appendChild(b)})}
+const _ce10=cardEl;
+cardEl=function(c){
+  const el=_ce10(c);
+  if(c.t==='note'){const t=el.querySelector('.txt');
+    t.addEventListener('input',()=>{const s=getSelection();if(!s.rangeCount||!s.isCollapsed)return slClose();const n=s.anchorNode;if(!n||n.nodeType!==3)return slClose();
+      const m=/(^|\s)\/([^\s\/]*)$/.exec(n.textContent.slice(0,s.anchorOffset));if(!m)return slClose();
+      slNode=n;slOff=s.anchorOffset;slQ=m[2];slI=0;slShow()});
+    t.addEventListener('keydown',e=>{if(!slEl)return;
+      if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();slI=(slI+(e.key==='ArrowDown'?1:slItems.length-1))%slItems.length;slShow()}
+      else if(e.key==='Enter'||e.key==='Tab'){e.preventDefault();slRun(slItems[slI][1])}
+      else if(e.key==='Escape'){e.preventDefault();slClose()}});
+    t.addEventListener('blur',()=>setTimeout(slClose,150))}
+  return el};
+
+/* my templates: saved as JSON in Drive (المشاريع / القوالب) */
+let TFID=null;
+async function tplDir(){if(TFID)return TFID;const f=await list(`name='القوالب' and mimeType='${FOLDER}' and trashed=false and '${root}' in parents`);TFID=f.length?f[0].id:(await mkFolder('القوالب',root,PAL[3])).id;return TFID}
+async function tplSave(){
+  const name=prompt('اسم القالب');if(!name)return;
+  const keep=B.cards.filter(c=>!['file','folder','board'].includes(c.t)),ids=new Set(keep.map(c=>c.id));
+  if(!keep.length)return toast('لا توجد بطاقات صالحة للحفظ (الملفات والمجلدات لا تُحفظ في القوالب)');
+  const x0=Math.min(...keep.map(c=>c.x)),y0=Math.min(...keep.map(c=>c.y)),cp=x=>JSON.parse(JSON.stringify(x));
+  const data={v:1,name,cards:keep.map(c=>{const n=cp(c);n.x-=x0;n.y-=y0;delete n.fid;return n}),lines:cp(B.lines.filter(l=>l.p.every(e=>!e.c||ids.has(e.c))))};
+  try{const d=await tplDir();await upload(new File([JSON.stringify(data)],name.replace(/[\\\/:*?"<>|]/g,'-')+'.json',{type:'application/json'}),d);toast('✓ حُفظ القالب «'+name+'»')}
+  catch(e){console.error(e);toast('تعذر حفظ القالب')}}
+async function tplList(){
+  try{const d=await tplDir(),fs=await list(`'${d}' in parents and trashed=false and name contains '.json'`,'files(id,name)');
+    if(!fs.length)return toast('لا توجد قوالب محفوظة بعد');
+    fb('<span>قوالبي (Shift+ضغط = حذف):</span>'+fs.map(f=>`<button data-a="${f.id}">${esc(f.name.replace(/\.json$/,''))}</button>`).join('')+'<button data-a="x">إغلاق</button>');
+    fbH=async e=>{const a=e.target.dataset.a;if(!a)return;if(a==='x'){fb('');fbH=null;return}
+      if(e.shiftKey){if(confirm('نقل هذا القالب إلى سلة Drive؟')){await rmDrive(a);tplList()}return}
+      try{tplInsert(await (await api(`${D}/${a}?alt=media`)).json());fb('');fbH=null}catch(err){toast('تعذر فتح القالب')}}}
+  catch(e){console.error(e);toast('تعذر قراءة القوالب')}}
+function tplInsert(t){
+  if(!t||!Array.isArray(t.cards))return toast('ملف قالب غير صالح');
+  const o=vpos(),map={},cp=x=>JSON.parse(JSON.stringify(x)),add=[];
+  t.cards.slice(0,300).forEach(c=>{if(!c||typeof c!=='object'||['file','folder','board'].includes(c.t))return;const n=cp(c);map[c.id]=n.id=uid();n.x=Math.max(0,o.x+(+c.x||0));n.y=Math.max(0,o.y+(+c.y||0));delete n.fid;add.push(n)});
+  B.cards.push(...add);
+  (t.lines||[]).forEach(l=>{if(!l||!Array.isArray(l.p)||l.p.length!==2)return;const q=cp(l);q.id=uid();q.p=q.p.map(e=>e&&e.c?{...e,c:map[e.c]}:{x:o.x+(+(e||{}).x||0),y:o.y+(+(e||{}).y||0)});
+    if(q.p.every(e=>!('c' in e)||e.c))B.lines.push(q)});
+  save();render();toast('✓ تم إدراج القالب')}
+</script>
 </body>
 </html>
