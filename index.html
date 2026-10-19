@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-sIBh3jfciI1gc91CMhXr+N2WjGRehP7VMs9zKgrHIPk=' https://accounts.google.com; style-src 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' blob: data:; media-src blob:; connect-src https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com; frame-src https://accounts.google.com blob:; worker-src 'self'; manifest-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-xZQ4My6EY2+MRHZvTUEDb/iG5F0tqTZUoKekLyJjQu8=' https://accounts.google.com; style-src 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' blob: data:; media-src blob:; connect-src https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com; frame-src https://accounts.google.com blob:; worker-src 'self'; manifest-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#2f5bea">
 <link rel="icon" href="icon-192.png">
@@ -301,13 +301,20 @@ document.onkeydown=e=>{if(e.key==='Escape'&&conn){$('#lineB').click()}};
 function render(){
   const st=$('#stage');st.querySelectorAll('.card').forEach(n=>n.remove());els={};
   B.cards.forEach(c=>{const el=cardEl(c);els[c.id]=el;st.appendChild(el)});lines()}
-function cardEl(c){
-  const el=document.createElement('div');el.className='card'+(c.id===selId?' sel':'');el.style.left=c.x+'px';el.style.top=c.y+'px';
-  if(c.t==='note')el.style.background=`var(--${c.c})`;
-  el.innerHTML=`<div class="bar"><span><button data-a="x" title="إزالة من اللوحة">✕</button>${c.t==='note'?'<button data-a="c">●</button>':''}</span><span>⠿</span></div><div class="bd"></div>`;
-  const b=el.lastChild;
-  if(c.t==='note'){b.innerHTML='<div class="txt" contenteditable="plaintext-only" data-p="اكتب فكرتك…"></div>';const t=b.firstChild;t.textContent=c.text;t.oninput=()=>{c.text=t.innerText;save()}}
-  if(c.t==='todo'){const draw=f=>{b.innerHTML='';
+/* ── card module: frame → CARD[type] builder → ordered hooks (DECOR / onType) ── */
+const CARD={};                                   // type → (c, el, body) => fills the card body
+const DECOR=[];                                  // hooks run in order after the body is built
+const onType=(t,f)=>DECOR.push((el,c)=>{if(c.t===t)f(el,c)});
+function cardFrame(c){
+  const el=document.createElement('div');el._c=c;el.className='card'+(SEL.has(c.id)?' sel':'');el.style.left=c.x+'px';el.style.top=c.y+'px';
+  if(c.w)el.style.width=c.w+'px';
+  el.innerHTML=`<div class="bar"><span><button data-a="x" title="إزالة من اللوحة">✕</button>${c.t==='note'?'<button data-a="c" title="لون البطاقة">🎨</button>':''}</span><span>⠿</span></div><div class="bd"></div>`;
+  el.querySelector('[data-a=x]').onclick=()=>delCard(c);
+  el.firstChild.onpointerdown=e=>{if(e.button||e.target.closest('button'))return;dragCard(e,c,el)};
+  el.addEventListener('pointerdown',()=>{if(SEL.size&&!SEL.has(c.id))setSel([])},true);
+  return el}
+CARD.note=(c,el,b)=>{el.style.background=`var(--${c.c})`;b.innerHTML='<div class="txt" contenteditable="plaintext-only" data-p="اكتب فكرتك…"></div>';const t=b.firstChild;t.textContent=c.text;t.oninput=()=>{c.text=t.innerText;save()}};
+CARD.todo=(c,el,b)=>{const draw=f=>{b.innerHTML='';
     c.items.forEach((it,i)=>{const r=document.createElement('div');r.className='row';
       r.innerHTML=`<input type="checkbox" ${it.d?'checked':''}><textarea rows="1" placeholder="مهمة" class="${it.d?'d':''}">${esc(it.t)}</textarea>`;
       const cb=r.querySelector('input'),tx=r.querySelector('textarea'),fit=()=>{if(tx.scrollHeight){tx.style.height='auto';tx.style.height=tx.scrollHeight+'px'}};setTimeout(fit,0);setTimeout(fit,400);
@@ -315,28 +322,75 @@ function cardEl(c){
       tx.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();c.items.splice(i+1,0,{t:'',d:0});save();draw(i+1)}
         if(e.key==='Backspace'&&!tx.value&&c.items.length>1){c.items.splice(i,1);save();draw(Math.max(0,i-1))}};b.appendChild(r)});
     const a=document.createElement('button');a.className='add';a.textContent='+ مهمة';a.onclick=()=>{c.items.push({t:'',d:0});save();draw(c.items.length-1)};b.appendChild(a);
-    if(f!=null){const x=b.querySelectorAll('textarea')[f];x&&x.focus()}setTimeout(lines,0)};draw()}
-  if(c.t==='link'){b.className='bd lk';const ok=/^https?:\/\//.test(c.url);
+    if(f!=null){const x=b.querySelectorAll('textarea')[f];x&&x.focus()}setTimeout(lines,0)};draw()};
+CARD.link=(c,el,b)=>{b.className='bd lk';const ok=/^https?:\/\//.test(c.url);
     b.innerHTML=`<input class="t" placeholder="عنوان الرابط" value="${esc(c.title)}"><input class="u" dir="ltr" placeholder="https://…" value="${esc(c.url)}"><a target="_blank" rel="noopener noreferrer" ${ok?`href="${esc(c.url)}"`:''}>${esc(c.title||c.url||'—')}</a>`;
     const[t,u]=b.querySelectorAll('input'),a=b.querySelector('a');
-    const up=()=>{c.title=t.value;c.url=u.value.trim();a.textContent=c.title||c.url||'—';/^https?:\/\//.test(c.url)?a.href=c.url:a.removeAttribute('href');save()};t.oninput=u.oninput=up}
-  if(c.t==='file'){b.style.padding=0;const m=c.mime||'';let h='';
+    const up=()=>{c.title=t.value;c.url=u.value.trim();a.textContent=c.title||c.url||'—';/^https?:\/\//.test(c.url)?a.href=c.url:a.removeAttribute('href');save()};t.oninput=u.oninput=up};
+CARD.file=(c,el,b)=>{b.style.padding=0;const m=c.mime||'';let h='';
     if(m.startsWith('image/'))h='<img alt="">';else if(m.startsWith('audio/'))h='<div style="padding:10px"><audio controls></audio></div>';else if(m.startsWith('video/'))h='<video controls></video>';
     b.innerHTML=h+`<a class="fn" target="_blank" rel="noopener noreferrer" href="${/^https:\/\//.test(c.link||'')?esc(c.link):'#'}">${m.startsWith('image/')||m.startsWith('audio/')||m.startsWith('video/')?'':'📎 '}${esc(c.name)}</a>`;
     const m2=b.querySelector('img,audio,video');
-    if(m2){m2.onload=m2.onloadedmetadata=lines;blobURL(c.fid).then(u=>m2.src=u).catch(()=>toast('تعذر عرض '+c.name))}}
-  el.addEventListener('click',e=>{if(!conn)return;e.preventDefault();e.stopPropagation();
-    if(!selId){selId=c.id}else if(selId!==c.id){B.lines.push({a:selId,b:c.id});selId=null;save()}else selId=null;render()},true);
-  el.querySelectorAll('[data-a]').forEach(x=>x.onclick=()=>{
-    if(x.dataset.a==='x'){if(!confirm('إزالة البطاقة من اللوحة؟ (يبقى الملف في Drive)'))return;
-      B.cards=B.cards.filter(k=>k!==c);B.lines=B.lines.filter(l=>l.a!==c.id&&l.b!==c.id)}
-    else c.c=NC[(NC.indexOf(c.c)+1)%NC.length];save();render()});
-  const bar=el.firstChild;
-  bar.onpointerdown=e=>{if(e.target.closest('button')||conn)return;bar.setPointerCapture(e.pointerId);el.classList.add('drag');
-    const sx=e.clientX,sy=e.clientY,ox=c.x,oy=c.y;
-    bar.onpointermove=m=>{c.x=Math.max(0,ox+m.clientX-sx);c.y=Math.max(0,oy+m.clientY-sy);el.style.left=c.x+'px';el.style.top=c.y+'px';lines()};
-    bar.onpointerup=()=>{bar.onpointermove=bar.onpointerup=null;el.classList.remove('drag');save()}};
-  return el}
+    if(m2){m2.onload=m2.onloadedmetadata=lines;blobURL(c.fid).then(u=>m2.src=u).catch(()=>toast('تعذر عرض '+c.name))}};
+function cardEl(c){const el=cardFrame(c),b=el.querySelector('.bd');if(CARD[c.t])CARD[c.t](c,el,b);for(const f of DECOR)f(el,c);return el}
+/* hooks (previously stacked wrappers), in their original order */
+onType('table',(el,c)=>{const b=el.querySelector('.bd');if(!c.w)el.style.width='auto';el.style.minWidth='260px';tbl(c,b)});
+onType('file',(el,c)=>{const b=el.querySelector('.bd');if(/^image\//.test(c.mime||'')){
+    const h=document.createElement('div');h.className='rz';el.appendChild(h);
+    h.onpointerdown=e=>{e.preventDefault();e.stopPropagation();h.setPointerCapture(e.pointerId);const sx=e.clientX,sw=el.offsetWidth;
+      h.onpointermove=m=>{c.w=Math.max(60,sw+(m.clientX-sx)/Z);el.style.width=c.w+'px';lines()};
+      h.onpointerup=()=>{h.onpointermove=h.onpointerup=null;save()}}}});
+onType('file',(el,c)=>{if(/^رسم-/.test(c.name||'')){
+    el.classList.add('dw');
+    el.addEventListener('pointerdown',e=>{if(e.button||e.target.closest('.bar,.rz'))return;e.preventDefault();dragCard(e,c,el)})}});
+onType('table',(el,c)=>{
+    el.style.minWidth='120px';const h=document.createElement('div');h.className='rz';el.appendChild(h);
+    h.onpointerdown=e=>{e.preventDefault();e.stopPropagation();h.setPointerCapture(e.pointerId);
+      const sx=e.clientX,sy=e.clientY,sw=el.offsetWidth,sh=el.querySelector('table').offsetHeight;
+      h.onpointermove=m=>{c.w=Math.max(160,sw+(m.clientX-sx)/Z);c.hh=Math.max(60,sh+(m.clientY-sy)/Z);el.style.width=c.w+'px';
+        const t=el.querySelector('table');t.style.tableLayout='fixed';t.style.height=c.hh+'px';lines()};
+      h.onpointerup=()=>{h.onpointermove=h.onpointerup=null;save()}}});
+onType('note',(el,c)=>{const t=el.querySelector('.txt');t.contentEditable='true';t.dir='auto';if(c.html)t.innerHTML=clean(c.html);sty(t,c.st);
+    t.addEventListener('input',()=>{c.html=clean(t.innerHTML);save()});
+    t.addEventListener('paste',e=>{e.preventDefault();document.execCommand('insertText',false,e.clipboardData.getData('text/plain'))});
+    if(c.free)el.classList.add('tx')});
+DECOR.push((el,c)=>{if(QS&&!match(c))el.style.opacity=.25;const im=el.querySelector('img');if(im&&c.t==='file'&&!/^رسم-/.test(c.name||''))im.ondblclick=()=>lightbox(im.src);});
+onType('board',(el,c)=>{const b=el.querySelector('.bd');const s=(ROOT&&ROOT.boards[c.sub])||{cards:[]};
+    b.innerHTML=`<input class="ct" placeholder="اسم اللوحة"><div style="color:var(--mu);font-size:12px;margin:6px 0">${(s.cards||[]).length} عنصر</div><button class="ob">فتح اللوحة ▸</button>`;
+    const i=b.firstChild;i.value=s.name||'';i.oninput=()=>{s.name=i.value;save()};b.querySelector('.ob').onclick=()=>enter(c.sub)});
+onType('file',(el,c)=>{const b=el.querySelector('.bd');if(/pdf/.test(c.mime||'')){const v=document.createElement('button');v.textContent='👁 معاينة PDF';v.style.cssText='margin:8px 10px 0';
+    v.onclick=async()=>{try{pdfBox(await blobURL(c.fid))}catch(e){toast('تعذر فتح الملف')}};b.insertBefore(v,b.firstChild)}});
+DECOR.push((el,c)=>{if(!el.querySelector('.rz')&&!c.col){
+    if(c.t==='note'&&c.h){el.style.height=c.h+'px';el.classList.add('hh')}
+    const h=document.createElement('div');h.className='rz';h.title='اسحب لتغيير الحجم';el.appendChild(h);
+    h.onpointerdown=e=>{e.preventDefault();e.stopPropagation();h.setPointerCapture(e.pointerId);
+      const sx=e.clientX,sy=e.clientY,sw=el.offsetWidth,sh=el.offsetHeight;
+      h.onpointermove=m=>{c.w=Math.max(80,sw+(m.clientX-sx)/Z);el.style.width=c.w+'px';
+        if(c.t==='note'){c.h=Math.max(50,sh+(m.clientY-sy)/Z);el.style.height=c.h+'px';el.classList.add('hh')}
+        lines()};
+      h.onpointerup=()=>{h.onpointermove=h.onpointerup=null;save()}}}});
+onType('note',(el,c)=>{paintNote(el,c);const b=el.querySelector('[data-a=c]');if(b){b.textContent='🎨';b.title='لون البطاقة';b.onclick=()=>noteColors(c)}});
+DECOR.push((el,c)=>{const a=el.querySelector('audio');if(a)a.addEventListener('loadedmetadata',()=>{if(a.duration===Infinity){a.currentTime=1e101;a.addEventListener('timeupdate',function f(){a.removeEventListener('timeupdate',f);a.currentTime=0})}});});
+onType('folder',(el,c)=>{const b=el.querySelector('.bd');b.style.padding='0';b.innerHTML='';
+    const a=document.createElement('a'),i=document.createElement('span'),n=document.createElement('b'),s=document.createElement('small');
+    a.className='fo';a.target='_blank';a.rel='noopener noreferrer';a.title='فتح المجلد في Google Drive';
+    if(/^[\w-]+$/.test(c.fid||''))a.href='https://drive.google.com/drive/folders/'+c.fid;
+    i.textContent='📁';n.textContent=c.name||'مجلد';s.textContent=`${c.files||0} ملف`+(c.dirs?` · ${c.dirs} مجلد فرعي`:'')+' — اضغط للفتح في Drive';
+    a.append(i,n,s);b.appendChild(a)});
+onType('note',(el,c)=>{const t=el.querySelector('.txt');
+    t.addEventListener('keydown',e=>{if(e.key!==' ')return;const s=getSelection();if(!s.rangeCount||!s.isCollapsed)return;const n=s.anchorNode;if(!n||n.nodeType!==3)return;
+      const mk=n.textContent.slice(0,s.anchorOffset);if(!MD[mk]||(n.previousSibling&&n.previousSibling.nodeName!=='BR'))return;
+      e.preventDefault();n.textContent=n.textContent.slice(s.anchorOffset);const r=document.createRange();r.setStart(n,0);r.collapse(true);s.removeAllRanges();s.addRange(r);
+      document.execCommand(MD[mk][0],false,MD[mk][1]);c.html=clean(t.innerHTML);save()})});
+onType('note',(el,c)=>{const t=el.querySelector('.txt');
+    t.addEventListener('input',()=>{const s=getSelection();if(!s.rangeCount||!s.isCollapsed)return slClose();const n=s.anchorNode;if(!n||n.nodeType!==3)return slClose();
+      const m=/(^|\s)\/([^\s\/]*)$/.exec(n.textContent.slice(0,s.anchorOffset));if(!m)return slClose();
+      slNode=n;slOff=s.anchorOffset;slQ=m[2];slI=0;slShow()});
+    t.addEventListener('keydown',e=>{if(!slEl)return;
+      if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();slI=(slI+(e.key==='ArrowDown'?1:slItems.length-1))%slItems.length;slShow()}
+      else if(e.key==='Enter'||e.key==='Tab'){e.preventDefault();slRun(slItems[slI][1])}
+      else if(e.key==='Escape'){e.preventDefault();slClose()}});
+    t.addEventListener('blur',()=>setTimeout(slClose,150))});
 
 /* ---------- connector lines ---------- */
 const ctr=e=>[e.offsetLeft+e.offsetWidth/2,e.offsetTop+e.offsetHeight/2];
@@ -349,7 +403,6 @@ function lines(){
     h+=`<path class="ln" d="${d}" marker-end="url(#ar)"/><path class="hit" data-i="${i}" d="${d}"/>`});
   sv.innerHTML=h}
 $('#sv').onclick=e=>{const i=e.target.dataset&&e.target.dataset.i;if(i!=null&&confirm('حذف خط التوصيل؟')){B.lines.splice(+i,1);save();lines()}};
-
 
 /* ════════ 2. canvas: zoom, pan, connectors, tables, drawing ════════ */
 const LC=['#4a5368','#e03131','#f08c00','#2f9e44','#1971c2','#9c36b5','#e64980','#111111'];
@@ -456,23 +509,6 @@ function tbl(c,b){
   draw()}
 
 /* wrap card renderer: zoom-aware drag, resize, table, Drive delete */
-const _ce=cardEl;
-cardEl=function(c){
-  const el=_ce(c),b=el.querySelector('.bd');
-  if(c.w)el.style.width=c.w+'px';
-  if(c.t==='table'){if(!c.w)el.style.width='auto';el.style.minWidth='260px';tbl(c,b)}
-  el.querySelector('[data-a=x]').onclick=()=>delCard(c);
-  const bar=el.firstChild;
-  bar.onpointerdown=e=>{if(e.button||e.target.closest('button'))return;bar.setPointerCapture(e.pointerId);el.classList.add('drag');
-    const sx=e.clientX,sy=e.clientY,ox=c.x,oy=c.y;
-    bar.onpointermove=m=>{c.x=Math.max(0,ox+(m.clientX-sx)/Z);c.y=Math.max(0,oy+(m.clientY-sy)/Z);el.style.left=c.x+'px';el.style.top=c.y+'px';lines()};
-    bar.onpointerup=()=>{bar.onpointermove=bar.onpointerup=null;el.classList.remove('drag');save()}};
-  if(c.t==='file'&&/^image\//.test(c.mime||'')){
-    const h=document.createElement('div');h.className='rz';el.appendChild(h);
-    h.onpointerdown=e=>{e.preventDefault();e.stopPropagation();h.setPointerCapture(e.pointerId);const sx=e.clientX,sw=el.offsetWidth;
-      h.onpointermove=m=>{c.w=Math.max(60,sw+(m.clientX-sx)/Z);el.style.width=c.w+'px';lines()};
-      h.onpointerup=()=>{h.onpointermove=h.onpointerup=null;save()}}}
-  return el};
 
 /* free drawing -> becomes an image card (uploaded to Drive) */
 function startDraw(){
@@ -503,7 +539,6 @@ function startDraw(){
 $('#tools').insertAdjacentHTML('beforeend','<button data-t="table"><b>▦</b>جدول</button><button data-t="draw"><b>✎</b>رسم</button>');
 document.querySelector('[data-t=table]').onclick=()=>addCard({t:'table',cells:grid(3,3)});
 document.querySelector('[data-t=draw]').onclick=startDraw;
-
 
 /* ════════ 3. selection, group delete (Drive), cleanup, drag ════════ */
 /* ---- selection ---- */
@@ -556,24 +591,6 @@ $('#tools').insertAdjacentHTML('beforeend','<button data-t="clean"><b>🧹</b>ت
 document.querySelector('[data-t=clean]').onclick=cleanup;
 
 /* ---- card wrapper: group drag, transparent drawings, table resize ---- */
-const _ce2=cardEl;
-cardEl=function(c){
-  const el=_ce2(c);
-  if(SEL.has(c.id))el.classList.add('sel');
-  el.addEventListener('pointerdown',()=>{if(SEL.size&&!SEL.has(c.id))setSel([])},true);
-  el.firstChild.onpointerdown=e=>{if(e.button||e.target.closest('button'))return;dragCard(e,c,el)};
-  if(c.t==='file'&&/^رسم-/.test(c.name||'')){
-    el.classList.add('dw');
-    el.addEventListener('pointerdown',e=>{if(e.button||e.target.closest('.bar,.rz'))return;e.preventDefault();dragCard(e,c,el)})}
-  if(c.t==='table'){
-    el.style.minWidth='120px';const h=document.createElement('div');h.className='rz';el.appendChild(h);
-    h.onpointerdown=e=>{e.preventDefault();e.stopPropagation();h.setPointerCapture(e.pointerId);
-      const sx=e.clientX,sy=e.clientY,sw=el.offsetWidth,sh=el.querySelector('table').offsetHeight;
-      h.onpointermove=m=>{c.w=Math.max(160,sw+(m.clientX-sx)/Z);c.hh=Math.max(60,sh+(m.clientY-sy)/Z);el.style.width=c.w+'px';
-        const t=el.querySelector('table');t.style.tableLayout='fixed';t.style.height=c.hh+'px';lines()};
-      h.onpointerup=()=>{h.onpointermove=h.onpointerup=null;save()}}}
-  return el};
-
 
 /* ════════ 4. sign-in (remembered, silent renewal) ════════ */
 /* ---- remembered sign-in: cached token + silent renewal + minimal gate ---- */
@@ -608,7 +625,6 @@ $('#go').onclick=async()=>{
   try{await tokReq(localStorage.getItem('signed')?'none':'consent');await boot();return}catch(e){console.error(e)}
   show('gate');$('#gate p').textContent='اضغط الزر للدخول بحسابك.'})();
 
-
 /* ════════ 5. trash-based delete, sign-out, privacy link ════════ */
 /* PERM=false: delete = move to Drive trash (recoverable 30 days). true: permanent delete */
 const PERM=false;
@@ -619,7 +635,6 @@ $('#out').onclick=async()=>{
   const t=tok,done=()=>{try{sessionStorage.removeItem('tk');localStorage.removeItem('tk');localStorage.removeItem('signed')}catch(e){}location.reload()};
   if(t&&window.google)google.accounts.oauth2.revoke(t,done);else done();setTimeout(done,1500)};
 $('#gate').insertAdjacentHTML('beforeend','<a href="privacy.html" target="_blank" rel="noopener noreferrer" style="font-size:12px;color:var(--mu)">سياسة الخصوصية</a>');
-
 
 /* ════════ 6. text formatting, search, undo/redo, copy/paste, fit, minimap ════════ */
 /* ===== text formatting: 5 fonts, size, colour; selection-level (notes) + whole-element ===== */
@@ -670,16 +685,7 @@ $('#q').oninput=e=>{QS=e.target.value.trim().toLowerCase();qi=-1;if(B)B.cards.fo
 $('#q').onkeydown=e=>{if(e.key!=='Enter'||!QS||!B)return;const m=B.cards.filter(match);if(!m.length)return toast('لا نتائج');qi=(qi+1)%m.length;view.scrollTo({left:m[qi].x*Z-120,top:m[qi].y*Z-120,behavior:'smooth'})};
 
 /* ===== card wrapper: rich notes, free text, image lightbox ===== */
-const _ce3=cardEl;
-cardEl=function(c){
-  const el=_ce3(c);el._c=c;
-  if(c.t==='note'){const t=el.querySelector('.txt');t.contentEditable='true';t.dir='auto';if(c.html)t.innerHTML=clean(c.html);sty(t,c.st);
-    t.addEventListener('input',()=>{c.html=clean(t.innerHTML);save()});
-    t.addEventListener('paste',e=>{e.preventDefault();document.execCommand('insertText',false,e.clipboardData.getData('text/plain'))});
-    if(c.free)el.classList.add('tx')}
-  if(QS&&!match(c))el.style.opacity=.25;
-  const im=el.querySelector('img');if(im&&c.t==='file'&&!/^رسم-/.test(c.name||''))im.ondblclick=()=>lightbox(im.src);
-  return el};
+
 function lightbox(src){const d=document.createElement('div');d.id='lb';d.innerHTML='<img alt="">';d.firstChild.src=src;d.onclick=()=>d.remove();document.body.appendChild(d)}
 
 /* ===== undo / redo (restores / re-trashes Drive files too) ===== */
@@ -733,7 +739,6 @@ view.addEventListener('scroll',qmm);
 mm.onclick=e=>{const r=mm.getBoundingClientRect();view.scrollLeft=(e.clientX-r.left)/mm._k*Z-view.clientWidth/2;view.scrollTop=(e.clientY-r.top)/mm._k*Z-view.clientHeight/2};
 $('#homeB').addEventListener('click',()=>{mm.hidden=true;$('#tf').hidden=true});
 
-
 /* ════════ 7. nested boards, snap guides, PDF preview, PNG/PDF export ════════ */
 /* ===== nested boards ===== */
 let ROOT=null,stk=[];
@@ -751,8 +756,6 @@ function purge(id){const s=ROOT&&ROOT.boards[id];if(!s)return;s.cards.forEach(k=
 const _dc=delCards;delCards=async function(arr){const bs=arr.filter(c=>c.t==='board');await _dc(arr);bs.forEach(c=>{if(!B.cards.includes(c))purge(c.sub)})};
 $('#tools').insertAdjacentHTML('beforeend','<button data-t="board"><b>▣</b>لوحة فرعية</button>');
 document.querySelector('[data-t=board]').onclick=()=>{const id=uid();ROOT.boards[id]={name:'لوحة فرعية',cards:[],lines:[]};addCard({t:'board',sub:id})};
-
-
 
 /* ===== drag with snap + alignment guides (hold Alt to disable) ===== */
 function dragCard(e,c,el){
@@ -775,15 +778,6 @@ function dragCard(e,c,el){
 
 /* ===== card wrapper: column, board, PDF preview ===== */
 function pdfBox(u){const d=document.createElement('div');d.id='lb';d.innerHTML='<span class="x">✕</span><iframe></iframe>';d.querySelector('iframe').src=u;d.onclick=e=>{if(e.target!==d.querySelector('iframe'))d.remove()};document.body.appendChild(d)}
-const _ce4=cardEl;
-cardEl=function(c){
-  const el=_ce4(c),b=el.querySelector('.bd');
-  if(c.t==='board'){const s=(ROOT&&ROOT.boards[c.sub])||{cards:[]};
-    b.innerHTML=`<input class="ct" placeholder="اسم اللوحة"><div style="color:var(--mu);font-size:12px;margin:6px 0">${(s.cards||[]).length} عنصر</div><button class="ob">فتح اللوحة ▸</button>`;
-    const i=b.firstChild;i.value=s.name||'';i.oninput=()=>{s.name=i.value;save()};b.querySelector('.ob').onclick=()=>enter(c.sub)}
-  if(c.t==='file'&&/pdf/.test(c.mime||'')){const v=document.createElement('button');v.textContent='👁 معاينة PDF';v.style.cssText='margin:8px 10px 0';
-    v.onclick=async()=>{try{pdfBox(await blobURL(c.fid))}catch(e){toast('تعذر فتح الملف')}};b.insertBefore(v,b.firstChild)}
-  return el};
 
 /* ===== export PNG / PDF (own canvas renderer) ===== */
 async function renderBoard(){
@@ -822,23 +816,8 @@ $('#xp').onclick=async()=>{try{const cv=await renderBoard();if(!cv)return toast(
 $('#xf').onclick=async()=>{try{const cv=await renderBoard();if(!cv)return toast('اللوحة فارغة');
   const jpg=Uint8Array.from(atob(cv.toDataURL('image/jpeg',.92).split(',')[1]),c=>c.charCodeAt(0));dl(pdfFrom(jpg,cv.width,cv.height),(P.name||'board')+'.pdf')}catch(e){console.error(e);toast('تعذر التصدير')}};
 
-
 /* ════════ 8. resize handles ════════ */
 /* ===== resize handle on every card (width; notes also height) ===== */
-const _ce5=cardEl;
-cardEl=function(c){
-  const el=_ce5(c);
-  if(!el.querySelector('.rz')&&!c.col){
-    if(c.t==='note'&&c.h){el.style.height=c.h+'px';el.classList.add('hh')}
-    const h=document.createElement('div');h.className='rz';h.title='اسحب لتغيير الحجم';el.appendChild(h);
-    h.onpointerdown=e=>{e.preventDefault();e.stopPropagation();h.setPointerCapture(e.pointerId);
-      const sx=e.clientX,sy=e.clientY,sw=el.offsetWidth,sh=el.offsetHeight;
-      h.onpointermove=m=>{c.w=Math.max(80,sw+(m.clientX-sx)/Z);el.style.width=c.w+'px';
-        if(c.t==='note'){c.h=Math.max(50,sh+(m.clientY-sy)/Z);el.style.height=c.h+'px';el.classList.add('hh')}
-        lines()};
-      h.onpointerup=()=>{h.onpointermove=h.onpointerup=null;save()}}}
-  return el};
-
 
 /* ════════ 9. note colours ════════ */
 /* ===== note card colours ===== */
@@ -854,12 +833,6 @@ function noteColors(c){
     if(k==='x'){fb('');fbH=null;return}
     const col=t.tagName==='I'?t.dataset.c:t.type==='color'?t.value:null;if(!col&&k!=='r')return;
     cs.forEach(n=>{if(col)n.bg=col;else delete n.bg;const q=els[n.id];if(q)paintNote(q,n)});save()}}
-const _ce6=cardEl;
-cardEl=function(c){
-  const el=_ce6(c);
-  if(c.t==='note'){paintNote(el,c);const b=el.querySelector('[data-a=c]');if(b){b.textContent='🎨';b.title='لون البطاقة';b.onclick=()=>noteColors(c)}}
-  return el};
-
 
 /* ════════ 10. voice typing (shortcuts) + install as app ════════ */
 /* ===== voice typing (Arabic / English) ===== */
@@ -881,7 +854,6 @@ addEventListener('beforeinstallprompt',e=>{e.preventDefault();dip=e;$('#inst').h
 $('#inst').onclick=async()=>{if(!dip)return;dip.prompt();try{await dip.userChoice}catch(e){}dip=null;$('#inst').hidden=true};
 addEventListener('appinstalled',()=>{$('#inst').hidden=true;toast('✓ تم تثبيت التطبيق')});
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
-
 
 /* ════════ 11. voice memo recording ════════ */
 /* ===== voice memo: record -> upload to Drive -> audio card ===== */
@@ -912,11 +884,6 @@ function recStop(){if(mr&&mr.state!=='inactive')mr.stop()}
 $('#recB').onclick=()=>mr&&mr.state==='recording'?recStop():recStart();
 $('#homeB').addEventListener('click',()=>{rCancel=1;recStop()});
 /* MediaRecorder webm has no duration header: force the player to learn it so the seek bar works */
-const _ce7=cardEl;
-cardEl=function(c){const el=_ce7(c),a=el.querySelector('audio');
-  if(a)a.addEventListener('loadedmetadata',()=>{if(a.duration===Infinity){a.currentTime=1e101;a.addEventListener('timeupdate',function f(){a.removeEventListener('timeupdate',f);a.currentTime=0})}});
-  return el};
-
 
 /* ════════ 12. folder upload, multi-line to-do, columns removed (migration) ════════ */
 /* ===== columns removed: drop old column cards but keep their children in place ===== */
@@ -954,16 +921,6 @@ view.ondrop=async e=>{
   const loose=[],dirs=[];for(const en of ens){if(en.isDirectory)dirs.push(en);else loose.push(await entFile(en))}
   if(loose.length)addFiles(loose,pos);
   for(const [i,en] of dirs.entries()){const out=[];await walk(en,[],out);await uploadTree(out,{x:pos.x+i*30,y:pos.y+i*30})}};
-const _ce8=cardEl;
-cardEl=function(c){const el=_ce8(c);
-  if(c.t==='folder'){const b=el.querySelector('.bd');b.style.padding='0';b.innerHTML='';
-    const a=document.createElement('a'),i=document.createElement('span'),n=document.createElement('b'),s=document.createElement('small');
-    a.className='fo';a.target='_blank';a.rel='noopener noreferrer';a.title='فتح المجلد في Google Drive';
-    if(/^[\w-]+$/.test(c.fid||''))a.href='https://drive.google.com/drive/folders/'+c.fid;
-    i.textContent='📁';n.textContent=c.name||'مجلد';s.textContent=`${c.files||0} ملف`+(c.dirs?` · ${c.dirs} مجلد فرعي`:'')+' — اضغط للفتح في Drive';
-    a.append(i,n,s);b.appendChild(a)}
-  return el};
-
 
 /* ════════ 13. voice typing helpers ════════ */
 /* ===== voice typing v2: works in every text field, explicit mic permission, clear error messages ===== */
@@ -982,7 +939,6 @@ function typeInto(t,txt){
 $('#pn').insertAdjacentHTML('afterend','<button type="button" id="mic2" title="إملاء صوتي">🎤 إملاء</button>');
 $('#mic2').addEventListener('mousedown',e=>e.preventDefault());$('#mic2').onclick=()=>vOn?vStop():vStart();
 addEventListener('keydown',e=>{if(e.altKey&&e.code==='KeyM'){e.preventDefault();vOn?vStop():vStart()}});
-
 
 /* ════════ 14. voice diagnostics ════════ */
 /* ===== voice typing diagnostics: shows exactly why the browser is not dictating ===== */
@@ -1010,7 +966,6 @@ async function diagTest(){
 document.body.insertAdjacentHTML('beforeend','<button id="vdg" title="تشخيص الإملاء الصوتي" hidden>ℹ</button>');
 $('#vdg').onclick=openDiag;
 const _sh2=show;show=function(id){_sh2(id);$('#vdg').hidden=id!=='bd'};
-
 
 /* ════════ 15. voice typing v3 (mic level meter) ════════ */
 /* ===== voice typing v3: live mic level meter, tells you whether the microphone hears anything ===== */
@@ -1049,7 +1004,6 @@ async function vStart(){
   setTimeout(()=>{if(vOn&&vPeak<.02){toast('الميكروفون «'+label.slice(0,30)+'» لا يلتقط أي صوت — تأكد أنه غير مكتوم واختر الميكروفون الصحيح من إعدادات Chrome');openDiag()}},4000);
   setTimeout(()=>{if(vOn&&!got&&vPeak>=.05)toast('الميكروفون يسمعك لكن خدمة التعرف لا ترد — تحقق من الإنترنت أو بدّل اللغة (ع / EN)')},15000)}
 
-
 /* ════════ 16. rich text, arrange, templates, network view ════════ */
 /* ================= 1) RICH TEXT: headings, lists, quote, code, rule, align, direction, link, markdown shortcuts ================= */
 const OKB={H1:'h1',H2:'h2',H3:'h3',P:'p',DIV:'div',UL:'ul',OL:'ol',LI:'li',BLOCKQUOTE:'blockquote',PRE:'pre',CODE:'code',HR:'hr',B:'b',STRONG:'b',I:'i',EM:'i',U:'u',S:'s',STRIKE:'s',BR:'br',SPAN:'span',A:'a'};
@@ -1081,14 +1035,6 @@ $('#tf').addEventListener('click',e=>{
 const bkv=()=>document.querySelectorAll('#tf .bk').forEach(b=>b.hidden=!(tgt&&tgt.classList&&tgt.classList.contains('txt')));
 document.addEventListener('selectionchange',()=>setTimeout(bkv,0));
 const MD={'#':['formatBlock','h1'],'##':['formatBlock','h2'],'###':['formatBlock','h3'],'-':['insertUnorderedList'],'*':['insertUnorderedList'],'1.':['insertOrderedList'],'>':['formatBlock','blockquote']};
-const _ce9=cardEl;
-cardEl=function(c){const el=_ce9(c);
-  if(c.t==='note'){const t=el.querySelector('.txt');
-    t.addEventListener('keydown',e=>{if(e.key!==' ')return;const s=getSelection();if(!s.rangeCount||!s.isCollapsed)return;const n=s.anchorNode;if(!n||n.nodeType!==3)return;
-      const mk=n.textContent.slice(0,s.anchorOffset);if(!MD[mk]||(n.previousSibling&&n.previousSibling.nodeName!=='BR'))return;
-      e.preventDefault();n.textContent=n.textContent.slice(s.anchorOffset);const r=document.createRange();r.setStart(n,0);r.collapse(true);s.removeAllRanges();s.addRange(r);
-      document.execCommand(MD[mk][0],false,MD[mk][1]);c.html=clean(t.innerHTML);save()})}
-  return el};
 
 /* ================= 2) AUTO-ARRANGE + align/distribute ================= */
 const arrT=()=>B.cards.filter(c=>els[c.id]&&(SEL.size>1?SEL.has(c.id):true)),sz=c=>[els[c.id].offsetWidth,els[c.id].offsetHeight];
@@ -1166,7 +1112,6 @@ function showNet(){
   w.querySelector('button').onclick=()=>w.remove();document.body.appendChild(w)}
 document.querySelector('[data-t=net]').onclick=()=>{if(!B.cards.length)return toast('اللوحة فارغة');showNet()};
 
-
 /* ════════ 17. slash menu, my templates (Drive) ════════ */
 /* slash menu in notes: type "/" then pick a block (heading, list, quote, code, rule) */
 const SLASH=[['عنوان كبير','h1'],['عنوان متوسط','h2'],['عنوان صغير','h3'],['نص عادي','p'],['قائمة نقطية','ul'],['قائمة رقمية','ol'],['اقتباس','bq'],['كود','pre'],['خط فاصل','hr']];
@@ -1183,19 +1128,6 @@ function slShow(){
   const rg=getSelection().getRangeAt(0),r=rg.getBoundingClientRect?rg.getBoundingClientRect():{left:60,bottom:60};
   slEl.style.left=Math.max(8,r.left)+'px';slEl.style.top=(r.bottom+6)+'px';slEl.innerHTML='';
   slItems.forEach((x,i)=>{const b=document.createElement('div');b.textContent=x[0];if(i===slI)b.className='on';b.onmousedown=e=>{e.preventDefault();slRun(x[1])};slEl.appendChild(b)})}
-const _ce10=cardEl;
-cardEl=function(c){
-  const el=_ce10(c);
-  if(c.t==='note'){const t=el.querySelector('.txt');
-    t.addEventListener('input',()=>{const s=getSelection();if(!s.rangeCount||!s.isCollapsed)return slClose();const n=s.anchorNode;if(!n||n.nodeType!==3)return slClose();
-      const m=/(^|\s)\/([^\s\/]*)$/.exec(n.textContent.slice(0,s.anchorOffset));if(!m)return slClose();
-      slNode=n;slOff=s.anchorOffset;slQ=m[2];slI=0;slShow()});
-    t.addEventListener('keydown',e=>{if(!slEl)return;
-      if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();slI=(slI+(e.key==='ArrowDown'?1:slItems.length-1))%slItems.length;slShow()}
-      else if(e.key==='Enter'||e.key==='Tab'){e.preventDefault();slRun(slItems[slI][1])}
-      else if(e.key==='Escape'){e.preventDefault();slClose()}});
-    t.addEventListener('blur',()=>setTimeout(slClose,150))}
-  return el};
 
 /* my templates: saved as JSON in Drive (المشاريع / القوالب) */
 let TFID=null;
