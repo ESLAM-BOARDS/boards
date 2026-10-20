@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-xZQ4My6EY2+MRHZvTUEDb/iG5F0tqTZUoKekLyJjQu8=' https://accounts.google.com; style-src 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' blob: data:; media-src blob:; connect-src https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com; frame-src https://accounts.google.com blob:; worker-src 'self'; manifest-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-0kvx8S1oc/bFjgBLQhlVnsTjIVIqbL6HT78ckoK6DA0=' https://accounts.google.com; style-src 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' blob: data:; media-src blob:; connect-src https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com; frame-src https://accounts.google.com blob:; worker-src 'self'; manifest-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#2f5bea">
 <link rel="icon" href="icon-192.png">
@@ -148,6 +148,17 @@ dialog{border:1px solid var(--ln);border-radius:14px;background:var(--pn);color:
 #sl{position:fixed;z-index:80;background:var(--pn);border:1px solid var(--ln);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.25);padding:4px;min-width:150px}
 #sl div{padding:5px 10px;border-radius:6px;cursor:pointer}#sl .on,#sl div:hover{background:var(--ac);color:#fff}
 
+
+#pd{position:fixed;inset:0;z-index:90;background:#8f98a8;display:flex;flex-direction:column}
+#pd .ph{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 12px;background:var(--pn);color:var(--ink);border-bottom:1px solid var(--ln)}
+#pd .ph button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+#pd .ph .pn{width:150px}
+#pd .cs,#pd .ws,#pd .zs{display:inline-flex;gap:5px;align-items:center;padding:0 6px;border-inline-start:1px solid var(--ln)}
+#pd .cs i{width:20px;height:20px;border-radius:50%;cursor:pointer;border:2px solid var(--ln);display:inline-block}#pd .cs i.on{border-color:var(--ink);box-shadow:0 0 0 2px var(--ac)}
+#pd .cs input{width:30px;height:26px;padding:0;border:0;background:none}
+#pd .ws b{display:grid;place-items:center;width:30px;height:30px;border:1px solid var(--ln);border-radius:8px;cursor:pointer}#pd .ws b.on{background:var(--ac)}#pd .ws u{background:var(--ink);border-radius:50%;display:block}#pd .ws b.on u{background:#fff}
+#pc{flex:1;width:100%;min-height:0;touch-action:none;display:block;cursor:crosshair}
+.pv{width:100%;height:auto;display:block;background:#fffef6}.pt{padding:6px 10px;font-size:13px;color:var(--mu)}
 </style>
 </head>
 <body>
@@ -201,10 +212,12 @@ const PAL=['#ff7537','#fa573c','#f691b2','#cd74e6','#4986e7','#16a765','#fad165'
 const NC=['n0','n1','n2','n3','n4'];
 let tok,tc,root,projs=[],P=null,B=null,dirty=0,saveT,conn=false,selId=null,els={},blobs={},pickC=PAL[4];
 function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2600)}
-function show(id){['gate','home','bd'].forEach(s=>$('#'+s).hidden=s!==id);$('#hd').hidden=id==='gate'}
+function showCore(id){['gate','home','bd'].forEach(s=>$('#'+s).hidden=s!==id);$('#hd').hidden=id==='gate'}
+const ON_SHOW=[];   // hooks, run in order after showCore
+function show(id){showCore(id);for(const f of ON_SHOW)f(id)}
 
 /* ---------- Google auth + Drive ---------- */
-function auth(){return new Promise((ok,no)=>{tc.callback=r=>r.error?no(r):(tok=r.access_token,ok());tc.requestAccessToken({prompt:tok?'':'consent'})})}
+
 async function api(url,o={},retry=1){
   const r=await fetch(url,{...o,headers:{...(o.headers||{}),Authorization:'Bearer '+tok}});
   if(r.status===401&&retry){await auth();return api(url,o,0)}
@@ -237,7 +250,7 @@ $('#go').onclick=async()=>{
   }catch(e){console.error(e);toast('فشل تسجيل الدخول — راجع إعدادات OAuth')}};
 
 /* ---------- Home: projects ---------- */
-async function openHome(){
+async function openHomeCore(){
   if(P)await flush();P=null;B=null;$('#ttl').textContent='';$('#st').textContent='';show('home');
   try{projs=(await list(`'${root}' in parents and mimeType='${FOLDER}' and trashed=false`)).filter(p=>p.name!=='القوالب')}catch(e){return toast('تعذر تحميل المشاريع')}
   const h=$('#home');h.innerHTML='<div class="pc new" id="newP">+ مشروع جديد</div>';
@@ -247,7 +260,7 @@ async function openHome(){
     d.onclick=e=>{const a=e.target.dataset.a;if(!a)return openProject(p);e.stopPropagation();act(p,a,c)};h.appendChild(d)});
   $('#newP').onclick=newProject;
 }
-async function act(p,a,c){
+async function actCore(p,a,c){
   try{
     if(a==='c'){const n=PAL[(PAL.indexOf(c)+1)%PAL.length];await api(`${D}/${p.id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({appProperties:{color:n},folderColorRgb:n})})}
     if(a==='r'){const n=prompt('اسم المشروع',p.name);if(!n)return;await api(`${D}/${p.id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n})})}
@@ -261,12 +274,14 @@ function newProject(){
   $('#dlg').showModal()}
 
 /* ---------- Board ---------- */
-async function openProject(p){
+async function openProjectCore(p){
   P=p;$('#ttl').textContent=p.name;show('bd');B={cards:[],lines:[]};render();
   try{const f=await list(`'${p.id}' in parents and name='board.json' and trashed=false`);
     if(f.length){P.bid=f[0].id;B=await (await api(`${D}/${P.bid}?alt=media`)).json();B.lines=B.lines||[]}}catch(e){toast('تعذر تحميل اللوحة')}
   render();$('#st').textContent='✓ محفوظ في Drive'}
-function save(){dirty=1;$('#st').textContent='…جارٍ الحفظ';clearTimeout(saveT);saveT=setTimeout(flush,900)}
+const ON_PROJECT_OPEN=[];   // hooks, run in order after openProjectCore
+async function openProject(p){await openProjectCore(p);for(const f of ON_PROJECT_OPEN)await f(p)}
+function saveCore(){dirty=1;$('#st').textContent='…جارٍ الحفظ';clearTimeout(saveT);saveT=setTimeout(flush,900)}
 async function flush(){
   if(!dirty||!P)return;clearTimeout(saveT);dirty=0;const s=JSON.stringify(typeof rootState==='function'?rootState():B);
   try{if(P.bid)await api(`${U}/${P.bid}?uploadType=media`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:s});
@@ -274,7 +289,6 @@ async function flush(){
     $('#st').textContent='✓ محفوظ في Drive'}catch(e){dirty=1;$('#st').textContent='⚠ فشل الحفظ';console.error(e)}}
 $('#homeB').onclick=openHome;
 
-function vpos(){const v=$('#view');return{x:v.scrollLeft+40+Math.random()*140,y:v.scrollTop+30+Math.random()*100}}
 function addCard(c,pos){const p=pos||vpos();B.cards.push({id:uid(),x:p.x,y:p.y,...c});save();render()}
 document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{
   const t=b.dataset.t;
@@ -352,8 +366,7 @@ onType('table',(el,c)=>{
       h.onpointerup=()=>{h.onpointermove=h.onpointerup=null;save()}}});
 onType('note',(el,c)=>{const t=el.querySelector('.txt');t.contentEditable='true';t.dir='auto';if(c.html)t.innerHTML=clean(c.html);sty(t,c.st);
     t.addEventListener('input',()=>{c.html=clean(t.innerHTML);save()});
-    t.addEventListener('paste',e=>{e.preventDefault();document.execCommand('insertText',false,e.clipboardData.getData('text/plain'))});
-    if(c.free)el.classList.add('tx')});
+    t.addEventListener('paste',e=>{e.preventDefault();document.execCommand('insertText',false,e.clipboardData.getData('text/plain'))});});
 DECOR.push((el,c)=>{if(QS&&!match(c))el.style.opacity=.25;const im=el.querySelector('img');if(im&&c.t==='file'&&!/^رسم-/.test(c.name||''))im.ondblclick=()=>lightbox(im.src);});
 onType('board',(el,c)=>{const b=el.querySelector('.bd');const s=(ROOT&&ROOT.boards[c.sub])||{cards:[]};
     b.innerHTML=`<input class="ct" placeholder="اسم اللوحة"><div style="color:var(--mu);font-size:12px;margin:6px 0">${(s.cards||[]).length} عنصر</div><button class="ob">فتح اللوحة ▸</button>`;
@@ -395,13 +408,7 @@ onType('note',(el,c)=>{const t=el.querySelector('.txt');
 /* ---------- connector lines ---------- */
 const ctr=e=>[e.offsetLeft+e.offsetWidth/2,e.offsetTop+e.offsetHeight/2];
 function edge(e,c,t){const dx=t[0]-c[0],dy=t[1]-c[1],s=Math.min(e.offsetWidth/2/(Math.abs(dx)||1e-6),e.offsetHeight/2/(Math.abs(dy)||1e-6));return[c[0]+dx*s,c[1]+dy*s]}
-function lines(){
-  const sv=$('#sv');let h='<defs><marker id="ar" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0L9,4.5L0,9z" style="fill:var(--ink)"/></marker></defs>';
-  B.lines.forEach((l,i)=>{const a=els[l.a],b=els[l.b];if(!a||!b)return;
-    const A=ctr(a),C=ctr(b),p=edge(a,A,C),q=edge(b,C,A),dx=q[0]-p[0],dy=q[1]-p[1],k=.12;
-    const d=`M${p[0]},${p[1]} Q${(p[0]+q[0])/2-dy*k},${(p[1]+q[1])/2+dx*k} ${q[0]},${q[1]}`;
-    h+=`<path class="ln" d="${d}" marker-end="url(#ar)"/><path class="hit" data-i="${i}" d="${d}"/>`});
-  sv.innerHTML=h}
+
 $('#sv').onclick=e=>{const i=e.target.dataset&&e.target.dataset.i;if(i!=null&&confirm('حذف خط التوصيل؟')){B.lines.splice(+i,1);save();lines()}};
 
 /* ════════ 2. canvas: zoom, pan, connectors, tables, drawing ════════ */
@@ -428,7 +435,7 @@ const endPan=()=>{if(pan){pan.up=1;view.style.cursor=''}};addEventListener('poin
 addEventListener('keydown',e=>{
   if((e.ctrlKey||e.metaKey)&&/^(Equal|Minus|Digit0|Numpad(Add|Subtract|0))$/.test(e.code))e.preventDefault();
   if(e.key==='Delete'&&selL&&!e.target.closest('input,[contenteditable]')){B.lines=B.lines.filter(l=>l.id!==selL);selL=null;fb('');save();lines()}});
-vpos=function(){return{x:(view.scrollLeft+40+Math.random()*140)/Z,y:(view.scrollTop+30+Math.random()*100)/Z}};
+function vpos(){return{x:(view.scrollLeft+40+Math.random()*140)/Z,y:(view.scrollTop+30+Math.random()*100)/Z}}
 view.ondrop=e=>{e.preventDefault();if(!P)return;const q=sp(e);addFiles([...e.dataTransfer.files],{x:q[0],y:q[1]})};
 $('#homeB').addEventListener('click',()=>{const d=$('#dc');d&&d.remove();fb('');fbH=null;selL=null});
 
@@ -438,12 +445,12 @@ $('#fb').onclick=$('#fb').oninput=e=>fbH&&fbH(e);
 
 /* connectors: 2 end dots + middle curve dot + color */
 const ep=e=>{const el=e.c&&els[e.c];return el?[el.offsetLeft+e.rx*el.offsetWidth,el.offsetTop+e.ry*el.offsetHeight]:[e.x,e.y]};
-lines=function(){
+function lines(){
   B.lines=(B.lines||[]).filter(l=>l.p);B.lines.forEach(l=>{l.id=String(l.id).replace(/[^\w-]/g,'');if(!/^#[0-9a-f]{3,8}$/i.test(l.col))l.col=LC[0]});let h='';
   B.lines.forEach(l=>{const a=ep(l.p[0]),b=ep(l.p[1]),mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2,d=`M${a} Q${mx+2*l.mo.x},${my+2*l.mo.y} ${b}`;
     h+=`<marker id="m${l.id}" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0L9,4.5L0,9z" style="fill:${l.col}"/></marker><path class="ln" d="${d}" style="stroke:${l.col}" marker-end="url(#m${l.id})"/><path class="hit" data-l="${l.id}" d="${d}"/>`;
     if(l.id===selL)h+=[[a,0],[[mx+l.mo.x,my+l.mo.y],2],[b,1]].map(([q,i])=>`<circle class="hd" data-l="${l.id}" data-h="${i}" cx="${q[0]}" cy="${q[1]}" r="${7/Z}"/>`).join('')});
-  $('#sv').innerHTML=h};
+  $('#sv').innerHTML=h;qmm()}
 function attach(l,i,q){
   for(let k=B.cards.length-1;k>=0;k--){const c=B.cards[k],el=els[c.id];if(!el)continue;
     const w=el.offsetWidth,hh=el.offsetHeight;
@@ -460,7 +467,7 @@ $('#sv').onpointerdown=e=>{
   const mv=m=>{const q=sp(m);if(i===2){const a=ep(l.p[0]),b=ep(l.p[1]);l.mo={x:q[0]-(a[0]+b[0])/2,y:q[1]-(a[1]+b[1])/2}}else l.p[i]={x:q[0],y:q[1]};lines()};
   const up=m=>{removeEventListener('pointermove',mv);removeEventListener('pointerup',up);if(i!==2)attach(l,i,sp(m));save();lines()};
   addEventListener('pointermove',mv);addEventListener('pointerup',up)};
-function showLB(){
+function showLBCore(){
   const l=B.lines.find(x=>x.id===selL);if(!l)return fb('');
   fb('<span>لون الخط</span>'+LC.map(c=>`<i data-c="${c}" style="background:${c}"></i>`).join('')+`<input type="color" value="${l.col}"><button data-k="del">حذف الخط</button>`);
   fbH=e=>{const t=e.target;
@@ -472,11 +479,11 @@ $('#lineB').onclick=()=>{
   B.lines.push(l);selL=l.id;save();lines();showLB()};
 
 /* delete = also from Google Drive */
-const _act=act;
-act=async function(p,a,c){
-  if(a!=='d')return _act(p,a,c);
+
+async function act(p,a,c){
+  if(a!=='d')return actCore(p,a,c);
   if(!confirm('نقل المشروع وكل ملفاته إلى سلة Drive؟ (يمكن استرجاعه 30 يومًا)'))return;
-  try{await rmDrive(p.id);openHome()}catch(e){toast('تعذر الحذف')}};
+  try{await rmDrive(p.id);openHome()}catch(e){toast('تعذر الحذف')}}
 
 /* tables */
 const mk=()=>({t:'',bg:'',cs:1,rs:1,h:0}),grid=(r,c)=>Array.from({length:r},()=>Array.from({length:c},mk));
@@ -549,7 +556,7 @@ function selBar(){
     fbH=e=>{const k=e.target.dataset.k;if(k==='d')delCards(B.cards.filter(c=>SEL.has(c.id)));if(k==='n')setSel([])};fbH.sel=1}
   else if(fbH&&fbH.sel){fb('');fbH=null}}
 function setSel(ids){SEL.clear();ids.forEach(i=>SEL.add(i));for(const id in els)els[id].classList.toggle('sel',SEL.has(id));selBar()}
-const _sl=showLB;showLB=function(){SEL.clear();for(const id in els)els[id].classList.remove('sel');_sl()};
+function showLB(){SEL.clear();for(const id in els)els[id].classList.remove('sel');showLBCore()}
 document.querySelector('[data-t=draw]').onclick=()=>{setSel([]);startDraw()};
 
 /* rubber-band selection */
@@ -569,7 +576,7 @@ addEventListener('keydown',e=>{
   if(e.key==='Escape')setSel([])});
 
 /* ---- delete (board + Google Drive), single or many ---- */
-async function delCards(arr){
+async function delCardsCore(arr){
   if(!arr.length)return;const files=arr.filter(c=>(c.t==='file'||c.t==='folder')&&c.fid);
   if(!confirm(arr.length>1?`حذف ${arr.length} عنصرًا من اللوحة ونقل ملفاتها إلى سلة Drive؟`:'حذف من اللوحة ونقل الملف إلى سلة Google Drive (يمكن استرجاعه 30 يومًا)؟'))return;
   const fail=new Set();
@@ -600,10 +607,10 @@ function tokReq(prompt){return new Promise((ok,no)=>{
   const t=google.accounts.oauth2.initTokenClient({client_id:localStorage.getItem('cid'),scope:SC,prompt,
     callback:r=>r.error?no(r):(saveTok(r),ok()),error_callback:e=>no(e)});
   t.requestAccessToken({prompt})})}
-auth=async function(interactive){
+async function auth(interactive){
   const seen=localStorage.getItem('signed');
   if(!interactive&&seen){try{return await tokReq('none')}catch(e){}}
-  return tokReq(seen?'':'consent')};
+  return tokReq(seen?'':'consent')}
 async function boot(){
   const f=await list(`name='المشاريع' and mimeType='${FOLDER}' and trashed=false and 'root' in parents`);
   root=f.length?f[0].id:(await mkFolder('المشاريع',null,PAL[4])).id;await openHome()}
@@ -642,19 +649,7 @@ const FONTS=['Cairo','Tajawal','Montserrat','IBM Plex Sans Arabic','Amiri'],SIZE
 function stCss(s){const o={};if(!s)return o;if(s.font)o.fontFamily=`'${s.font}',Cairo,sans-serif`;if(s.size)o.fontSize=s.size+'px';if(s.color)o.color=s.color;
   if('b'in s)o.fontWeight=s.b?'700':'400';if('i'in s)o.fontStyle=s.i?'italic':'normal';return o}
 const sty=(el,s)=>Object.assign(el.style,stCss(s));
-function clean(h){ /* whitelist sanitizer for rich note HTML */
-  const d=new DOMParser().parseFromString('<body>'+h+'</body>','text/html').body,o=document.createElement('div'),ok={B:'b',I:'i',U:'u',SPAN:'span',BR:'br',DIV:'div',STRONG:'b',EM:'i'};
-  const walk=(n,out)=>n.childNodes.forEach(k=>{
-    if(k.nodeType===3){out.appendChild(document.createTextNode(k.nodeValue));return}
-    if(k.nodeType!==1)return;if(!ok[k.tagName]){if(!/^(SCRIPT|STYLE)$/.test(k.tagName))walk(k,out);return}
-    const e=document.createElement(ok[k.tagName]);
-    if(k.tagName==='SPAN'){const s=k.style;
-      if(/^(#[0-9a-f]{3,8}|rgb\([\d\s,.]+\))$/i.test(s.color))e.style.color=s.color;
-      const f=(s.fontFamily||'').replace(/["']/g,'').split(',')[0].trim();if(FONTS.includes(f))e.style.fontFamily=`'${f}',Cairo,sans-serif`;
-      if(/^\d+(\.\d+)?px$/.test(s.fontSize))e.style.fontSize=s.fontSize;
-      if(s.fontWeight==='700'||s.fontWeight==='bold')e.style.fontWeight='700';if(s.fontStyle==='italic')e.style.fontStyle='italic'}
-    walk(k,e);out.appendChild(e)});
-  walk(d,o);return o.innerHTML}
+
 document.body.insertAdjacentHTML('beforeend',`<div id="tf" hidden><select id="tff">${FONTS.map(f=>`<option>${f}</option>`).join('')}</select><select id="tfs">${SIZES.map(s=>`<option>${s}</option>`).join('')}</select>${CL.map(c=>`<i data-c="${c}" style="background:${c}"></i>`).join('')}<input type="color" id="tfc" value="#111827"><button data-k="b"><b>B</b></button><button data-k="i"><em>I</em></button></div><button id="fit">⤢ عرض الكل</button><canvas id="mm" width="170" height="115" hidden></canvas>`);
 let tgt=null,lr=null;
 const owner=()=>{const c=tgt.closest('.card')._c;return tgt.tagName==='TD'?{o:c.cells[+tgt.dataset.r][+tgt.dataset.c],rich:0}:{o:c,rich:1}};
@@ -673,8 +668,6 @@ function fmt(k,v){
 $('#tf').addEventListener('mousedown',e=>{if(e.target.tagName!=='SELECT'&&e.target.type!=='color')e.preventDefault()});
 $('#tf').addEventListener('click',e=>{const t=e.target;if(t.dataset.c)fmt('color',t.dataset.c);const k=t.closest('button[data-k]');if(k)fmt(k.dataset.k)});
 $('#tff').onchange=e=>fmt('font',e.target.value);$('#tfs').onchange=e=>fmt('size',+e.target.value);$('#tfc').oninput=e=>fmt('color',e.target.value);
-$('#tools').insertAdjacentHTML('beforeend','<button data-t="text"><b>T</b>نص حر</button>');
-document.querySelector('[data-t=text]').onclick=()=>addCard({t:'note',c:'n0',free:1,text:'',st:{size:28,b:1}});
 
 /* ===== search ===== */
 let QS='',qi=-1;
@@ -690,15 +683,15 @@ function lightbox(src){const d=document.createElement('div');d.id='lb';d.innerHT
 
 /* ===== undo / redo (restores / re-trashes Drive files too) ===== */
 let hist=[],redoS=[],lastS=null,lastT=0,rs=0;
-const snap=()=>JSON.stringify({cards:B.cards,lines:B.lines}),fids=a=>new Set(a.filter(c=>c.fid).map(c=>c.fid));
-const _sv=save;
-save=function(){if(B&&!rs){const s=snap();if(lastS===null)lastS=s;else if(s!==lastS){if(Date.now()-lastT>800){hist.push(lastS);if(hist.length>60)hist.shift();redoS=[]}lastT=Date.now();lastS=s}}_sv()};
-const _op=openProject;openProject=async function(p){await _op(p);hist=[];redoS=[];lastS=snap();qmm()};
+const snap=()=>JSON.stringify({cards:B.cards,lines:B.lines},(k,v)=>k==='ink'&&Array.isArray(v)?v.length:v),fids=a=>new Set(a.filter(c=>c.fid).map(c=>c.fid));
+
+function save(){if(B&&!rs){const s=snap();if(lastS===null)lastS=s;else if(s!==lastS){if(Date.now()-lastT>800){hist.push(lastS);if(hist.length>60)hist.shift();redoS=[]}lastT=Date.now();lastS=s}}saveCore()}
+ON_PROJECT_OPEN.push(async (p)=>{hist=[];redoS=[];lastS=snap();qmm()});
 function goH(from,to){
   if(!from.length||!B)return;to.push(snap());const b=fids(B.cards),s=JSON.parse(from.pop()),a=fids(s.cards);
   a.forEach(f=>{if(!b.has(f))api(`${D}/${f}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:'{"trashed":false}'}).catch(()=>{})});
   b.forEach(f=>{if(!a.has(f))rmDrive(f).catch(()=>{})});
-  B.cards=s.cards;B.lines=s.lines;lastS=snap();rs=1;save();rs=0;render();setSel([])}
+  B.cards=s.cards;B.lines=s.lines;inkBack();lastS=snap();rs=1;save();rs=0;render();setSel([])}
 $('#hd').insertAdjacentHTML('beforeend','<button id="un" title="تراجع Ctrl+Z">↶</button><button id="re" title="إعادة Ctrl+Y">↷</button><button id="bk" title="نسخة احتياطية JSON">⬇ نسخة</button>');
 $('#un').onclick=()=>goH(hist,redoS);$('#re').onclick=()=>goH(redoS,hist);
 $('#bk').onclick=()=>{if(!B)return;const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({name:P.name,cards:B.cards,lines:B.lines},null,1)],{type:'application/json'}));a.download=(P.name||'board')+'.json';a.click()};
@@ -734,7 +727,7 @@ function drawMM(){
   mg.clearRect(0,0,170,115);mg.fillStyle='#7b8aa8';B.cards.forEach(c=>{const e=els[c.id];if(e)mg.fillRect(c.x*k,c.y*k,Math.max(2,e.offsetWidth*k),Math.max(2,e.offsetHeight*k))});
   mg.strokeStyle='#2f5bea';mg.lineWidth=1.5;mg.strokeRect(view.scrollLeft/Z*k,view.scrollTop/Z*k,view.clientWidth/Z*k,view.clientHeight/Z*k)}
 const qmm=()=>{if(mmT)return;mmT=requestAnimationFrame(()=>{mmT=0;drawMM()})};
-const _ln=lines;lines=function(){_ln();qmm()};
+
 view.addEventListener('scroll',qmm);
 mm.onclick=e=>{const r=mm.getBoundingClientRect();view.scrollLeft=(e.clientX-r.left)/mm._k*Z-view.clientWidth/2;view.scrollTop=(e.clientY-r.top)/mm._k*Z-view.clientHeight/2};
 $('#homeB').addEventListener('click',()=>{mm.hidden=true;$('#tf').hidden=true});
@@ -750,10 +743,10 @@ function viewReset(){selL=null;setSel([]);hist=[];redoS=[];lastS=snap();render()
 function enter(id){syncRoot();const s=ROOT.boards[id];if(!s)return;stk.push({id,name:s.name||'لوحة'});B={cards:s.cards,lines:s.lines};viewReset()}
 function leave(){if(!stk.length)return;syncRoot();stk.pop();const t=stk.length?ROOT.boards[stk[stk.length-1].id]:ROOT;B=stk.length?{cards:t.cards,lines:t.lines}:ROOT;viewReset()}
 $('#homeB').insertAdjacentHTML('afterend','<button id="bkb" hidden>↰ رجوع</button>');$('#bkb').onclick=leave;
-const _op2=openProject;openProject=async function(p){await _op2(p);ROOT=B;ROOT.boards=ROOT.boards||{};stk=[];$('#bkb').hidden=true};
-const _oh=openHome;openHome=async function(){syncRoot();if(ROOT)B=ROOT;const r=_oh();ROOT=null;stk=[];return r};
+ON_PROJECT_OPEN.push(async (p)=>{ROOT=B;ROOT.boards=ROOT.boards||{};stk=[];$('#bkb').hidden=true});
+async function openHome(){syncRoot();if(ROOT)B=ROOT;const r=openHomeCore();ROOT=null;stk=[];return r}
 function purge(id){const s=ROOT&&ROOT.boards[id];if(!s)return;s.cards.forEach(k=>{if((k.t==='file'||k.t==='folder')&&k.fid)rmDrive(k.fid).catch(()=>{});if(k.t==='board')purge(k.sub)});delete ROOT.boards[id];save()}
-const _dc=delCards;delCards=async function(arr){const bs=arr.filter(c=>c.t==='board');await _dc(arr);bs.forEach(c=>{if(!B.cards.includes(c))purge(c.sub)})};
+async function delCards(arr){const bs=arr.filter(c=>c.t==='board');await delCardsCore(arr);bs.forEach(c=>{if(!B.cards.includes(c))purge(c.sub)})}
 $('#tools').insertAdjacentHTML('beforeend','<button data-t="board"><b>▣</b>لوحة فرعية</button>');
 document.querySelector('[data-t=board]').onclick=()=>{const id=uid();ROOT.boards[id]={name:'لوحة فرعية',cards:[],lines:[]};addCard({t:'board',sub:id})};
 
@@ -789,7 +782,7 @@ async function renderBoard(){
     const el=els[c.id];if(!el)continue;const er=el.getBoundingClientRect(),cs=getComputedStyle(el),w=el.offsetWidth,h=el.offsetHeight;
     const rel=r=>[c.x+(r.left-er.left)/Z,c.y+(r.top-er.top)/Z,r.width/Z,r.height/Z];
     if(!tr(cs.backgroundColor)){g.fillStyle=cs.backgroundColor;g.fillRect(c.x,c.y,w,h);g.strokeStyle='#c9d1df';g.lineWidth=1;g.strokeRect(c.x,c.y,w,h)}
-    el.querySelectorAll('img').forEach(im=>{if(im.complete&&im.naturalWidth){const[a,b,cw,ch]=rel(im.getBoundingClientRect());g.drawImage(im,a,b,cw,ch)}});
+    el.querySelectorAll('img').forEach(im=>{if(im.complete&&im.naturalWidth){const[a,b,cw,ch]=rel(im.getBoundingClientRect());g.drawImage(im,a,b,cw,ch)}});el.querySelectorAll('canvas').forEach(cn=>{const[a,b,cw,ch]=rel(cn.getBoundingClientRect());g.drawImage(cn,a,b,cw,ch)});
     el.querySelectorAll('td').forEach(td=>{const[a,b,cw,ch]=rel(td.getBoundingClientRect()),tc=getComputedStyle(td);if(!tr(tc.backgroundColor)){g.fillStyle=tc.backgroundColor;g.fillRect(a,b,cw,ch)}g.strokeStyle='#c9d1df';g.strokeRect(a,b,cw,ch)});
     el.querySelectorAll('.txt,td,.fn,.ct,.lk a,.lk input,.row input[type=text],.row textarea').forEach(n=>{
       const t=(/^(INPUT|TEXTAREA)$/.test(n.tagName)?n.value:n.innerText)||'';if(!t.trim())return;
@@ -845,7 +838,7 @@ document.addEventListener('focusin',e=>{const t=e.target;if(edOk(t)&&!(t.closest
 $('#mic').onclick=()=>vOn?vStop():vStart();
 $('#vlg').onclick=()=>{vl=vl.startsWith('ar')?'en-US':'ar-EG';localStorage.setItem('vlang',vl);vlab();if(vOn){vStop();vStart()}};
 ['#mic','#vlg'].forEach(s=>$(s).addEventListener('mousedown',e=>e.preventDefault()));
-const _sh=show;show=function(id){_sh(id);const b=id!=='bd';['#mic','#vlg','#fit'].forEach(s=>$(s).hidden=b);if(b)vStop()};$('#fit').hidden=true;
+ON_SHOW.push((id)=>{const b=id!=='bd';['#mic','#vlg','#fit'].forEach(s=>$(s).hidden=b);if(b)vStop()});$('#fit').hidden=true;
 
 /* ===== install as a desktop app (PWA) ===== */
 let dip=null;
@@ -887,8 +880,8 @@ $('#homeB').addEventListener('click',()=>{rCancel=1;recStop()});
 
 /* ════════ 12. folder upload, multi-line to-do, columns removed (migration) ════════ */
 /* ===== columns removed: drop old column cards but keep their children in place ===== */
-function stripCols(r){const f=a=>{const n=(a||[]).filter(c=>c.t!=='col');n.forEach(c=>{delete c.col});return n};r.cards=f(r.cards);Object.values(r.boards||{}).forEach(b=>{b.cards=f(b.cards)})}
-const _op3=openProject;openProject=async function(p){await _op3(p);if(ROOT){stripCols(ROOT);B=ROOT;hist=[];redoS=[];lastS=snap();render()}};
+function stripCols(r){const f=a=>{const n=(a||[]).filter(c=>c.t!=='col');n.forEach(c=>{delete c.col;delete c.free;if(c.t==='pad'&&Array.isArray(c.ink))INKC[c.id]=c.ink});return n};r.cards=f(r.cards);Object.values(r.boards||{}).forEach(b=>{b.cards=f(b.cards)})}
+ON_PROJECT_OPEN.push(async (p)=>{if(ROOT){stripCols(ROOT);B=ROOT;hist=[];redoS=[];lastS=snap();render()}});
 
 /* ===== upload a whole folder (button or drag & drop) -> same folder tree in Drive ===== */
 const rdAll=r=>new Promise((ok,no)=>{const out=[],go=()=>r.readEntries(a=>{if(!a.length)ok(out);else{out.push(...a);go()}},no);go()});
@@ -965,7 +958,7 @@ async function diagTest(){
   try{r.start();vlog.push('تم بدء الاستماع — تحدّث الآن')}catch(e){vlog.push('start فشل: '+e.message)}upd();setTimeout(()=>{try{r.stop()}catch(e){}},8000)}
 document.body.insertAdjacentHTML('beforeend','<button id="vdg" title="تشخيص الإملاء الصوتي" hidden>ℹ</button>');
 $('#vdg').onclick=openDiag;
-const _sh2=show;show=function(id){_sh2(id);$('#vdg').hidden=id!=='bd'};
+ON_SHOW.push((id)=>{$('#vdg').hidden=id!=='bd'});
 
 /* ════════ 15. voice typing v3 (mic level meter) ════════ */
 /* ===== voice typing v3: live mic level meter, tells you whether the microphone hears anything ===== */
@@ -1007,7 +1000,7 @@ async function vStart(){
 /* ════════ 16. rich text, arrange, templates, network view ════════ */
 /* ================= 1) RICH TEXT: headings, lists, quote, code, rule, align, direction, link, markdown shortcuts ================= */
 const OKB={H1:'h1',H2:'h2',H3:'h3',P:'p',DIV:'div',UL:'ul',OL:'ol',LI:'li',BLOCKQUOTE:'blockquote',PRE:'pre',CODE:'code',HR:'hr',B:'b',STRONG:'b',I:'i',EM:'i',U:'u',S:'s',STRIKE:'s',BR:'br',SPAN:'span',A:'a'};
-clean=function(h){
+function clean(h){
   const d=new DOMParser().parseFromString('<body>'+h+'</body>','text/html').body,o=document.createElement('div');
   const walk=(n,out)=>n.childNodes.forEach(k=>{
     if(k.nodeType===3){out.appendChild(document.createTextNode(k.nodeValue));return}
@@ -1022,7 +1015,7 @@ clean=function(h){
     if(/^(h1|h2|h3|p|div|li|blockquote|ul|ol)$/.test(tg)){if(/^(left|right|center|justify)$/.test(s.textAlign))e.style.textAlign=s.textAlign;const dr=k.getAttribute('dir');if(dr==='rtl'||dr==='ltr')e.setAttribute('dir',dr)}
     if(tg==='a'){const hr=k.getAttribute('href')||'';if(/^https?:\/\//i.test(hr)){e.setAttribute('href',hr);e.target='_blank';e.rel='noopener noreferrer'}}
     walk(k,e);out.appendChild(e)});
-  walk(d,o);return o.innerHTML};
+  walk(d,o);return o.innerHTML}
 const CMD={h1:['formatBlock','h1'],h2:['formatBlock','h2'],h3:['formatBlock','h3'],p:['formatBlock','p'],ul:['insertUnorderedList'],ol:['insertOrderedList'],bq:['formatBlock','blockquote'],pre:['formatBlock','pre'],hr:['insertHorizontalRule'],al:['justifyLeft'],ac:['justifyCenter'],ar:['justifyRight'],u:['underline'],s:['strikeThrough']};
 $('#tf').insertAdjacentHTML('beforeend','<span class="bk" hidden><button data-x="h1">H1</button><button data-x="h2">H2</button><button data-x="h3">H3</button><button data-x="p">¶</button><button data-x="ul">• قائمة</button><button data-x="ol">1. قائمة</button><button data-x="bq">❝</button><button data-x="pre">&lt;/&gt;</button><button data-x="hr">―</button><button data-x="al">⟵</button><button data-x="ac">⟷</button><button data-x="ar">⟶</button><button data-x="dir">RTL/LTR</button><button data-x="u"><u>U</u></button><button data-x="s"><s>S</s></button><button data-x="a">🔗</button></span>');
 $('#tf').addEventListener('click',e=>{
@@ -1075,7 +1068,7 @@ function tpl(kind){
     ['فرع 1','فرع 2','فرع 3','فرع 4','فرع 5','فرع 6'].forEach((n,i)=>{const a=i/6*2*Math.PI-Math.PI/2,dx=Math.cos(a),dy=Math.sin(a),br=mk(380+dx*400,250+dy*250,n,NP[(i*2+1)%NP.length],{w:170}),
       s=Math.abs(dx)>Math.abs(dy)*1.2?(dx>0?[1,.5,0,.5]:[0,.5,1,.5]):(dy>0?[.5,1,.5,0]:[.5,0,.5,1]);
       B.lines.push({id:uid(),p:[{c:cen.id,rx:s[0],ry:s[1]},{c:br.id,rx:s[2],ry:s[3]}],mo:{x:0,y:0},col:LC[1+i%7]})})}
-  if(kind==='mood'){mk(0,0,'لوحة إلهام','',{html:'<h1>لوحة إلهام</h1>',free:1,w:420,st:{size:36,b:1}});
+  if(kind==='mood'){mk(0,0,'لوحة إلهام','',{html:'<h1>لوحة إلهام</h1>',w:420,st:{size:36,b:1}});
     ['#ffa8a8','#ffd8a8','#fff3b8','#b2f2bb','#a5d8ff','#e5dbff'].forEach((h,i)=>mk(i*100,110,h,h,{w:90,html:'<div style="text-align:center">'+h+'</div>'}));
     mk(0,230,'اكتب ما يلهمك هنا…','#ffffff',{w:300});mk(330,230,'اسحب صورك إلى اللوحة ثم اضغط «ترتيب ← متدرج»','#e5dbff',{w:300})}
   save();render();toast('✓ تمت إضافة القالب')}
@@ -1156,6 +1149,120 @@ function tplInsert(t){
   (t.lines||[]).forEach(l=>{if(!l||!Array.isArray(l.p)||l.p.length!==2)return;const q=cp(l);q.id=uid();q.p=q.p.map(e=>e&&e.c?{...e,c:map[e.c]}:{x:o.x+(+(e||{}).x||0),y:o.y+(+(e||{}).y||0)});
     if(q.p.every(e=>!('c' in e)||e.c))B.lines.push(q)});
   save();render();toast('✓ تم إدراج القالب')}
+
+/* ════════ 18. writing board ════════ */
+/* ═══ writing board (لوحة كتابة): endless ruled notebook · pen / highlighter / eraser · finger, stylus or mouse · strokes saved as vectors ═══ */
+const PW=1000,LS=36,TOP=90,PAPER='#fffef6',INKC={},BBX=new WeakMap(),INKOK=new WeakSet(),HEX=/^#[0-9a-f]{3,8}$/i;
+const WP={pen:[2,4,8,14],hl:[14,22,32,46],er:[10,18,30,50]};
+const inkBox=s=>{let b=BBX.get(s);if(!b){const p=s.p;let a=1e9,c=1e9,d=-1e9,e=-1e9;for(let i=0;i<p.length;i+=2){a=Math.min(a,p[i]);d=Math.max(d,p[i]);c=Math.min(c,p[i+1]);e=Math.max(e,p[i+1])}const h=s.w/2+1;b=[a-h,c-h,d+h,e+h];BBX.set(s,b)}return b};
+const cleanInk=a=>(Array.isArray(a)?a:[]).filter(s=>s&&Array.isArray(s.p)&&s.p.length>=2).map(s=>({k:s.k?1:0,c:HEX.test(s.c)?s.c:'#111827',w:Math.min(80,Math.max(1,+s.w||4)),p:s.p.map(v=>Number.isFinite(+v)?+v:0)}));
+function inkBack(){B.cards.forEach(c=>{if(c.t==='pad')c.ink=INKC[c.id]||[]})}
+function drawStroke(g,s,zm,ox,oy){
+  const p=s.p,n=p.length/2;if(!n)return;g.save();g.lineCap=g.lineJoin='round';g.strokeStyle=g.fillStyle=s.c;g.lineWidth=Math.max(1,s.w*zm);
+  if(s.k){g.globalAlpha=.38;g.globalCompositeOperation='multiply'}
+  const X=i=>p[2*i]*zm+ox,Y=i=>p[2*i+1]*zm+oy;g.beginPath();
+  if(n===1){g.arc(X(0),Y(0),Math.max(.5,s.w*zm/2),0,6.2832);g.fill()}
+  else{g.moveTo(X(0),Y(0));for(let i=1;i<n-1;i++)g.quadraticCurveTo(X(i),Y(i),(X(i)+X(i+1))/2,(Y(i)+Y(i+1))/2);g.lineTo(X(n-1),Y(n-1));g.stroke()}
+  g.restore()}
+function paintPaper(g,zm,ox,oy,vw,vh,ph,bg){
+  g.fillStyle=bg;g.fillRect(0,0,vw,vh);const w=PW*zm,h=ph*zm;g.fillStyle=PAPER;g.shadowColor='rgba(0,0,0,.25)';g.shadowBlur=12;g.fillRect(ox,oy,w,h);g.shadowBlur=0;
+  g.lineWidth=1;g.strokeStyle='#b8d0ec';g.beginPath();
+  const a=Math.max(0,Math.ceil((-oy/zm-TOP)/LS)),b=Math.min(Math.floor((ph-TOP)/LS),Math.floor(((vh-oy)/zm-TOP)/LS));
+  for(let i=a;i<=b;i++){const y=Math.round((TOP+i*LS)*zm+oy)+.5;g.moveTo(Math.max(0,ox),y);g.lineTo(Math.min(vw,ox+w),y)}g.stroke();
+  g.strokeStyle='#f1a8a8';g.beginPath();const mx=Math.round(ox+(PW-80)*zm)+.5;g.moveTo(mx,Math.max(0,oy));g.lineTo(mx,Math.min(vh,oy+h));g.stroke()}
+function paintPad(cv,c){cv.width=600;cv.height=420;const g=cv.getContext('2d');paintPaper(g,.6,0,0,600,420,c.ph||2400,'#fffef6');c.ink.forEach(s=>{if(inkBox(s)[1]<700)drawStroke(g,s,.6,0,0)})}
+CARD.pad=(c,el,b)=>{
+  if(!INKOK.has(c.ink)){c.ink=cleanInk(c.ink);INKOK.add(c.ink)}INKC[c.id]=c.ink;
+  b.style.padding=0;b.style.cursor='pointer';b.innerHTML='<canvas class="pv"></canvas><div class="pt"></div>';paintPad(b.firstChild,c);
+  b.lastChild.textContent='✎ '+(c.title||'لوحة كتابة')+' — اضغط للفتح';b.addEventListener('click',()=>openPad(c))};
+let padClose=null;
+function openPad(c){
+  if($('#pd'))return;setSel([]);if(typeof vOn!=='undefined'&&vOn)vStop();
+  const root=document.createElement('div');root.id='pd';
+  root.innerHTML=`<div class="ph"><button data-k="x">✕ إغلاق</button><input class="pn" placeholder="عنوان اللوحة" maxlength="60"><button data-k="pen" class="on">✎ قلم</button><button data-k="hl">▮ مظلّل</button><button data-k="er">⌫ ممحاة</button><button data-k="hand">✋ تحريك</button><span class="cs">${DC.map(x=>`<i data-c="${x}" style="background:${x}"></i>`).join('')}<input type="color" value="#111827"></span><span class="ws">${[0,1,2,3].map(i=>`<b data-w="${i}"><u style="width:${4+i*4}px;height:${4+i*4}px"></u></b>`).join('')}</span><button data-k="un">↶</button><button data-k="re">↷</button><span class="zs"><button data-k="zo">−</button><button data-k="z1">100%</button><button data-k="zi">+</button><button data-k="zf">⤢ عرض الصفحة</button></span></div><canvas id="pc"></canvas>`;
+  document.body.appendChild(root);
+  const cv=root.querySelector('#pc'),g=cv.getContext('2d'),title=root.querySelector('.pn');title.value=c.title||'';
+  let ink=cleanInk(c.ink),hist=[],redo=[],tool='pen',col={pen:'#111827',hl:'#ffd43b'},wi={pen:1,hl:1,er:1},zm=1,ox=0,oy=0,ph=c.ph||2400,vw=900,vh=600,cur=null,erasing=0,sid=null,last=null,erPos=null,ptrs=new Map(),pen=false,gest=null,pan=null,raf=0,space=false;
+  const r1=v=>Math.round(v*10)/10,wsz=()=>WP[tool][wi[tool]];
+  const size=()=>{const r=cv.getBoundingClientRect(),d=window.devicePixelRatio||1;vw=r.width||900;vh=r.height||600;cv.width=Math.round(vw*d);cv.height=Math.round(vh*d);g.setTransform(d,0,0,d,0,0)};
+  const clamp=()=>{zm=Math.min(4,Math.max(.25,zm));const w=PW*zm;ox=w<=vw?(vw-w)/2:Math.min(0,Math.max(vw-w,ox));oy=Math.min(0,oy);
+    while(-oy/zm+vh/zm>ph-900)ph+=1800;oy=Math.max(oy,-(ph*zm-vh));zl.textContent=Math.round(zm*100)+'%'};
+  const zl=root.querySelector('[data-k=z1]');
+  const draw=()=>{raf=0;paintPaper(g,zm,ox,oy,vw,vh,ph,'#8f98a8');const x0=-ox/zm,y0=-oy/zm,x1=x0+vw/zm,y1=y0+vh/zm;
+    for(const s of ink){const b=inkBox(s);if(b[2]<x0||b[0]>x1||b[3]<y0||b[1]>y1)continue;drawStroke(g,s,zm,ox,oy)}
+    if(tool==='er'&&erPos){g.save();g.strokeStyle='#444';g.lineWidth=1;g.beginPath();g.arc(erPos[0],erPos[1],wsz()*zm/2,0,6.2832);g.stroke();g.restore()}};
+  const ask=()=>{if(!raf)raf=requestAnimationFrame(draw)};
+  const pt=e=>{const r=cv.getBoundingClientRect();return[(e.clientX-r.left-ox)/zm,(e.clientY-r.top-oy)/zm,e.clientX-r.left,e.clientY-r.top]};
+  const commit=()=>{c.ink=ink;INKC[c.id]=ink;INKOK.add(ink);c.ph=ph;save()};
+  const zoomAt=(nz,cx,cy)=>{const r=cv.getBoundingClientRect(),px=(cx-r.left-ox)/zm,py=(cy-r.top-oy)/zm;zm=nz;clamp();ox=cx-r.left-px*zm;oy=cy-r.top-py*zm;clamp();ask()};
+  const mid=()=>{const r=cv.getBoundingClientRect();return[r.left+vw/2,r.top+vh/2]};
+  /* erasing: remove the touched part of a stroke and split it in two */
+  const segD=(ax,ay,bx,by,x,y)=>{const dx=bx-ax,dy=by-ay,l=dx*dx+dy*dy;let t=l?((x-ax)*dx+(y-ay)*dy)/l:0;t=Math.max(0,Math.min(1,t));return Math.hypot(ax+t*dx-x,ay+t*dy-y)};
+  const mkS=(s,p)=>({k:s.k,c:s.c,w:s.w,p});
+  const cutStroke=(s,x,y,r)=>{const p=s.p,n=p.length/2,R=r+s.w/2;let cuts=false,cu=[],res=[];
+    for(let i=0;i<n;i++){const px=p[2*i],py=p[2*i+1],hit=Math.hypot(px-x,py-y)<R,cross=cu.length>=2&&segD(cu[cu.length-2],cu[cu.length-1],px,py,x,y)<R;
+      if(hit||cross){cuts=true;if(cu.length>=4)res.push(mkS(s,cu));cu=hit?[]:[px,py]}else cu.push(px,py)}
+    if(!cuts)return null;if(cu.length>=4)res.push(mkS(s,cu));return res};
+  const eraseAt=(x,y)=>{const r=wsz()/2;let out=[],ch=false;for(const s of ink){const b=inkBox(s);if(x<b[0]-r||x>b[2]+r||y<b[1]-r||y>b[3]+r){out.push(s);continue}const cutS=cutStroke(s,x,y,r);if(cutS){ch=true;out.push(...cutS)}else out.push(s)}if(ch)ink=out};
+  const eraseTo=q=>{if(last){const d=Math.hypot(q[0]-last[0],q[1]-last[1]),st=Math.max(1,Math.ceil(d/Math.max(2,wsz()/3)));for(let i=1;i<=st;i++)eraseAt(last[0]+(q[0]-last[0])*i/st,last[1]+(q[1]-last[1])*i/st)}else eraseAt(q[0],q[1]);last=q};
+  const addPts=e=>{for(const ev of(e.getCoalescedEvents?e.getCoalescedEvents():[e])){const q=pt(ev),p=cur.p;if(!(Math.hypot(q[0]-p[p.length-2],q[1]-p[p.length-1])<.6/Math.max(.5,zm)))p.push(r1(q[0]),r1(q[1]));BBX.delete(cur);if(q[1]>ph-700)ph+=1800}};
+  const abort=()=>{if(cur){ink=ink.filter(s=>s!==cur);hist.pop();cur=null;sid=null}};
+  const end=()=>{if(cur||erasing){commit();cur=null;erasing=0;sid=null;last=null;ask()}};
+  const startPan=e=>{pan={x:e.clientX,y:e.clientY,ox,oy,id:e.pointerId};cv.style.cursor='grabbing'};
+  const touches=()=>[...ptrs.values()].filter(p=>p.t==='touch');
+  const gestStart=()=>{const[a,b]=touches(),r=cv.getBoundingClientRect(),cx=(a.x+b.x)/2,cy=(a.y+b.y)/2;gest={d:Math.hypot(a.x-b.x,a.y-b.y)||1,zm,px:(cx-r.left-ox)/zm,py:(cy-r.top-oy)/zm}};
+  const gestMove=()=>{const[a,b]=touches();if(!a||!b)return;const r=cv.getBoundingClientRect(),cx=(a.x+b.x)/2,cy=(a.y+b.y)/2;zm=gest.zm*(Math.hypot(a.x-b.x,a.y-b.y)||1)/gest.d;clamp();ox=cx-r.left-gest.px*zm;oy=cy-r.top-gest.py*zm;clamp();ask()};
+  cv.addEventListener('pointerdown',e=>{e.preventDefault();try{cv.setPointerCapture(e.pointerId)}catch(_){}
+    if(e.pointerType==='pen')pen=true;ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY,t:e.pointerType});
+    if(touches().length>=2){abort();pan=null;gestStart();return}
+    if((e.pointerType==='touch'&&pen)||e.button===1||tool==='hand'||space){startPan(e);return}
+    if(e.button>0)return;
+    const q=pt(e);hist.push(ink.slice());redo=[];sid=e.pointerId;
+    if(tool==='er'){erasing=1;last=null;eraseTo(q)}else{cur={k:tool==='hl'?1:0,c:col[tool],w:wsz(),p:[r1(q[0]),r1(q[1])]};ink.push(cur)}ask()});
+  cv.addEventListener('pointermove',e=>{const p=ptrs.get(e.pointerId);if(p){p.x=e.clientX;p.y=e.clientY}
+    if(gest){gestMove();return}
+    if(pan&&pan.id===e.pointerId){ox=pan.ox+(e.clientX-pan.x);oy=pan.oy+(e.clientY-pan.y);clamp();ask();return}
+    const q=pt(e);erPos=[q[2],q[3]];
+    if(cur&&sid===e.pointerId)addPts(e);else if(erasing&&sid===e.pointerId)eraseTo(q);ask()});
+  const up=e=>{ptrs.delete(e.pointerId);if(gest&&touches().length<2)gest=null;if(pan&&pan.id===e.pointerId){pan=null;cv.style.cursor=tool==='hand'?'grab':'crosshair'}if(sid===e.pointerId)end()};
+  cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);cv.addEventListener('pointerleave',()=>{erPos=null;ask()});
+  const wheel=e=>{if(!$('#pd'))return;e.preventDefault();e.stopPropagation();if(e.ctrlKey)zoomAt(zm*Math.exp(-e.deltaY*.0015),e.clientX,e.clientY);else{if(e.shiftKey)ox-=e.deltaY;else oy-=e.deltaY;clamp();ask()}};
+  const keyd=e=>{if(!$('#pd')||(e.target.closest&&e.target.closest('.pn')))return;e.stopPropagation();
+    if(e.code==='Space'){space=true;e.preventDefault()}
+    if(e.key==='Escape')close();
+    if((e.ctrlKey||e.metaKey)&&e.code==='KeyZ'){e.preventDefault();e.shiftKey?act('re'):act('un')}
+    if((e.ctrlKey||e.metaKey)&&e.code==='KeyY'){e.preventDefault();act('re')}};
+  const keyu=e=>{if(e.code==='Space')space=false};
+  addEventListener('wheel',wheel,{passive:false,capture:true});addEventListener('keydown',keyd,true);addEventListener('keyup',keyu,true);
+  const act=k=>{
+    if(k==='un'&&hist.length){redo.push(ink.slice());ink=hist.pop();commit()}
+    if(k==='re'&&redo.length){hist.push(ink.slice());ink=redo.pop();commit()}
+    ask()};
+  const sync=()=>{root.querySelectorAll('[data-k=pen],[data-k=hl],[data-k=er],[data-k=hand]').forEach(b=>b.classList.toggle('on',b.dataset.k===tool));
+    root.querySelectorAll('[data-c]').forEach(i=>i.classList.toggle('on',i.dataset.c===col[tool]));
+    root.querySelectorAll('[data-w]').forEach(b=>b.classList.toggle('on',+b.dataset.w===wi[tool]));
+    root.querySelector('.cs').style.opacity=tool==='er'||tool==='hand'?.4:1;cv.style.cursor=tool==='hand'?'grab':tool==='er'?'none':'crosshair';ask()};
+  const close=()=>{end();c.title=title.value.trim();c.ink=ink;c.ph=ph;INKC[c.id]=ink;save();removeEventListener('wheel',wheel,true);removeEventListener('keydown',keyd,true);removeEventListener('keyup',keyu,true);
+    root.remove();padClose=null;const q=els[c.id];if(q){const b=q.querySelector('.bd');if(b&&b.firstChild)paintPad(b.firstChild,c);if(b&&b.lastChild)b.lastChild.textContent='✎ '+(c.title||'لوحة كتابة')+' — اضغط للفتح'}};
+  padClose=close;
+  root.querySelector('.ph').addEventListener('click',e=>{const t=e.target.closest('[data-k],[data-c],[data-w]');if(!t)return;
+    if(t.dataset.c&&tool!=='er'&&tool!=='hand'){col[tool]=t.dataset.c}
+    else if(t.dataset.w!=null&&tool!=='hand'){wi[tool]=+t.dataset.w}
+    else if(t.dataset.k){const k=t.dataset.k;
+      if(k==='x')return close();
+      if(['pen','hl','er','hand'].includes(k))tool=k;
+      if(k==='un'||k==='re')act(k);
+      const m=mid();if(k==='zi')zoomAt(zm*1.25,m[0],m[1]);if(k==='zo')zoomAt(zm/1.25,m[0],m[1]);
+      if(k==='z1')zoomAt(1,m[0],m[1]);
+      if(k==='zf'){zm=(vw-24)/PW;clamp();oy=Math.min(0,oy);clamp()}}
+    sync()});
+  root.querySelector('.cs input').addEventListener('input',e=>{if(tool==='pen'||tool==='hl'){col[tool]=e.target.value;sync()}});
+  title.addEventListener('input',()=>{c.title=title.value;save()});
+  size();addEventListener('resize',()=>{if($('#pd')){size();clamp();ask()}});
+  zm=Math.min(1,(vw-24)/PW);clamp();sync()}
+ON_SHOW.push(id=>{if(id!=='bd'&&padClose)padClose()});
+$('#tools').insertAdjacentHTML('beforeend','<button data-t="pad"><b>✎</b>لوحة كتابة</button>');
+document.querySelector('[data-t=pad]').onclick=()=>{addCard({t:'pad',w:260,title:'',ink:[],ph:2400});const c=B.cards[B.cards.length-1];if(c)openPad(c)};
 </script>
 </body>
 </html>
