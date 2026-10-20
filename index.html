@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-0kvx8S1oc/bFjgBLQhlVnsTjIVIqbL6HT78ckoK6DA0=' https://accounts.google.com; style-src 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' blob: data:; media-src blob:; connect-src https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com; frame-src https://accounts.google.com blob:; worker-src 'self'; manifest-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-F6UxqYDPEh5w1SBCzXShOYsMqgOSECvpKZ5wqssrPkQ=' https://accounts.google.com; style-src 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' blob: data:; media-src blob:; connect-src https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com; frame-src https://accounts.google.com blob:; worker-src 'self'; manifest-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#2f5bea">
 <link rel="icon" href="icon-192.png">
@@ -159,6 +159,13 @@ dialog{border:1px solid var(--ln);border-radius:14px;background:var(--pn);color:
 #pd .ws b{display:grid;place-items:center;width:30px;height:30px;border:1px solid var(--ln);border-radius:8px;cursor:pointer}#pd .ws b.on{background:var(--ac)}#pd .ws u{background:var(--ink);border-radius:50%;display:block}#pd .ws b.on u{background:#fff}
 #pc{flex:1;width:100%;min-height:0;touch-action:none;display:block;cursor:crosshair}
 .pv{width:100%;height:auto;display:block;background:#fffef6}.pt{padding:6px 10px;font-size:13px;color:var(--mu)}
+
+.tw{position:relative;padding:0 24px}
+.ca{position:absolute;top:50%;transform:translateY(-50%);width:20px;height:20px;border-radius:50%;padding:0;line-height:1;font-size:15px;background:var(--ac);color:#fff;border:0;cursor:pointer}
+.ca.r{right:2px}.ca.l{left:2px}
+.ra{display:block;width:calc(100% - 48px);margin:4px 24px 0;padding:2px;font-size:12px;opacity:.75}
+.card table{table-layout:fixed;border-collapse:collapse}
+.card td{min-width:0;overflow-wrap:anywhere}
 </style>
 </head>
 <body>
@@ -325,7 +332,7 @@ function cardFrame(c){
   el.innerHTML=`<div class="bar"><span><button data-a="x" title="إزالة من اللوحة">✕</button>${c.t==='note'?'<button data-a="c" title="لون البطاقة">🎨</button>':''}</span><span>⠿</span></div><div class="bd"></div>`;
   el.querySelector('[data-a=x]').onclick=()=>delCard(c);
   el.firstChild.onpointerdown=e=>{if(e.button||e.target.closest('button'))return;dragCard(e,c,el)};
-  el.addEventListener('pointerdown',()=>{if(SEL.size&&!SEL.has(c.id))setSel([])},true);
+  el.addEventListener('pointerdown',e=>{if(e.shiftKey&&!e.target.closest('input,textarea,[contenteditable],td')){e.preventDefault();e.stopPropagation();const ids=new Set(SEL);ids.has(c.id)?ids.delete(c.id):ids.add(c.id);setSel([...ids]);return}if(SEL.size&&!SEL.has(c.id))setSel([])},true);
   return el}
 CARD.note=(c,el,b)=>{el.style.background=`var(--${c.c})`;b.innerHTML='<div class="txt" contenteditable="plaintext-only" data-p="اكتب فكرتك…"></div>';const t=b.firstChild;t.textContent=c.text;t.oninput=()=>{c.text=t.innerText;save()}};
 CARD.todo=(c,el,b)=>{const draw=f=>{b.innerHTML='';
@@ -348,7 +355,7 @@ CARD.file=(c,el,b)=>{b.style.padding=0;const m=c.mime||'';let h='';
     if(m2){m2.onload=m2.onloadedmetadata=lines;blobURL(c.fid).then(u=>m2.src=u).catch(()=>toast('تعذر عرض '+c.name))}};
 function cardEl(c){const el=cardFrame(c),b=el.querySelector('.bd');if(CARD[c.t])CARD[c.t](c,el,b);for(const f of DECOR)f(el,c);return el}
 /* hooks (previously stacked wrappers), in their original order */
-onType('table',(el,c)=>{const b=el.querySelector('.bd');if(!c.w)el.style.width='auto';el.style.minWidth='260px';tbl(c,b)});
+
 onType('file',(el,c)=>{const b=el.querySelector('.bd');if(/^image\//.test(c.mime||'')){
     const h=document.createElement('div');h.className='rz';el.appendChild(h);
     h.onpointerdown=e=>{e.preventDefault();e.stopPropagation();h.setPointerCapture(e.pointerId);const sx=e.clientX,sw=el.offsetWidth;
@@ -357,13 +364,7 @@ onType('file',(el,c)=>{const b=el.querySelector('.bd');if(/^image\//.test(c.mime
 onType('file',(el,c)=>{if(/^رسم-/.test(c.name||'')){
     el.classList.add('dw');
     el.addEventListener('pointerdown',e=>{if(e.button||e.target.closest('.bar,.rz'))return;e.preventDefault();dragCard(e,c,el)})}});
-onType('table',(el,c)=>{
-    el.style.minWidth='120px';const h=document.createElement('div');h.className='rz';el.appendChild(h);
-    h.onpointerdown=e=>{e.preventDefault();e.stopPropagation();h.setPointerCapture(e.pointerId);
-      const sx=e.clientX,sy=e.clientY,sw=el.offsetWidth,sh=el.querySelector('table').offsetHeight;
-      h.onpointermove=m=>{c.w=Math.max(160,sw+(m.clientX-sx)/Z);c.hh=Math.max(60,sh+(m.clientY-sy)/Z);el.style.width=c.w+'px';
-        const t=el.querySelector('table');t.style.tableLayout='fixed';t.style.height=c.hh+'px';lines()};
-      h.onpointerup=()=>{h.onpointermove=h.onpointerup=null;save()}}});
+
 onType('note',(el,c)=>{const t=el.querySelector('.txt');t.contentEditable='true';t.dir='auto';if(c.html)t.innerHTML=clean(c.html);sty(t,c.st);
     t.addEventListener('input',()=>{c.html=clean(t.innerHTML);save()});
     t.addEventListener('paste',e=>{e.preventDefault();document.execCommand('insertText',false,e.clipboardData.getData('text/plain'))});});
@@ -487,33 +488,7 @@ async function act(p,a,c){
 
 /* tables */
 const mk=()=>({t:'',bg:'',cs:1,rs:1,h:0}),grid=(r,c)=>Array.from({length:r},()=>Array.from({length:c},mk));
-function tbl(c,b){
-  const s={a:null,b:null},R=()=>{const a=s.a||[0,0],z=s.b||a;return[Math.min(a[0],z[0]),Math.min(a[1],z[1]),Math.max(a[0],z[0]),Math.max(a[1],z[1])]};
-  const flat=()=>c.cells.forEach(r=>r.forEach(x=>{x.cs=x.rs=1;x.h=0}));
-  const um=(r,k)=>{const x=c.cells[r][k];for(let i=0;i<x.rs;i++)for(let j=0;j<x.cs;j++)c.cells[r+i][k+j].h=0;x.cs=x.rs=1};
-  const mark=()=>{const[r1,c1,r2,c2]=R();b.querySelectorAll('td').forEach(td=>{const r=+td.dataset.r,k=+td.dataset.c;td.classList.toggle('on',r>=r1&&r<=r2&&k>=c1&&k<=c2)})};
-  const act2=k=>{const[r1,c1,r2,c2]=R();
-    if(k==='ar'){flat();c.cells.splice(r2+1,0,c.cells[0].map(mk))}
-    if(k==='dr'){if(r2-r1+1>=c.cells.length)return;flat();c.cells.splice(r1,r2-r1+1)}
-    if(k==='ac'){flat();c.cells.forEach(r=>r.splice(c2+1,0,mk()))}
-    if(k==='dc'){if(c2-c1+1>=c.cells[0].length)return;flat();c.cells.forEach(r=>r.splice(c1,c2-c1+1))}
-    if(k==='mg'){c.cells.forEach((row,r)=>row.forEach((x,j)=>{if(!x.h&&(x.cs>1||x.rs>1)&&r<=r2&&r+x.rs-1>=r1&&j<=c2&&j+x.cs-1>=c1)um(r,j)}));
-      for(let r=r1;r<=r2;r++)for(let j=c1;j<=c2;j++)c.cells[r][j].h=1;const x=c.cells[r1][c1];x.h=0;x.cs=c2-c1+1;x.rs=r2-r1+1}
-    if(k==='um'){const x=c.cells[r1][c1];if(x.cs>1||x.rs>1)um(r1,c1)}
-    if(k==='ar'||k==='dr'||k==='ac'||k==='dc'){s.a=s.b=null}save();draw()};
-  const draw=()=>{b.innerHTML='';const tb=document.createElement('div');tb.className='tb';
-    tb.innerHTML=[['+ صف','ar'],['− صف','dr'],['+ عمود','ac'],['− عمود','dc'],['دمج','mg'],['فك','um']].map(([t,k])=>`<button data-k="${k}">${t}</button>`).join('')+TINT.map(x=>`<i data-bg="${x}" style="background:${x||'transparent'}" title="تظليل"></i>`).join('');
-    tb.onclick=e=>{const k=e.target.dataset.k;if(k)return act2(k);if(e.target.dataset.bg!==undefined){const[r1,c1,r2,c2]=R();
-      for(let r=r1;r<=r2;r++)for(let j=c1;j<=c2;j++)c.cells[r][j].bg=e.target.dataset.bg;save();draw()}};
-    const t=document.createElement('table');
-    c.cells.forEach((row,r)=>{const tr=t.insertRow();row.forEach((x,k)=>{if(x.h)return;const td=tr.insertCell();
-      td.colSpan=x.cs;td.rowSpan=x.rs;td.style.background=x.bg||'';if(x.bg)td.style.color='#1b2333';
-      td.contentEditable='plaintext-only';td.textContent=x.t;sty(td,x.st);td.dataset.r=r;td.dataset.c=k;
-      td.oninput=()=>{x.t=td.innerText;save()};
-      td.onmousedown=e=>{if(e.shiftKey&&s.a){e.preventDefault();s.b=[r,k];mark()}};
-      td.onfocus=()=>{s.a=s.b=[r,k];mark()}})});
-    if(c.w)t.style.tableLayout='fixed';if(c.hh)t.style.height=c.hh+'px';b.append(tb,t);mark();setTimeout(lines,0)};
-  draw()}
+
 
 /* wrap card renderer: zoom-aware drag, resize, table, Drive delete */
 
@@ -563,11 +538,11 @@ document.querySelector('[data-t=draw]').onclick=()=>{setSel([]);startDraw()};
 view.addEventListener('pointerdown',e=>{
   if(e.button!==0||$('#dc')||![view,zw,stage].includes(e.target))return;
   e.preventDefault();if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();
-  const a=sp(e),mq=document.createElement('div');mq.id='mq';stage.appendChild(mq);let moved=0;
+  const a=sp(e),mq=document.createElement('div');mq.id='mq';stage.appendChild(mq);let moved=0;const base=e.shiftKey?[...SEL]:[];
   const mv=m=>{const b=sp(m),x=Math.min(a[0],b[0]),y=Math.min(a[1],b[1]),w=Math.abs(a[0]-b[0]),h=Math.abs(a[1]-b[1]);
     if(w+h>6)moved=1;Object.assign(mq.style,{left:x+'px',top:y+'px',width:w+'px',height:h+'px'});
-    if(moved)setSel(B.cards.filter(c=>{const el=els[c.id];return el&&c.x<x+w&&c.x+el.offsetWidth>x&&c.y<y+h&&c.y+el.offsetHeight>y}).map(c=>c.id))};
-  const up=()=>{removeEventListener('pointermove',mv);removeEventListener('pointerup',up);mq.remove();if(!moved)setSel([])};
+    if(moved)setSel([...new Set([...base,...B.cards.filter(c=>{const el=els[c.id];return el&&c.x<x+w&&c.x+el.offsetWidth>x&&c.y<y+h&&c.y+el.offsetHeight>y}).map(c=>c.id)])])};
+  const up=()=>{removeEventListener('pointermove',mv);removeEventListener('pointerup',up);mq.remove();if(!moved&&!e.shiftKey)setSel([])};
   addEventListener('pointermove',mv);addEventListener('pointerup',up)});
 addEventListener('keydown',e=>{
   if($('#bd').hidden||(e.target.closest&&e.target.closest('input,[contenteditable],textarea')))return;
@@ -602,9 +577,9 @@ document.querySelector('[data-t=clean]').onclick=cleanup;
 /* ════════ 4. sign-in (remembered, silent renewal) ════════ */
 /* ---- remembered sign-in: cached token + silent renewal + minimal gate ---- */
 const SC='https://www.googleapis.com/auth/drive.file';try{localStorage.removeItem('tk')}catch(e){}
-function saveTok(r){tok=r.access_token;try{sessionStorage.setItem('tk',JSON.stringify({t:tok,e:Date.now()+(r.expires_in-120)*1000}));localStorage.setItem('signed','1')}catch(e){}}
+function saveTok(r){tok=r.access_token;try{sessionStorage.setItem('tk',JSON.stringify({t:tok,e:Date.now()+(r.expires_in-120)*1000}));localStorage.setItem('signed','1')}catch(e){}if(!localStorage.getItem('hint'))fetch('https://www.googleapis.com/drive/v3/about?fields=user(emailAddress)',{headers:{Authorization:'Bearer '+tok}}).then(x=>x.json()).then(j=>{if(j.user&&j.user.emailAddress)localStorage.setItem('hint',j.user.emailAddress)}).catch(()=>{})}
 function tokReq(prompt){return new Promise((ok,no)=>{
-  const t=google.accounts.oauth2.initTokenClient({client_id:localStorage.getItem('cid'),scope:SC,prompt,
+  const t=google.accounts.oauth2.initTokenClient({client_id:localStorage.getItem('cid'),scope:SC,prompt,hint:localStorage.getItem('hint')||undefined,
     callback:r=>r.error?no(r):(saveTok(r),ok()),error_callback:e=>no(e)});
   t.requestAccessToken({prompt})})}
 async function auth(interactive){
@@ -639,7 +614,7 @@ const rmDrive=id=>PERM?api(`${D}/${id}`,{method:'DELETE'}):api(`${D}/${id}`,{met
 $('#hd').insertAdjacentHTML('beforeend','<button id="out" title="خروج وإلغاء صلاحية التطبيق">خروج</button>');
 $('#out').onclick=async()=>{
   try{await flush()}catch(e){}
-  const t=tok,done=()=>{try{sessionStorage.removeItem('tk');localStorage.removeItem('tk');localStorage.removeItem('signed')}catch(e){}location.reload()};
+  const t=tok,done=()=>{try{sessionStorage.removeItem('tk');localStorage.removeItem('tk');localStorage.removeItem('signed');localStorage.removeItem('hint')}catch(e){}location.reload()};
   if(t&&window.google)google.accounts.oauth2.revoke(t,done);else done();setTimeout(done,1500)};
 $('#gate').insertAdjacentHTML('beforeend','<a href="privacy.html" target="_blank" rel="noopener noreferrer" style="font-size:12px;color:var(--mu)">سياسة الخصوصية</a>');
 
@@ -653,17 +628,17 @@ const sty=(el,s)=>Object.assign(el.style,stCss(s));
 document.body.insertAdjacentHTML('beforeend',`<div id="tf" hidden><select id="tff">${FONTS.map(f=>`<option>${f}</option>`).join('')}</select><select id="tfs">${SIZES.map(s=>`<option>${s}</option>`).join('')}</select>${CL.map(c=>`<i data-c="${c}" style="background:${c}"></i>`).join('')}<input type="color" id="tfc" value="#111827"><button data-k="b"><b>B</b></button><button data-k="i"><em>I</em></button></div><button id="fit">⤢ عرض الكل</button><canvas id="mm" width="170" height="115" hidden></canvas>`);
 let tgt=null,lr=null;
 const owner=()=>{const c=tgt.closest('.card')._c;return tgt.tagName==='TD'?{o:c.cells[+tgt.dataset.r][+tgt.dataset.c],rich:0}:{o:c,rich:1}};
-function syncTf(){if(!tgt)return;const s=owner().o.st||{};$('#tff').value=s.font||'Cairo';$('#tfs').value=s.size||16}
+function syncTf(){if(!tgt||!tgt.isConnected)return;const s=owner().o.st||{};$('#tff').value=s.font||'Cairo';$('#tfs').value=s.size||16}
 document.addEventListener('selectionchange',()=>{const s=getSelection();if(!s.rangeCount)return;let n=s.anchorNode;n=n&&(n.nodeType===1?n:n.parentElement);
   const e=n&&n.closest&&n.closest('.txt,td[contenteditable]');if(e&&e.closest('.card')._c){tgt=e;lr=s.getRangeAt(0).cloneRange();$('#tf').hidden=false;syncTf()}});
 document.addEventListener('pointerdown',e=>{if(!e.target.closest('.card,#tf')){tgt=null;$('#tf').hidden=true}},true);
 function fmt(k,v){
-  if(!tgt)return;const{o,rich}=owner(),s=getSelection();tgt.focus();if(lr&&rich){s.removeAllRanges();s.addRange(lr)}
+  if(!tgt||!tgt.isConnected)return;const{o,rich}=owner(),s=getSelection();if(tgt.tagName!=='TD')tgt.focus();if(lr&&rich){s.removeAllRanges();s.addRange(lr)}
   if(rich&&!s.isCollapsed){const x=document.execCommand.bind(document);x('styleWithCSS',false,true);
     if(k==='font')x('fontName',false,v);if(k==='color')x('foreColor',false,v);if(k==='b')x('bold');if(k==='i')x('italic');
     if(k==='size'){x('fontSize',false,'7');tgt.querySelectorAll('span').forEach(p=>{if(p.style.fontSize.includes('xxx-large'))p.style.fontSize=v+'px'})}
     o.html=clean(tgt.innerHTML)}
-  else{o.st=o.st||{};if(k==='b'||k==='i')o.st[k]=o.st[k]?0:1;else o.st[k]=v;sty(tgt,o.st)}
+  else{const cd=tgt.closest('.card'),rg=tgt.tagName==='TD'&&cd._rng?cd._rng():[o],on=!(o.st&&o.st[k]);rg.forEach(x=>{x.st=x.st||{};if(k==='b'||k==='i')x.st[k]=on?1:0;else x.st[k]=v});if(rg.length>1&&cd._draw){const rr=tgt.dataset.r,cc=tgt.dataset.c;cd._draw();tgt=cd.querySelector('td[data-r="'+rr+'"][data-c="'+cc+'"]')||tgt}else sty(tgt,o.st)}
   save();syncTf()}
 $('#tf').addEventListener('mousedown',e=>{if(e.target.tagName!=='SELECT'&&e.target.type!=='color')e.preventDefault()});
 $('#tf').addEventListener('click',e=>{const t=e.target;if(t.dataset.c)fmt('color',t.dataset.c);const k=t.closest('button[data-k]');if(k)fmt(k.dataset.k)});
@@ -786,8 +761,8 @@ async function renderBoard(){
     el.querySelectorAll('td').forEach(td=>{const[a,b,cw,ch]=rel(td.getBoundingClientRect()),tc=getComputedStyle(td);if(!tr(tc.backgroundColor)){g.fillStyle=tc.backgroundColor;g.fillRect(a,b,cw,ch)}g.strokeStyle='#c9d1df';g.strokeRect(a,b,cw,ch)});
     el.querySelectorAll('.txt,td,.fn,.ct,.lk a,.lk input,.row input[type=text],.row textarea').forEach(n=>{
       const t=(/^(INPUT|TEXTAREA)$/.test(n.tagName)?n.value:n.innerText)||'';if(!t.trim())return;
-      const[a,b,cw]=rel(n.getBoundingClientRect()),f=getComputedStyle(n),px=parseFloat(f.fontSize),ar=/[\u0600-\u06FF]/.test(t),mw=cw-12,tx=ar?a+cw-6:a+6;
-      g.font=`${f.fontStyle} ${f.fontWeight} ${px}px ${f.fontFamily}`;g.fillStyle=f.color;g.direction=ar?'rtl':'ltr';g.textAlign=ar?'right':'left';g.textBaseline='top';
+      const[a,b,cw]=rel(n.getBoundingClientRect()),f=getComputedStyle(n),px=parseFloat(f.fontSize),ar=/[\u0600-\u06FF]/.test(t),mw=cw-12,al=f.textAlign,ce=al==='center',ra=al==='right'||(ar&&al!=='left'&&!ce),tx=ce?a+cw/2:ra?a+cw-6:a+6;
+      g.font=`${f.fontStyle} ${f.fontWeight} ${px}px ${f.fontFamily}`;g.fillStyle=f.color;g.direction=ar?'rtl':'ltr';g.textAlign=ce?'center':ra?'right':'left';g.textBaseline='top';
       let y=b+4;t.split('\n').forEach(p=>{let ln='';p.split(' ').forEach(wd=>{const z=ln?ln+' '+wd:wd;if(g.measureText(z).width>mw&&ln){g.fillText(ln,tx,y);y+=px*1.5;ln=wd}else ln=z});g.fillText(ln,tx,y);y+=px*1.5})});
     el.querySelectorAll('.row input[type=checkbox]').forEach(cb=>{const[a,b]=rel(cb.getBoundingClientRect());g.font='15px sans-serif';g.fillStyle='#444';g.textAlign='left';g.direction='ltr';g.textBaseline='top';g.fillText(cb.checked?'☑':'☐',a,b)})}
   B.lines.forEach(l=>{const p=ep(l.p[0]),q=ep(l.p[1]),mx=(p[0]+q[0])/2+2*l.mo.x,my=(p[1]+q[1])/2+2*l.mo.y;
@@ -1019,7 +994,7 @@ function clean(h){
 const CMD={h1:['formatBlock','h1'],h2:['formatBlock','h2'],h3:['formatBlock','h3'],p:['formatBlock','p'],ul:['insertUnorderedList'],ol:['insertOrderedList'],bq:['formatBlock','blockquote'],pre:['formatBlock','pre'],hr:['insertHorizontalRule'],al:['justifyLeft'],ac:['justifyCenter'],ar:['justifyRight'],u:['underline'],s:['strikeThrough']};
 $('#tf').insertAdjacentHTML('beforeend','<span class="bk" hidden><button data-x="h1">H1</button><button data-x="h2">H2</button><button data-x="h3">H3</button><button data-x="p">¶</button><button data-x="ul">• قائمة</button><button data-x="ol">1. قائمة</button><button data-x="bq">❝</button><button data-x="pre">&lt;/&gt;</button><button data-x="hr">―</button><button data-x="al">⟵</button><button data-x="ac">⟷</button><button data-x="ar">⟶</button><button data-x="dir">RTL/LTR</button><button data-x="u"><u>U</u></button><button data-x="s"><s>S</s></button><button data-x="a">🔗</button></span>');
 $('#tf').addEventListener('click',e=>{
-  const b=e.target.closest('button[data-x]');if(!b||!tgt||!tgt.classList.contains('txt'))return;
+  const b=e.target.closest('button[data-x]');if(!b||!tgt||!tgt.isConnected||!tgt.classList.contains('txt'))return;
   const k=b.dataset.x,s=getSelection();tgt.focus();if(lr){s.removeAllRanges();s.addRange(lr)}
   if(k==='dir'){let n=s.anchorNode;while(n&&n.parentNode!==tgt)n=n.parentNode;const el=n&&n.nodeType===1?n:tgt;el.dir=el.dir==='rtl'?'ltr':'rtl'}
   else if(k==='a'){const u=prompt('الرابط (https://…)');if(u)document.execCommand('createLink',false,u)}
@@ -1179,7 +1154,7 @@ let padClose=null;
 function openPad(c){
   if($('#pd'))return;setSel([]);if(typeof vOn!=='undefined'&&vOn)vStop();
   const root=document.createElement('div');root.id='pd';
-  root.innerHTML=`<div class="ph"><button data-k="x">✕ إغلاق</button><input class="pn" placeholder="عنوان اللوحة" maxlength="60"><button data-k="pen" class="on">✎ قلم</button><button data-k="hl">▮ مظلّل</button><button data-k="er">⌫ ممحاة</button><button data-k="hand">✋ تحريك</button><span class="cs">${DC.map(x=>`<i data-c="${x}" style="background:${x}"></i>`).join('')}<input type="color" value="#111827"></span><span class="ws">${[0,1,2,3].map(i=>`<b data-w="${i}"><u style="width:${4+i*4}px;height:${4+i*4}px"></u></b>`).join('')}</span><button data-k="un">↶</button><button data-k="re">↷</button><span class="zs"><button data-k="zo">−</button><button data-k="z1">100%</button><button data-k="zi">+</button><button data-k="zf">⤢ عرض الصفحة</button></span></div><canvas id="pc"></canvas>`;
+  root.innerHTML=`<div class="ph"><button data-k="x">✕ إغلاق</button><input class="pn" placeholder="عنوان اللوحة" maxlength="60"><button data-k="pen" class="on">✎ قلم</button><button data-k="hl">▮ مظلّل</button><button data-k="er">⌫ ممحاة</button><button data-k="hand">✋ تحريك</button><span class="cs">${DC.map(x=>`<i data-c="${x}" style="background:${x}"></i>`).join('')}<input type="color" value="#111827"></span><span class="ws">${[0,1,2,3].map(i=>`<b data-w="${i}"><u style="width:${4+i*4}px;height:${4+i*4}px"></u></b>`).join('')}</span><button data-k="un">↶</button><button data-k="re">↷</button><span class="zs"><button data-k="zo">−</button><button data-k="z1">100%</button><button data-k="zi">+</button><button data-k="zf">⤢ عرض الصفحة</button></span><button data-k="png">⬇ PNG</button><button data-k="pdf">⬇ PDF</button></div><canvas id="pc"></canvas>`;
   document.body.appendChild(root);
   const cv=root.querySelector('#pc'),g=cv.getContext('2d'),title=root.querySelector('.pn');title.value=c.title||'';
   let ink=cleanInk(c.ink),hist=[],redo=[],tool='pen',col={pen:'#111827',hl:'#ffd43b'},wi={pen:1,hl:1,er:1},zm=1,ox=0,oy=0,ph=c.ph||2400,vw=900,vh=600,cur=null,erasing=0,sid=null,last=null,erPos=null,ptrs=new Map(),pen=false,gest=null,pan=null,raf=0,space=false;
@@ -1253,7 +1228,7 @@ function openPad(c){
       if(['pen','hl','er','hand'].includes(k))tool=k;
       if(k==='un'||k==='re')act(k);
       const m=mid();if(k==='zi')zoomAt(zm*1.25,m[0],m[1]);if(k==='zo')zoomAt(zm/1.25,m[0],m[1]);
-      if(k==='z1')zoomAt(1,m[0],m[1]);
+      if(k==='z1')zoomAt(1,m[0],m[1]);if(k==='png'||k==='pdf')padExport(k,c,ink,ph);
       if(k==='zf'){zm=(vw-24)/PW;clamp();oy=Math.min(0,oy);clamp()}}
     sync()});
   root.querySelector('.cs input').addEventListener('input',e=>{if(tool==='pen'||tool==='hl'){col[tool]=e.target.value;sync()}});
@@ -1263,6 +1238,97 @@ function openPad(c){
 ON_SHOW.push(id=>{if(id!=='bd'&&padClose)padClose()});
 $('#tools').insertAdjacentHTML('beforeend','<button data-t="pad"><b>✎</b>لوحة كتابة</button>');
 document.querySelector('[data-t=pad]').onclick=()=>{addCard({t:'pad',w:260,title:'',ink:[],ph:2400});const c=B.cards[B.cards.length-1];if(c)openPad(c)};
+
+/* ════════ 19. table (Excel-like), pad export, remembered Google account ════════ */
+/* ═══ table: Excel-like grid — rows add at the bottom, (+) on each side adds columns, drag borders to resize, alignment, merge, shading ═══ */
+const TD_W=110,TD_H=36;
+function tblInit(c){
+  const R=c.cells.length,C=c.cells[0].length;
+  if(!Array.isArray(c.cw)||c.cw.length!==C)c.cw=Array(C).fill(c.w?Math.max(50,Math.round((c.w-48)/C)):TD_W);
+  if(!Array.isArray(c.rh)||c.rh.length!==R)c.rh=Array(R).fill(c.hh?Math.max(24,Math.round(c.hh/R)):TD_H);
+  c.cw=c.cw.map(v=>Math.min(1200,Math.max(30,+v||TD_W)));c.rh=c.rh.map(v=>Math.min(900,Math.max(24,+v||TD_H)));delete c.w;delete c.hh}
+function tbl(c,el,b){
+  tblInit(c);el.style.width='auto';
+  const s={a:null,b:null},R=()=>{const a=s.a||[0,0],z=s.b||a;return[Math.min(a[0],z[0]),Math.min(a[1],z[1]),Math.max(a[0],z[0]),Math.max(a[1],z[1])]};
+  const flat=()=>c.cells.forEach(r=>r.forEach(x=>{x.cs=x.rs=1;x.h=0}));
+  const um=(r,k)=>{const x=c.cells[r][k];for(let i=0;i<x.rs;i++)for(let j=0;j<x.cs;j++)c.cells[r+i][k+j].h=0;x.cs=x.rs=1};
+  const range=()=>{const[r1,c1,r2,c2]=R(),o=[];for(let r=r1;r<=r2;r++)for(let k=c1;k<=c2;k++)if(c.cells[r]&&c.cells[r][k])o.push(c.cells[r][k]);return o};
+  el._rng=range;let T=null,drag=null;
+  const mark=()=>{const[r1,c1,r2,c2]=R();b.querySelectorAll('td').forEach(td=>{const r=+td.dataset.r,k=+td.dataset.c;td.classList.toggle('on',r>=r1&&r<=r2&&k>=c1&&k<=c2)})};
+  const sizes=()=>{if(!T)return;T.style.width=c.cw.reduce((a,v)=>a+v,0)+'px';[...T.querySelectorAll('col')].forEach((k,i)=>{k.style.width=c.cw[i]+'px'});[...T.rows].forEach((tr,i)=>{tr.style.height=c.rh[i]+'px'})};
+  const op=(k,focusNew)=>{const[r1,c1,r2,c2]=R();
+    if(k==='ar'){flat();c.cells.push(c.cells[0].map(()=>mk()));c.rh.push(TD_H)}                              // new row always goes to the bottom
+    if(k==='acr'){flat();c.cells.forEach(r=>r.unshift(mk()));c.cw.unshift(TD_W);s.a=s.b=null}                // table is right-to-left: physical right = start
+    if(k==='acl'){flat();c.cells.forEach(r=>r.push(mk()));c.cw.push(TD_W);s.a=s.b=null}
+    if(k==='dr'){if(r2-r1+1>=c.cells.length)return toast('لا يمكن حذف كل الصفوف');flat();c.cells.splice(r1,r2-r1+1);c.rh.splice(r1,r2-r1+1);s.a=s.b=null}
+    if(k==='dc'){if(c2-c1+1>=c.cells[0].length)return toast('لا يمكن حذف كل الأعمدة');flat();c.cells.forEach(r=>r.splice(c1,c2-c1+1));c.cw.splice(c1,c2-c1+1);s.a=s.b=null}
+    if(k==='mg'){c.cells.forEach((row,r)=>row.forEach((x,j)=>{if(!x.h&&(x.cs>1||x.rs>1)&&r<=r2&&r+x.rs-1>=r1&&j<=c2&&j+x.cs-1>=c1)um(r,j)}));
+      for(let r=r1;r<=r2;r++)for(let j=c1;j<=c2;j++)c.cells[r][j].h=1;const x=c.cells[r1][c1];x.h=0;x.cs=c2-c1+1;x.rs=r2-r1+1}
+    if(k==='um'){const x=c.cells[r1][c1];if(x.cs>1||x.rs>1)um(r1,c1)}
+    if(k.startsWith('h:'))range().forEach(x=>{x.al=k.slice(2)});
+    if(k.startsWith('v:'))range().forEach(x=>{x.va=k.slice(2)});
+    save();draw();
+    if(focusNew){const tr=T.rows[T.rows.length-1];tr&&tr.cells[0]&&tr.cells[0].focus()}};
+  el._draw=()=>{draw()};
+  const hit=e=>{const td=e.target.closest&&e.target.closest('td');if(!td||!T||!T.contains(td))return null;const r=td.getBoundingClientRect(),x=c.cells[+td.dataset.r][+td.dataset.c],E=5;
+    if(e.clientX-r.left<E)return{t:'c',i:+td.dataset.c+x.cs-1,d:-1};                      // left edge of a column: drag left = wider
+    if(+td.dataset.c===0&&r.right-e.clientX<E)return{t:'c',i:0,d:1};                      // the table's right border
+    if(r.bottom-e.clientY<E)return{t:'r',i:+td.dataset.r+x.rs-1};return null};
+  const draw=()=>{
+    b.innerHTML='';b.style.padding='0';
+    const tb=document.createElement('div');tb.className='tb';
+    tb.innerHTML=[['+ صف','ar'],['− صف','dr'],['− عمود','dc'],['دمج','mg'],['فك','um'],['⟵','h:left'],['⟷','h:center'],['⟶','h:right'],['⤒','v:top'],['↕','v:middle'],['⤓','v:bottom']].map(([t,k])=>`<button data-k="${k}">${t}</button>`).join('')+TINT.map(x=>`<i data-bg="${x}" style="background:${x||'transparent'}" title="تظليل"></i>`).join('');
+    tb.onclick=e=>{const k=e.target.dataset.k;if(k)return op(k);if(e.target.dataset.bg!==undefined){range().forEach(x=>{x.bg=e.target.dataset.bg});save();draw()}};
+    const wrap=document.createElement('div');wrap.className='tw';
+    const t=document.createElement('table');t.dir='rtl';T=t;
+    const cg=document.createElement('colgroup');c.cw.forEach(()=>cg.appendChild(document.createElement('col')));t.appendChild(cg);
+    c.cells.forEach((row,r)=>{const tr=t.insertRow();row.forEach((x,k)=>{if(x.h)return;const td=tr.insertCell();
+      td.colSpan=x.cs;td.rowSpan=x.rs;td.style.background=x.bg||'';if(x.bg)td.style.color='#1b2333';
+      td.contentEditable='plaintext-only';td.textContent=x.t;td.dataset.r=r;td.dataset.c=k;sty(td,x.st);if(x.al)td.style.textAlign=x.al;if(x.va)td.style.verticalAlign=x.va;
+      td.oninput=()=>{x.t=td.innerText;save()};
+      td.onmousedown=e=>{if(e.shiftKey&&s.a){e.preventDefault();s.b=[r,k];mark()}};
+      td.onfocus=()=>{s.a=s.b=[r,k];mark()};
+      td.onkeydown=e=>{if(e.key==='Tab'&&!e.shiftKey&&r+x.rs>=c.cells.length&&k+x.cs>=c.cells[0].length){e.preventDefault();op('ar',true)}}})});
+    t.addEventListener('pointermove',e=>{if(!drag){const h=hit(e);t.style.cursor=h?(h.t==='c'?'col-resize':'row-resize'):''}});
+    t.addEventListener('pointerdown',e=>{const h=hit(e);if(!h)return;e.preventDefault();e.stopPropagation();
+      const x0=e.clientX,y0=e.clientY,v0=h.t==='c'?c.cw[h.i]:c.rh[h.i];drag=h;
+      const mv=m=>{if(h.t==='c')c.cw[h.i]=Math.min(1200,Math.max(30,Math.round(v0+(m.clientX-x0)*h.d/Z)));else c.rh[h.i]=Math.min(900,Math.max(24,Math.round(v0+(m.clientY-y0)/Z)));sizes();lines()};
+      const up=()=>{removeEventListener('pointermove',mv);removeEventListener('pointerup',up);drag=null;save()};addEventListener('pointermove',mv);addEventListener('pointerup',up)});
+    const mkB=(cls,txt,title,k)=>{const x=document.createElement('button');x.className=cls;x.textContent=txt;x.title=title;x.onclick=()=>op(k);return x};
+    wrap.append(t,mkB('ca r','+','إضافة عمود على اليمين','acr'),mkB('ca l','+','إضافة عمود على اليسار','acl'));
+    b.append(tb,wrap,mkB('ra','＋ إضافة صف في الأسفل','','ar'));sizes();mark();setTimeout(lines,0)};
+  /* drag the corner = scale the whole table proportionally */
+  const h=document.createElement('div');h.className='rz';h.title='اسحب لتكبير/تصغير الجدول كاملًا';el.appendChild(h);
+  h.onpointerdown=e=>{e.preventDefault();e.stopPropagation();try{h.setPointerCapture(e.pointerId)}catch(_){}const sx=e.clientX,sy=e.clientY,w0=c.cw.slice(),r0=c.rh.slice(),tw=w0.reduce((a,v)=>a+v,0),th=r0.reduce((a,v)=>a+v,0);
+    h.onpointermove=m=>{const f=Math.max(.3,(tw+(m.clientX-sx)/Z)/tw),g=Math.max(.3,(th+(m.clientY-sy)/Z)/th);c.cw=w0.map(v=>Math.max(30,Math.round(v*f)));c.rh=r0.map(v=>Math.max(24,Math.round(v*g)));sizes();lines()};
+    h.onpointerup=()=>{h.onpointermove=h.onpointerup=null;save()}};
+  draw()}
+CARD.table=(c,el,b)=>tbl(c,el,b);
+
+/* ═══ writing board export (PNG, or multi-page A4 PDF) ═══ */
+function pdfMulti(pg){
+  const enc=s=>new TextEncoder().encode(s),parts=[],off=[];let pos=0;const add=x=>{const q=typeof x==='string'?enc(x):x;parts.push(q);pos+=q.length};
+  const n=pg.length;add('%PDF-1.4\n');off[1]=pos;add('1 0 obj\n<</Type/Catalog/Pages 2 0 R>>\nendobj\n');
+  off[2]=pos;add(`2 0 obj\n<</Type/Pages/Kids[${pg.map((_,i)=>(3+i*3)+' 0 R').join(' ')}]/Count ${n}>>\nendobj\n`);
+  pg.forEach((p,i)=>{const a=3+i*3,cs='q 595 0 0 842 0 0 cm /I Do Q';
+    off[a]=pos;add(`${a} 0 obj\n<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Resources<</XObject<</I ${a+1} 0 R>>>>/Contents ${a+2} 0 R>>\nendobj\n`);
+    off[a+1]=pos;add(`${a+1} 0 obj\n<</Type/XObject/Subtype/Image/Width ${p.w}/Height ${p.h}/ColorSpace/DeviceRGB/BitsPerComponent 8/Filter/DCTDecode/Length ${p.b.length}>>\nstream\n`);add(p.b);add('\nendstream\nendobj\n');
+    off[a+2]=pos;add(`${a+2} 0 obj\n<</Length ${cs.length}>>\nstream\n${cs}\nendstream\nendobj\n`)});
+  const x=pos,N=3+n*3;add(`xref\n0 ${N}\n0000000000 65535 f \n`+Array.from({length:N-1},(_,i)=>String(off[i+1]).padStart(10,'0')+' 00000 n \n').join('')+`trailer\n<</Size ${N}/Root 1 0 R>>\nstartxref\n${x}\n%%EOF`);
+  return new Blob(parts,{type:'application/pdf'})}
+function padExport(kind,c,ink,ph){
+  const name=(c.title||'لوحة كتابة').replace(/[\\\/:*?"<>|]/g,'-'),PG=1414;let bottom=PG;ink.forEach(s=>{bottom=Math.max(bottom,inkBox(s)[3]+120)});bottom=Math.min(Math.max(ph,PG),Math.ceil(bottom/PG)*PG);
+  const rend=(y0,h,sc)=>{const cv=document.createElement('canvas');cv.width=Math.round(PW*sc);cv.height=Math.round(h*sc);const g=cv.getContext('2d');
+    paintPaper(g,sc,0,-y0*sc,cv.width,cv.height,Math.max(ph,y0+h),PAPER);ink.forEach(s=>{const b=inkBox(s);if(b[3]<y0||b[1]>y0+h)return;drawStroke(g,s,sc,0,-y0*sc)});return cv};
+  try{
+    if(kind==='png')rend(0,bottom,Math.min(2,12000/bottom)).toBlob(b=>dl(b,name+'.png'));
+    else{const n=Math.min(60,Math.ceil(bottom/PG)),pg=[];for(let i=0;i<n;i++){const cv=rend(i*PG,PG,1.4),d=cv.toDataURL('image/jpeg',.9).split(',')[1];pg.push({b:Uint8Array.from(atob(d),x=>x.charCodeAt(0)),w:cv.width,h:cv.height})}dl(pdfMulti(pg),name+'.pdf')}
+    toast('✓ جارٍ تنزيل الملف')}catch(e){console.error(e);toast('تعذر التصدير')}}
+
+/* ═══ Google sign-in: remember the account (no account chooser) and renew the token quietly while you work ═══ */
+let renewing=0;
+addEventListener('pointerdown',()=>{if(renewing||!window.google||!localStorage.getItem('signed'))return;let s=null;try{s=JSON.parse(sessionStorage.getItem('tk')||'null')}catch(e){}
+  if(!s||s.e-Date.now()>300000)return;renewing=1;tokReq('none').catch(()=>{}).finally(()=>{renewing=0})},true);
 </script>
 </body>
 </html>
