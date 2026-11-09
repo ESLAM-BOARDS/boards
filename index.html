@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-wpuPutdSOm66c652fneDgRxyoSCbox9bgxZCIQWYNHg=' https://accounts.google.com; style-src 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' blob: data:; media-src blob:; connect-src https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com; frame-src https://accounts.google.com blob:; worker-src 'self'; manifest-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-ulCtMzSIzYq8t4Kquodw9sA+gPB8HEgJEMi6QfWPdkY=' https://accounts.google.com; style-src 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' blob: data:; media-src blob:; connect-src https://www.googleapis.com https://accounts.google.com https://oauth2.googleapis.com; frame-src https://accounts.google.com blob:; worker-src 'self'; manifest-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#2f5bea">
 <link rel="icon" href="icon-192.png">
@@ -186,6 +186,7 @@ html{touch-action:manipulation}body{overscroll-behavior:none}#view,#pc{touch-act
  #home{display:flex;flex-direction:column;gap:12px;padding:12px;overflow-y:auto;-webkit-overflow-scrolling:touch}.pc{flex:none}.pc .band{height:52px}.pc.new{min-height:90px}
  #gate{padding:16px}#toast{max-width:92vw;text-align:center}.card .bar{height:26px}.rz{width:26px;height:26px}
 }
+#fb,#tf{width:max-content}
 </style>
 </head>
 <body>
@@ -1549,7 +1550,7 @@ addEventListener('pointermove',e=>{if(lp&&Math.hypot(e.clientX-lp.x,e.clientY-lp
 ['pointerup','pointercancel'].forEach(t=>addEventListener(t,()=>{if(lp){clearTimeout(lp.t);lp=null}}));
 $('#tools').insertAdjacentHTML('beforeend','<button data-t="selmode" title="وضع التحديد بالسحب (للمس)"><b>☑</b>تحديد</button>');
 document.querySelector('[data-t=selmode]').onclick=e=>{selMode=!selMode;e.currentTarget.classList.toggle('on',selMode);toast(selMode?'وضع التحديد: اسحب بإصبعك لتحديد مربع':'وضع التحريك: اسحب بإصبعك لتحريك اللوحة')};
-ON_SHOW.push(id=>{['#q','#un','#re','#bk','#xp','#xf'].forEach(s=>{const b=$(s);if(b)b.hidden=id!=='bd'});window.__hs=undefined});
+ON_SHOW.push(id=>{['#q','#un','#re','#bk','#xp','#xf','#zl'].forEach(s=>{const b=$(s);if(b)b.hidden=id!=='bd'});window.__hs=undefined});
 $('#gate').addEventListener('click',e=>{if(localStorage.getItem('cid')&&!e.target.closest('input,a,button'))$('#go').click()});
 
 /* --- live sync: every ~9 s (and when you return to the app) compare the board file's version; merge changes made on another device --- */
@@ -1590,6 +1591,18 @@ async function pollHome(){
     if(window.__hs===undefined){window.__hs=sig;return}if(sig!==window.__hs){window.__hs=sig;openHome()}}catch(e){}}
 setInterval(()=>{pullRemote();pollHome()},9000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){pullRemote();pollHome()}});addEventListener('focus',()=>{pullRemote();pollHome()});addEventListener('online',()=>{pullRemote();pollHome()});
+
+/* --- on a phone, tapping into a card to edit it zooms in to a comfortable size (never zooms out) --- */
+function camTo(tz,tx,ty){const z0=Z,x0=CAM.x,y0=CAM.y,t0=performance.now();
+  const step=()=>{const k=Math.min(1,(performance.now()-t0)/260),e=1-Math.pow(1-k,3);Z=z0+(tz-z0)*e;CAM.x=x0+(tx-x0)*e;CAM.y=y0+(ty-y0)*e;applyZ();if(B)lines();if(k<1)requestAnimationFrame(step)};requestAnimationFrame(step)}
+let lastFocusCard=null;
+stage.addEventListener('focusin',e=>{
+  if(!(window.matchMedia&&matchMedia('(pointer:coarse)').matches))return;
+  const t=e.target,card=t.closest&&t.closest('.card');if(!card||!card._c||!(t.isContentEditable||/^(INPUT|TEXTAREA)$/.test(t.tagName)))return;
+  if(card===lastFocusCard&&Z>=.9)return;lastFocusCard=card;
+  const vw=view.clientWidth||innerWidth,w=Math.max(120,card.offsetWidth),tz=Math.min(1.4,Math.max(.9,(vw-16)/w));
+  if(Z>=tz-.02)return;                                                     // already comfortable
+  camTo(tz,(vw-w*tz)/2-card._c.x*tz,56-card._c.y*tz)});
 </script>
 </body>
 </html>
