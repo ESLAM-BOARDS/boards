@@ -1403,20 +1403,32 @@ const parseTSV=t=>{const rows=[];let row=[],cur='',q=false;
   if(cur!==''||row.length){row.push(cur);rows.push(row)}return rows};
 function tbl(c,el,b){
   tblInit(c);el.style.width='auto';
-  const s={a:null,b:null},R=()=>{const a=s.a||[0,0],z=s.b||a;return[Math.min(a[0],z[0]),Math.min(a[1],z[1]),Math.max(a[0],z[0]),Math.max(a[1],z[1])]};
+  const s={a:[0,0],b:[0,0]};
+  const clampSel=()=>{
+    const mr=c.cells.length-1,mc=c.cells[0].length-1;
+    if(!s.a)s.a=[0,0];if(!s.b)s.b=[...s.a];
+    s.a=[Math.max(0,Math.min(mr,s.a[0])),Math.max(0,Math.min(mc,s.a[1]))];
+    s.b=[Math.max(0,Math.min(mr,s.b[0])),Math.max(0,Math.min(mc,s.b[1]))];
+  };
+  const R=()=>{clampSel();const a=s.a,z=s.b;return[Math.min(a[0],z[0]),Math.min(a[1],z[1]),Math.max(a[0],z[0]),Math.max(a[1],z[1])]};
   const flat=()=>c.cells.forEach(r=>r.forEach(x=>{x.cs=x.rs=1;x.h=0}));
   const um=(r,k)=>{const x=c.cells[r][k];for(let i=0;i<x.rs;i++)for(let j=0;j<x.cs;j++)c.cells[r+i][k+j].h=0;x.cs=x.rs=1};
   const range=()=>{const[r1,c1,r2,c2]=R(),o=[];for(let r=r1;r<=r2;r++)for(let k=c1;k<=c2;k++)if(c.cells[r]&&c.cells[r][k])o.push(c.cells[r][k]);return o};
   el._rng=range;let T=null,TW=null,CG=null,RG=[],drag=null;
-  const mark=()=>{const[r1,c1,r2,c2]=R();b.querySelectorAll('td').forEach(td=>{const r=+td.dataset.r,k=+td.dataset.c;td.classList.toggle('on',r>=r1&&r<=r2&&k>=c1&&k<=c2)})};
+  const mark=()=>{
+    const[r1,c1,r2,c2]=R();
+    b.querySelectorAll('td').forEach(td=>{const r=+td.dataset.r,k=+td.dataset.c;td.classList.toggle('on',r>=r1&&r<=r2&&k>=c1&&k<=c2)});
+    if(CG)[...CG.children].forEach((g,j)=>g.classList.toggle('tgt',r1===0&&r2===c.cells.length-1&&j>=c1&&j<=c2));
+    if(RG)RG.forEach((g,i)=>g.classList.toggle('tgt',c1===0&&c2===c.cells[0].length-1&&i>=r1&&i<=r2));
+  };
   const place=()=>{if(!T||!TW)return;const wr=TW.getBoundingClientRect();[...T.rows].forEach((tr,i)=>{const g=RG[i];if(!g)return;const rr=tr.getBoundingClientRect();g.style.top=((rr.top-wr.top)/Z+TW.scrollTop)+'px';g.style.height=(rr.height/Z)+'px'})};
   const sizes=()=>{if(!T)return;const tot=c.cw.reduce((a,v)=>a+v,0);T.style.width=tot+'px';[...T.querySelectorAll('col')].forEach((k,i)=>{k.style.width=c.cw[i]+'px'});[...T.rows].forEach((tr,i)=>{tr.style.height=c.rh[i]+'px'});
     if(CG){CG.style.width=tot+'px';[...CG.children].forEach((g,i)=>{g.style.width=c.cw[i]+'px'})}place()};
   const refresh=()=>{if(!T)return;T.querySelectorAll('td').forEach(td=>{if(td===document.activeElement)return;const x=c.cells[+td.dataset.r][+td.dataset.c];if(isF(x.t))td.textContent=calc(c,x.t)})};
   const moveItem=(kind,from,to)=>{flat();
-    if(kind==='c'){c.cells.forEach(row=>{const[x]=row.splice(from,1);row.splice(to,0,x)});const[w]=c.cw.splice(from,1);c.cw.splice(to,0,w)}
-    else{const[x]=c.cells.splice(from,1);c.cells.splice(to,0,x);const[h]=c.rh.splice(from,1);c.rh.splice(to,0,h)}
-    s.a=s.b=null;save();draw()};
+    if(kind==='c'){c.cells.forEach(row=>{const[x]=row.splice(from,1);row.splice(to,0,x)});const[w]=c.cw.splice(from,1);c.cw.splice(to,0,w);s.a=[0,to];s.b=[c.cells.length-1,to]}
+    else{const[x]=c.cells.splice(from,1);c.cells.splice(to,0,x);const[h]=c.rh.splice(from,1);c.rh.splice(to,0,h);s.a=[to,0];s.b=[to,c.cells[0].length-1]}
+    save();draw()};
   const addTotal=fn=>{const[,c1,,c2]=R(),cols=[];flat();const last=c.cells.length,first=c.hr?2:1;
     if(!s.a){for(let k=0;k<c.cells[0].length;k++)cols.push(k)}else for(let k=c1;k<=c2;k++)cols.push(k);
     c.cells.push(c.cells[0].map(()=>mk()));c.rh.push(TD_H);const row=c.cells[last];
@@ -1427,34 +1439,38 @@ function tbl(c,el,b){
     while(c.cells.length<r0+rows.length){c.cells.push(c.cells[0].map(()=>mk()));c.rh.push(TD_H)}
     while(c.cells[0].length<k0+nc){c.cells.forEach(r=>r.push(mk()));c.cw.push(TD_W)}
     rows.forEach((row,i)=>row.slice(0,nc).forEach((v,j)=>{c.cells[r0+i][k0+j].t=v}));save();draw();toast('✓ تم استيراد '+rows.length+' صفًا × '+nc+' عمودًا')};
-  const op=(k,focusNew)=>{const[r1,c1,r2,c2]=R();
-    if(k==='ar'){flat();c.cells.push(c.cells[0].map(()=>mk()));c.rh.push(TD_H)}
-    if(k==='acr'){flat();c.cells.forEach(r=>r.unshift(mk()));c.cw.unshift(TD_W);s.a=s.b=null}
-    if(k==='acl'){flat();c.cells.forEach(r=>r.push(mk()));c.cw.push(TD_W);s.a=s.b=null}
-    if(k==='dr'){if(r2-r1+1>=c.cells.length)return toast('لا يمكن حذف كل الصفوف');flat();c.cells.splice(r1,r2-r1+1);c.rh.splice(r1,r2-r1+1);s.a=s.b=null}
-    if(k==='dc'){if(c2-c1+1>=c.cells[0].length)return toast('لا يمكن حذف كل الأعمدة');flat();c.cells.forEach(r=>r.splice(c1,c2-c1+1));c.cw.splice(c1,c2-c1+1);s.a=s.b=null}
-    if(k==='mg'){c.cells.forEach((row,r)=>row.forEach((x,j)=>{if(!x.h&&(x.cs>1||x.rs>1)&&r<=r2&&r+x.rs-1>=r1&&j<=c2&&j+x.cs-1>=c1)um(r,j)}));
+  const op=(k,focusNew)=>{
+    const[r1,c1,r2,c2]=R(),nr=()=>c.cells[0].map(()=>mk());
+    if(k==='ar'){flat();c.cells.push(nr());c.rh.push(TD_H);s.a=s.b=[c.cells.length-1,c1]}
+    else if(k==='acr'){flat();c.cells.forEach(r=>r.unshift(mk()));c.cw.unshift(TD_W);s.a=[r1,0];s.b=[r2,0]}
+    else if(k==='acl'){flat();c.cells.forEach(r=>r.push(mk()));c.cw.push(TD_W);const lastC=c.cells[0].length-1;s.a=[r1,lastC];s.b=[r2,lastC]}
+    else if(k==='dr'){if(r2-r1+1>=c.cells.length)return toast('لا يمكن حذف كل الصفوف');flat();c.cells.splice(r1,r2-r1+1);c.rh.splice(r1,r2-r1+1);const nr1=Math.min(r1,c.cells.length-1);s.a=[nr1,c1];s.b=[nr1,c2]}
+    else if(k==='dc'){if(c2-c1+1>=c.cells[0].length)return toast('لا يمكن حذف كل الأعمدة');flat();c.cells.forEach(r=>r.splice(c1,c2-c1+1));c.cw.splice(c1,c2-c1+1);const nc1=Math.min(c1,c.cells[0].length-1);s.a=[r1,nc1];s.b=[r2,nc1]}
+    else if(k==='mg'){c.cells.forEach((row,r)=>row.forEach((x,j)=>{if(!x.h&&(x.cs>1||x.rs>1)&&r<=r2&&r+x.rs-1>=r1&&j<=c2&&j+x.cs-1>=c1)um(r,j)}));
       for(let r=r1;r<=r2;r++)for(let j=c1;j<=c2;j++)c.cells[r][j].h=1;const x=c.cells[r1][c1];x.h=0;x.cs=c2-c1+1;x.rs=r2-r1+1}
-    if(k==='um'){const x=c.cells[r1][c1];if(x.cs>1||x.rs>1)um(r1,c1)}
-    if(k==='menu'){openMenu();return}
-    const sh=(dr,dc)=>{if(s.a){s.a=[s.a[0]+dr,s.a[1]+dc];s.b=[s.b[0]+dr,s.b[1]+dc]}},nr=()=>c.cells[0].map(()=>mk());
-    if(k==='ira'){flat();c.cells.splice(r1,0,nr());c.rh.splice(r1,0,TD_H);sh(1,0)}
-    if(k==='irb'){flat();c.cells.splice(r2+1,0,nr());c.rh.splice(r2+1,0,TD_H)}
-    if(k==='icr'){flat();c.cells.forEach(r=>r.splice(c1,0,mk()));c.cw.splice(c1,0,TD_W);sh(0,1)}
-    if(k==='icl'){flat();c.cells.forEach(r=>r.splice(c2+1,0,mk()));c.cw.splice(c2+1,0,TD_W)}
-    if(k==='mru'){if(r1<1)return toast('هذا أول صف');flat();const[x]=c.cells.splice(r1-1,1);c.cells.splice(r2,0,x);const[h]=c.rh.splice(r1-1,1);c.rh.splice(r2,0,h);sh(-1,0)}
-    if(k==='mrd'){if(r2>=c.cells.length-1)return toast('هذا آخر صف');flat();const[x]=c.cells.splice(r2+1,1);c.cells.splice(r1,0,x);const[h]=c.rh.splice(r2+1,1);c.rh.splice(r1,0,h);sh(1,0)}
-    if(k==='mcr'){if(c1<1)return toast('هذا أول عمود من اليمين');flat();c.cells.forEach(row=>{const[x]=row.splice(c1-1,1);row.splice(c2,0,x)});const[w]=c.cw.splice(c1-1,1);c.cw.splice(c2,0,w);sh(0,-1)}
-    if(k==='mcl'){if(c2>=c.cells[0].length-1)return toast('هذا آخر عمود من اليسار');flat();c.cells.forEach(row=>{const[x]=row.splice(c2+1,1);row.splice(c1,0,x)});const[w]=c.cw.splice(c2+1,1);c.cw.splice(c1,0,w);sh(0,1)}
-    if(k==='hr')c.hr=!c.hr;
-    if(k==='csv'){dl(new Blob([csvOf(c)],{type:'text/csv;charset=utf-8'}),(c.title||'جدول')+'.csv');return}
-    if(k.startsWith('h:'))range().forEach(x=>{x.al=k.slice(2)});
-    if(k.startsWith('v:'))range().forEach(x=>{x.va=k.slice(2)});
-    save();draw();
-    if(focusNew){const tr=T.rows[T.rows.length-1];tr&&tr.cells[0]&&tr.cells[0].focus()}};
+    else if(k==='um'){const x=c.cells[r1][c1];if(x.cs>1||x.rs>1)um(r1,c1)}
+    else if(k==='menu'){openMenu();return}
+    else if(k==='ira'){flat();c.cells.splice(r1,0,nr());c.rh.splice(r1,0,TD_H);s.a=[r1,c1];s.b=[r1,c2]}
+    else if(k==='irb'){flat();c.cells.splice(r2+1,0,nr());c.rh.splice(r2+1,0,TD_H);s.a=[r2+1,c1];s.b=[r2+1,c2]}
+    else if(k==='icr'){flat();c.cells.forEach(r=>r.splice(c1,0,mk()));c.cw.splice(c1,0,TD_W);s.a=[r1,c1];s.b=[r2,c1]}
+    else if(k==='icl'){flat();c.cells.forEach(r=>r.splice(c2+1,0,mk()));c.cw.splice(c2+1,0,TD_W);s.a=[r1,c2+1];s.b=[r2,c2+1]}
+    else if(k==='mru'){if(r1<1)return toast('هذا أول صف');flat();const rows=c.cells.splice(r1,r2-r1+1),hs=c.rh.splice(r1,r2-r1+1);c.cells.splice(r1-1,0,...rows);c.rh.splice(r1-1,0,...hs);s.a=[r1-1,c1];s.b=[r2-1,c2]}
+    else if(k==='mrd'){if(r2>=c.cells.length-1)return toast('هذا آخر صف');flat();const rows=c.cells.splice(r1,r2-r1+1),hs=c.rh.splice(r1,r2-r1+1);c.cells.splice(r1+1,0,...rows);c.rh.splice(r1+1,0,...hs);s.a=[r1+1,c1];s.b=[r2+1,c2]}
+    else if(k==='mcr'){if(c1<1)return toast('هذا أول عمود من اليمين');flat();const cnt=c2-c1+1;c.cells.forEach(row=>{const cl=row.splice(c1,cnt);row.splice(c1-1,0,...cl)});const ws=c.cw.splice(c1,cnt);c.cw.splice(c1-1,0,...ws);s.a=[r1,c1-1];s.b=[r2,c2-1]}
+    else if(k==='mcl'){if(c2>=c.cells[0].length-1)return toast('هذا آخر عمود من اليسار');flat();const cnt=c2-c1+1;c.cells.forEach(row=>{const cl=row.splice(c1,cnt);row.splice(c1+1,0,...cl)});const ws=c.cw.splice(c1,cnt);c.cw.splice(c1+1,0,...ws);s.a=[r1,c1+1];s.b=[r2,c2+1]}
+    else if(k==='hr')c.hr=!c.hr;
+    else if(k==='csv'){dl(new Blob([csvOf(c)],{type:'text/csv;charset=utf-8'}),(c.title||'جدول')+'.csv');return}
+    else if(k.startsWith('h:'))range().forEach(x=>{x.al=k.slice(2)});
+    else if(k.startsWith('v:'))range().forEach(x=>{x.va=k.slice(2)});
+    clampSel();save();draw();
+    if(focusNew){const tr=T.rows[T.rows.length-1];tr&&tr.cells[0]&&tr.cells[0].focus()}
+  };
   el._draw=()=>{draw()};
-  const openMenu=()=>{fb('<span>الصف:</span><button data-a="ira">⤒ إدراج أعلى</button><button data-a="irb">⤓ إدراج أسفل</button><button data-a="mru">↑ نقل لأعلى</button><button data-a="mrd">↓ نقل لأسفل</button><button data-a="dr">🗑 حذف</button><span>| العمود:</span><button data-a="icr">⇥ إدراج يمين</button><button data-a="icl">⇤ إدراج يسار</button><button data-a="mcr">→ نقل يمين</button><button data-a="mcl">← نقل يسار</button><button data-a="dc">🗑 حذف</button><button data-a="x">إغلاق</button>');
-    fbH=e=>{const a=e.target.dataset.a;if(!a)return;if(a==='x'){fb('');fbH=null;return}op(a)}};
+  const openMenu=()=>{
+    fb('<span><b>صف:</b></span><button data-a="ira">⤒ إدراج أعلى</button><button data-a="irb">⤓ إدراج أسفل</button><button data-a="mru">↑ نقل لأعلى</button><button data-a="mrd">↓ نقل لأسفل</button><button data-a="dr">🗑 حذف</button><span>| <b>عمود:</b></span><button data-a="icr">⇥ إدراج يمين</button><button data-a="icl">⇤ إدراج يسار</button><button data-a="mcr">→ نقل يمين</button><button data-a="mcl">← نقل يسار</button><button data-a="dc">🗑 حذف</button><button data-a="x">✕ إغلاق</button>');
+    $('#fb').onpointerdown=e=>{if(e.target.tagName==='BUTTON')e.preventDefault()};
+    fbH=e=>{if(e.type==='input')return;const btn=e.target.closest('button[data-a]');if(!btn)return;const a=btn.dataset.a;if(a==='x'){fb('');fbH=null;return}op(a)};
+  };
   const hit=e=>{const td=e.target.closest&&e.target.closest('td');if(!td||!T||!T.contains(td))return null;const r=td.getBoundingClientRect(),x=c.cells[+td.dataset.r][+td.dataset.c],E=5;
     if(e.clientX-r.left<E)return{t:'c',i:+td.dataset.c+x.cs-1,d:-1};
     if(+td.dataset.c===0&&r.right-e.clientX<E)return{t:'c',i:0,d:1};
@@ -1465,16 +1481,17 @@ function tbl(c,el,b){
       else{const rows=[...T.rows];to=rows.length-1;for(let j=0;j<rows.length;j++){if(m.clientY<rows[j].getBoundingClientRect().bottom){to=j;break}}}
       [...CG.children].forEach((g,j)=>g.classList.toggle('tgt',kind==='c'&&j===to&&to!==from));RG.forEach((g,j)=>g.classList.toggle('tgt',kind==='r'&&j===to&&to!==from))};
     const up=()=>{removeEventListener('pointermove',mv);removeEventListener('pointerup',up);
-      if(!moved){if(kind==='c'){s.a=[0,from];s.b=[c.cells.length-1,from]}else{s.a=[from,0];s.b=[from,c.cells[0].length-1]}mark();return}
+      if(!moved){if(kind==='c'){s.a=[0,from];s.b=[c.cells.length-1,from]}else{s.a=[from,0];s.b=[from,c.cells[0].length-1]}mark();openMenu();return}
       if(to!==from)moveItem(kind,from,to);else draw()};
     addEventListener('pointermove',mv);addEventListener('pointerup',up)};
   const draw=()=>{
     b.innerHTML='';b.style.padding='0';
     const tb=document.createElement('div');tb.className='tb';
+    tb.onpointerdown=e=>{if(e.target.closest('button'))e.preventDefault()};
     tb.innerHTML=[['+ صف','ar'],['− صف','dr'],['− عمود','dc'],['دمج','mg'],['فك','um'],['⟵','h:left'],['⟷','h:center'],['⟶','h:right'],['⤒','v:top'],['↕','v:middle'],['⤓','v:bottom'],[c.hr?'⬒ عنوان ✓':'⬒ عنوان','hr'],['⬇ CSV','csv'],['⋯ صفوف / أعمدة','menu']].map(([t,k])=>`<button data-k="${k}">${t}</button>`).join('')
       +'<select data-f title="إضافة صف إجمالي أسفل العمود"><option value="">Σ إجمالي…</option><option value="SUM">مجموع</option><option value="AVERAGE">متوسط</option><option value="COUNT">عدد</option><option value="MIN">أصغر قيمة</option><option value="MAX">أكبر قيمة</option></select>'
       +TINT.map(x=>`<i data-bg="${x}" style="background:${x||'transparent'}" title="تظليل"></i>`).join('');
-    tb.onclick=e=>{const k=e.target.dataset.k;if(k)return op(k);if(e.target.dataset.bg!==undefined){range().forEach(x=>{x.bg=e.target.dataset.bg});save();draw()}};
+    tb.onclick=e=>{const btn=e.target.closest('button[data-k]');if(btn)return op(btn.dataset.k);if(e.target.dataset.bg!==undefined){range().forEach(x=>{x.bg=e.target.dataset.bg});save();draw()}};
     tb.addEventListener('change',e=>{if(e.target.dataset.f===undefined||!e.target.value)return;addTotal(e.target.value)});
     const wrap=document.createElement('div');wrap.className='tw';
     TW=document.createElement('div');TW.className='twi'+(c.hr?' hr':'');
